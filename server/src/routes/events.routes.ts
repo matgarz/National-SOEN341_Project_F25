@@ -2,15 +2,55 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { emit } from 'process';
 
 const router = Router();
 const prisma = new PrismaClient();
 
 //These GET comments describe what GET page they are requesting from
 
+// GET /api/events/search?keyword=yourKeyword
+router.get('/search', async (req : Request, res : Response) => {
+try {
+  const keyword = req.query.keyword as string;
+
+  if (!keyword) { 
+    return res.status(400).json({ error: 'Search query is required'})
+  }
+
+  const events = await prisma.event.findMany({
+    where: {
+      status: 'APPROVED',
+      date: { gte: new Date() },
+      OR: [ // Searches title and description
+        { title: { contains: keyword }}, 
+        {description: { contains: keyword }}
+      ]
+    },
+
+    include: {
+      organization : true,
+      user: {
+        select: { id : true, name : true, email : true}
+      },
+      _count: { 
+        select: { ticket: true}
+      }
+    },
+    orderBy: { date: 'asc'}
+  });
+  res.json(events);
+
+} catch (error) { 
+  console.error('Error searching events: ', error);
+  res.status(500).json({ error: 'Failed to search events' });
+}
+});
+
+
 // GET /api/events = Get all upcoming events
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
 
     const events = await prisma.event.findMany({
@@ -20,11 +60,11 @@ router.get('/', async (req: Request, res: Response) => {
       },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true }
         },
         _count: {
-          select: { tickets: true }
+          select: { ticket: true }
         }
       },
       orderBy: { date: 'asc' }
@@ -46,11 +86,11 @@ router.get('/:id', async (req: Request, res: Response) => {
       where: { id: parseInt(req.params.id) },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true }
         },
         _count: {
-          select: { tickets: true }
+          select: { ticket: true }
         }
       }
     });
