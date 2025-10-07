@@ -1,13 +1,14 @@
 import React from 'react'
+import Brother from './assets/calendar';
+import { Button } from './components/ui/button';
 
-const App = () => {
+
+export default function App() {
   return (
     <main className='text-3xl text-indigo-400 font-bold underline'>
-      <h1>
-      SOEN 341 Project - National
-      </h1>
+      <Brother/>
     </main>
   )
 }
 
-export default App
+
