@@ -1,0 +1,158 @@
+This file contains all of our user stories:
+
+US #01: As a user I want to view a list of events with basic info (title, date, category), so that I can browse events.
+Acceptance criteria:
+- Given a user (student, organizer, administrator) logged into the platform
+- When user accesses the "Browse Events" page, system displays all upcoming events with the details (date, time, organizer, category, etc.)
+- If there are no events, platform displays a message there are no upcoming events.
+
+US #02: As a user (student/org/admin) I want to search events on a search engine.
+Acceptance criteria:
+- Given a user on the browse events page, when user enters a search keyword (ie. coding, music, networking, etc.), the system only displays events with title or description matching the keyword.
+
+US #03: As a user (student/org/admin) I want to use filters within my searches to find events.
+Acceptance criteria: 
+- Given a user on the "Browse Events" page, when user applies a filter (date, category, organization), only the relevant events matching the filter criteria are displayed.
+
+US #04: As a user, I want to see the details of an event when I click it (description, location, time, etc.)
+Conversation: 
+- Given user viewing upcoming events, when user clicks an event, the platform redirects the user to the event details page.
+- Event details page displays event description, tickets, QR, organizer etc.
+
+US #05: As a student, I want a personal calendar page to see all my saved events.
+
+US #06: As an organizer, I want a calendar view of my created events.
+
+US #07: As a user (organizer/admin/student) I want to save events to my calendar.
+Acceptance Test: the button saves the event to the calendar
+Conversation: Create a saving event feature for each event, each event should have a button that says save
+Confirmation: each event can be saved by the button save at its bottom corner and appears in the calendar of the person who saved it
+Story Points: 4
+Priority: High
+
+US #08: As a user, I want to save my tickets for events.
+Conversation: create a student repository for tickets, each ticket must have a "save" button
+Confirmation: ticket repo (wallet) shows tickets saved the moment immediately after saved
+Acceptance Test: After purchase ticket shows a button on the bottom corner "save". When clicked, the ticket is shown on the wallet
+Priority: HIgh
+Story points: 6
+
+US #09: As a user, I want to pay for a ticket using a safe payment system which sends a confirmation after payment.
+Conversation: there must be a payment functionality implemented, maybe via a form (it's not real tho)
+Acceptance test: payment makes the button "save" available, "pay now" button also implemented that shows form for payment, "the transaction has come through" message seems appropriate
+Confirmation: "the transaction is through message" after a good attempt
+Priority: low
+story points: 5
+
+US #10: As a user, I want to have a personal wallet where all my purchased tickets are accessible.
+Conversation:
+Wallet is like a “receipts” section where all pre-purchased tickets appear.
+From the wallet, the user can save tickets in exportable formats (at least PDF, maybe others later).
+Wallet might also include an “Interested In” section for bookmarked events.
+Should wallet be protected by a password/PIN? (discussion point).
+Confirmation:
+All purchased tickets appear in the wallet.
+Each ticket can be exported as a PDF.
+Bookmarked events appear under “Interested In.”
+Wallet is accessible only to the logged-in student account.
+
+Priority: High
+Story Points: 5
+
+US #11: As a student I need a unique qr-code for my ticket
+Conversation:
+Each ticket must generate a unique QR code upon purchase.
+QR code contains enough info to validate at the event (ticket ID, event ID, student ID).
+Question: should QR code encode all info (event name, seat, etc.) or just an ID that the server checks?
+QR codes should be viewable in the wallet and downloadable as an image.
+Validation process: organizer scans QR → backend checks ticket validity (not reused/expired).
+Security: prevent duplicate/fake QR codes.
+Confirmation (Acceptance Criteria):
+Each purchased ticket has a unique QR code assigned.
+QR code can be displayed in the wallet.
+QR code can be downloaded/saved (image format).
+When scanned, QR code correctly validates against backend and shows “valid/invalid.”
+A used/expired ticket’s QR code is rejected.
+priority: low
+story points: 3
+
+US #12: As a user, I want my digital ticket to include event info
+Conversation:
+-A digital ticket should not only show the QR code (from US#10) but also display key event details.
+-Minimum required fields:
+-Event name
+-Date & time
+-Location/venue
+-Organizer name
+-Ticket type (free/paid, student/guest)
+
+-Optional fields to discuss: seat number (if relevant), notes from organizer.
+-Tickets should display in a consistent format across wallet, PDF export, and QR scan view.
+-Question: Should expired tickets remain visible in the wallet with event info (like a history/receipt), or disappear?
+
+Confirmation (Acceptance Criteria):
+
+Ticket view shows event name, date, time, location, and organizer.
+Ticket view shows ticket type (e.g., free/paid, guest/student).
+All ticket details are consistent across wallet view and exported PDF.
+Event info remains attached to the ticket even after the event has passed.
+Priority: high
+Story points: 3
+
+US #13: As an organizer I need to create events with their attributes/info for students
+Conversation: forms to submit events must have all criteria described
+Confirmation: message showing "event info complete" after submission
+Acceptance Test: The event is submitted if all event info is filled up
+Priority: High
+Story points: 3
+
+US #14: As a user, I want to view ticket sales per event.
+
+US #15: As a user, I want to see attendance statistics to my events.
+
+US #16: As a user, I want to check remaining capacity to events.
+
+US #17: As an organizer I need a tool to export the attendee list of my event in csv
+Acceptance Test: export attendee list is shown for an event when button "attendee" list is clicked
+Conversation: database should keep track of each event's attendees
+Confirmation: as soon as a ticket is bought the attendee list is changed
+Priotrity: low
+Story Points: 3
+
+US #18: As an organizer I need a tool to validate ticket qr-codes
+Confirmation: an invalid ticket qr-code (not generated by the site) is accepted whereas all others are not
+Acceptance Test: try validation of 2 qr-codes (from the site, not from the site)
+Conversation: qr code scanning api needed
+Priority: low
+Story points: 4
+
+US #19: As an admin I must approve organizer accounts before they are created
+Acceptance Test: upon organizer account submission admin receives form and account is confirmed once admin clicks on "accept"
+Confirmation: organizer account always appears on "potential organizer" feed for admin
+Conversation: admin has a "potential organizer" feed and accounts should go from student->organizer
+Story points: 5
+Priority: high
+
+US #20: As an admin, I want to approve or reject events based on compliance with campus rules.
+Acceptance Test: whenever a new event is submitted, the admin receives it to "potential events" feed. Whenever he clicks "accept event" the event appears on any user's event feed.
+Priority: low
+Story points: 4
+
+US #21: As an admin, I want to see number of events total.
+
+US #22: As an admin, I want to see number of tickets issued.
+
+US #23: As an admin, I want to see attendance rates.
+
+US #24: As an admin, I want to be able to view all organizations.
+
+US #25: As an admin, I want to be able to change details of an organization.
+
+US #26: As an admin, I want to be able to deactivate an organization.
+
+US #27: As an admin I need to be able to assign org/admin/student roles to any user
+Acceptance test: whenever an admin changes a certain account status, if you log in to the account you immediately have the updated change
+conversation: all accounts should be able to shift in status:
+student<->organizer<->admin<->student
+Priority: high
+story points: 3

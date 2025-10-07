@@ -1,0 +1,22 @@
+﻿NATIONAL
+SPRINT 1 MEETING #2 09/18
+  
+
+19 SEPTEMBER 2025 / 6:30 PM / ROOM 907 
+ATTENDEES
+Ariberto, Romain, Mateo, Jonathan, Karim, Protip, Jasdeep, (Sick)Tristian
+AGENDA
+Tasks Done:
+1.  Created the ReadMe file on Github
+2. Creates user Stories through issues on Github
+3. Decided on which languages and frameworks to use for development (will be adding more as we go and build)
+4. Divided the tasks between members
+To be done (until next lab)
+* Finish the Sprint 1 details and requirements 
+* Submit Sprint 1 docs by the deadline 
+* Start with Web development and coding!!!
+NOTES
+* Will be using react, npm, routes & tailwind CSS frameworks for frontend
+* Will be using NodeJS + ExpressJS for backend implementation
+* Will be using Postgresql for database creation and handling
+* Will be using Supabase Auth for authorising and signing in user

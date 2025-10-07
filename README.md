@@ -22,14 +22,22 @@ This project is to be developed using Agile Development methods over four sprint
   - Admin Global Stats 
   
 # Team Members
-- Ariberto Bello Veras (40319600)<br>
+- Ariberto Bello Veras (40319600 @Aribertobello)<br>
+Role: <br><br>
 - Romain Corbel (40257534 @roma4in1)<br>
+Role: <br><br>
 - Mateo Garzon Velasco (40277001 @Matgarz)<br>
+Role: <br><br>
 - Jonathan Lebeau Lemieux (40251138 @BandoJo)<br>
-- Karim Mikhaeil (40233685 Karimikhaeil)<br>
+Role: Database Implementation and Management <br> <br>
+- Karim Mikhaeil (40233685 @Karimikhaeil)<br>
+Role: <br><br>
 - Protip Nag (40308526 @Protip9)<br>
+Role: <br><br>
 - Tristan Ovesson (40113603 @RastaLink)<br>
+Role: <br><br>
 - Jasdeep Sandhu (40266557 @jasdeep-s-s)<br>
+Role: <br><br>
 
 # Language and Frameworks
 ## Languages Used:
@@ -40,9 +48,10 @@ This project is to be developed using Agile Development methods over four sprint
 
 ## Frameworks & Tools used:
 - React
+- Tailwind CSS
 - Node.JS (Express.JS)
-- Postgresql
-- Supabase
+- MySQL + Prisma ORM
+- Azure Database
 
 ## For the User
   - You can be a student, organizer or administrator

@@ -1,0 +1,16 @@
+﻿NATIONAL
+SPRINT 1 MEETING #3 09/25
+  
+
+25 SEPTEMBER 2025 / 5:30 PM / H907
+ATTENDEES
+Ariberto, Romain, Mateo, Jonathan, Karim, Protip, Jasdeep, Tristian
+AGENDA
+Tasks Done:
+* Finish the Sprint 1 details and requirements 
+* Start with Web development and coding
+To be done (until next lab)
+* Submit Sprint 1 docs by the deadline 
+NOTES
+* Divided all the user-stories
+* Finalized the meeting documents
