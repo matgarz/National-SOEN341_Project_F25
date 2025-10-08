@@ -25,7 +25,9 @@ model Event {
   
   organizationId Int
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
-  
+  organizerId    Int?
+  Organizer      Organizer?       @relation(fields: [organizerId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
+
   creatorId      Int
   creator        User @relation(fields: [creatorId], references: [id], onDelete: Cascade, map: "Event_creatorId_fkey")
   reviews        Review[]
@@ -37,6 +39,7 @@ model Event {
   @@index([date], map: "Event_date_idx")
   @@index([organizationId], map: "Event_organizationId_idx")
   @@index([status], map: "Event_status_idx")
+  @@index([organizerId], map: "Event_organizationId_idx")
 }
 
 model organization {
@@ -118,6 +121,26 @@ model user {
 
   @@index([email], map: "User_email_idx")
   @@index([role], map: "User_role_idx")
+}
+
+//ORGANIZER ENTITY (profile for the even organizer)
+model Organizer {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String?
+  phone       String?
+  website     String?
+  logoUrl     String?
+  department  String?   // optional, e.g., club/department name
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  // Relations
+  organizationId Int?          // optional: tie organizer to an Organization
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  events Event[]               // one organizer → many events
+  @@index([isActive])
+  @@index([organizationId])
 }
 
 enum ticket_paymentStatus {

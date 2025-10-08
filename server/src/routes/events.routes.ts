@@ -8,7 +8,7 @@ const router = Router();
 const prisma = new PrismaClient();
 
 //These GET comments describe what GET page they are requesting from
-
+// this is for the events api
 router.get("/", async (req: Request, res: Response) => {
   try {
     const upcomingOnly = String(req.query.upcoming ?? "").toLowerCase() === "true";
@@ -23,6 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
       include: {
         organization: { select: { id: true, name: true } },
         user: { select: { id: true, name: true, email: true } },
+        // Organizer: { select: { id: true, name: true } },
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -31,7 +32,7 @@ router.get("/", async (req: Request, res: Response) => {
     res.json(events);
   } catch (err) {
     console.error("Error fetching events:", err);
-    res.status(500).json({ error: "Failed to fetch events" });
+    res.status(500).json({ error: "Failed to fetch events 1" });
   }
 });
 
@@ -101,7 +102,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     
   } catch (error) {             // catching errors
     console.error('Error fetching events:', error);
-    res.status(500).json({ error: 'Failed to fetch events' });
+    res.status(500).json({ error: 'Failed to fetch events 2' });
   }
 });
 
@@ -129,7 +130,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json(event);
   } catch (error) {         // catching errors
     console.error('Error fetching event:', error);
-    res.status(500).json({ error: 'Failed to fetch event' });
+    res.status(500).json({ error: 'Failed to fetch event 3' });
   }
 });
 

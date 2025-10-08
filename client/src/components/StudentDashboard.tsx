@@ -21,6 +21,7 @@ type ApiEvent = {
   imageUrl?: string | null;
   status: EventStatus;
   organization?: { id: number; name: string | null };
+  Organizer?: { id: number; name: string | null };
   creator?: { id: number; name: string | null; email: string };
   _count?: { tickets: number };        // if you included this in the backend
 };
