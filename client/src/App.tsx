@@ -1,12 +1,9 @@
-import React from 'react'
-import Brother from './assets/calendar';
-import { Button } from './components/ui/button';
-
+import ViewCal from './components/calView';
 
 export default function App() {
   return (
     <main className='text-3xl text-indigo-400 font-bold underline'>
-      <Brother/>
+      <ViewCal />
     </main>
   )
 }
