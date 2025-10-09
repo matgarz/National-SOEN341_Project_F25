@@ -1,52 +1,52 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import './App.css'
+import { useState} from 'react'
+import { Header } from './components/Header';
+import StudentDashboard from './components/StudentDashboard';
 
-function App() {
-  const [count, setCount] = useState(0);
-  const [message, setMessage] = useState(""); // state for backend data
+export default function App() {
+  const [currentView, setCurrentView] = useState('discover');
+  const [userRole, setUserRole] = useState<'student' | 'organizer' | 'admin'>('student');
+  const [searchQuery, setSearchQuery] = useState('');
+  /* const [filters, setFilters] = useState<FilterState>({
+    categories: [],
+    ticketTypes: [],
+    dateRange: 'all',
+    location: '',
+    sortBy: 'date-asc'
+  });*/ 
 
-  // Fetch from backend
-  useEffect(() => {
-    fetch("/api/hello")
-      .then((res) => res.json())
-      .then((data) => setMessage(data.message))
-      .catch((err) => console.error("Error fetching:", err));
-  }, []);
+  const getDefaultView = () => {
+    switch (userRole) {
+      case 'student':
+        return 'discover';
+      case 'organizer':
+        return 'events';
+      case 'admin':
+        return 'admin-dashboard';
+      default:
+        return 'discover';
+    }
+  };
+
+  // Auto-switch to appropriate view when role changes
+  const handleRoleChange = (newRole: 'student' | 'organizer' | 'admin') => {
+    setUserRole(newRole);
+    setCurrentView(getDefaultView());
+  };
+
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-background">
+      <Header
+        currentView={currentView}
+        userRole={userRole}
+        onViewChange={setCurrentView}
+        onRoleChange={handleRoleChange}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+      <StudentDashboard />
+      {/*<EventCard />*/}
       </div>
-
-      <h1>SOEN 341 Project</h1>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-
-      {/* Backend message */}
-      <p style={{ color: "green", fontWeight: "bold" }}>
-        {message || "Loading backend message..."}
-      </p>
-
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+  )
 }
 
-export default App;
