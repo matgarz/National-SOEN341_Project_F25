@@ -1,182 +1,126 @@
-//This is where you can update the schema for the database them run the command 'npx prisma migrate dev'
-//to update the actual migration.sql
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL") //the Database link inside our safe .env file
+  url      = env("DATABASE_URL")
 }
 
-//USER MANAGEMENT (1)
+model Event {
+  id             Int              @id @default(autoincrement())
+  title          String
+  description    String           @db.Text
+  date           DateTime
+  location       String
+  capacity       Int
+  ticketType     event_ticketType @default(FREE)
+  ticketPrice    Decimal?         @db.Decimal(10, 2)
+  category       String?
+  imageUrl       String?
+  status         EventStatus     @default(APPROVED)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  
+  
+  organizationId Int
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
+  organizerId    Int?
+  Organizer      Organizer?       @relation(fields: [organizerId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String // hashed with bcrypt for safety
-  name      String
-  studentId String?  @unique
-  role      Role     @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  creatorId      Int
+  creator        User @relation(fields: [creatorId], references: [id], onDelete: Cascade, map: "Event_creatorId_fkey")
+  reviews        Review[]
+  savedBy        SavedEvent[]
+  ticket         Ticket[]
 
-  // Relations
-  tickets       Ticket[]
-  savedEvents   SavedEvent[]
-  eventsCreated Event[]      @relation("EventCreator")
-  reviews       Review[]
-
-  @@index([email])
-  @@index([role])
+  @@index([category], map: "Event_category_idx")
+  @@index([creatorId], map: "Event_creatorId_idx")
+  @@index([date], map: "Event_date_idx")
+  @@index([organizationId], map: "Event_organizationId_idx")
+  @@index([status], map: "Event_status_idx")
+  @@index([organizerId], map: "Event_organizationId_idx")
 }
 
-enum Role {
-  STUDENT
-  ORGANIZER
-  ADMIN
-}
-
-//ORGANIZATIONS (2)
-
-model Organization {
+model organization {
   id           Int      @id @default(autoincrement())
-  name         String   @unique
+  name         String   @unique(map: "Organization_name_key")
   description  String?  @db.Text
   contactEmail String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime
+  event        event[]
 
-  // Relations
-  events Event[]
-
-  @@index([isActive])
+  @@index([isActive], map: "Organization_isActive_idx")
 }
 
-//EVENTS (3)
-
-model Event {
-  id          Int         @id @default(autoincrement())
-  title       String
-  description String      @db.Text
-  date        DateTime
-  location    String
-  capacity    Int // max tickets
-  ticketType  TicketType  @default(FREE)
-  ticketPrice Decimal?    @db.Decimal(10, 2)
-  category    String? // e.g., "Academic", "Social", "Sports"
-  imageUrl    String?
-  status      EventStatus @default(APPROVED)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  // Relations
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  creatorId Int
-  creator   User @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-
-  organizerId Int?
-  organizer   Organizer? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
-
-  tickets Ticket[]
-  savedBy SavedEvent[]
-  reviews Review[]
-
-  @@index([organizationId])
-  @@index([creatorId])
-  @@index([date])
-  @@index([status])
-  @@index([category])
-  @@index([organizerId])
-}
-
-enum TicketType {
-  FREE
-  PAID
-}
-
-enum EventStatus {
-  PENDING // awaiting admin approval
-  APPROVED // live and visible
-  REJECTED // rejected by admin
-  CANCELLED // cancelled by organizer
-  COMPLETED // event has passed
-}
-
-//TICKETS (4)
-
-model Ticket {
-  id            Int           @id @default(autoincrement())
-  qrCode        String        @unique // unique QR code string
-  claimed       Boolean       @default(true)
-  checkedIn     Boolean       @default(false)
-  checkedInAt   DateTime?
-  paymentStatus PaymentStatus @default(FREE)
-  paymentAmount Decimal?      @db.Decimal(10, 2)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Relations
-  eventId Int
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, eventId]) // one ticket per user per event
-  @@index([eventId, claimed])
-  @@index([userId])
-  @@index([qrCode])
-}
-
-enum PaymentStatus {
-  FREE
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-//CALENDAR (SAVED EVENTS) (5)
-
-model SavedEvent {
+model review {
   id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  eventId Int
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, eventId]) // prevent duplicate saves
-  @@index([userId])
-  @@index([eventId])
-}
-
-//REVIEWS (Additional Feature [possible]) (6)
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  rating    Int // 1-5 stars
+  rating    Int
   comment   String?  @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime
+  eventId   Int
+  userId    Int
+  event     event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Review_eventId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
 
-  // Relations
-  eventId Int
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  @@unique([userId, eventId], map: "Review_userId_eventId_key")
+  @@index([eventId], map: "Review_eventId_idx")
+  @@index([rating], map: "Review_rating_idx")
+}
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model savedevent {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  eventId   Int
+  event     event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "SavedEvent_eventId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SavedEvent_userId_fkey")
 
-  @@unique([userId, eventId]) // one review per user per event
-  @@index([eventId])
-  @@index([rating])
+  @@unique([userId, eventId], map: "SavedEvent_userId_eventId_key")
+  @@index([eventId], map: "SavedEvent_eventId_idx")
+  @@index([userId], map: "SavedEvent_userId_idx")
+}
+
+model ticket {
+  id            Int                  @id @default(autoincrement())
+  qrCode        String               @unique(map: "Ticket_qrCode_key")
+  claimed       Boolean              @default(true)
+  checkedIn     Boolean              @default(false)
+  checkedInAt   DateTime?
+  paymentStatus ticket_paymentStatus @default(FREE)
+  paymentAmount Decimal?             @db.Decimal(10, 2)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime
+  eventId       Int
+  userId        Int
+  event         event                @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Ticket_eventId_fkey")
+  user          user                 @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Ticket_userId_fkey")
+
+  @@unique([userId, eventId], map: "Ticket_userId_eventId_key")
+  @@index([eventId, claimed], map: "Ticket_eventId_claimed_idx")
+  @@index([qrCode], map: "Ticket_qrCode_idx")
+  @@index([userId], map: "Ticket_userId_idx")
+}
+
+model user {
+  id         Int          @id @default(autoincrement())
+  email      String       @unique(map: "User_email_key")
+  password   String
+  name       String
+  studentId  String?      @unique(map: "User_studentId_key")
+  role       user_role    @default(STUDENT)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime
+  event      event[]
+  review     review[]
+  savedevent savedevent[]
+  ticket     ticket[]
+
+  @@index([email], map: "User_email_idx")
+  @@index([role], map: "User_role_idx")
 }
 
 //ORGANIZER ENTITY (profile for the even organizer)
@@ -191,13 +135,37 @@ model Organizer {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
   // Relations
   organizationId Int?          // optional: tie organizer to an Organization
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-
   events Event[]               // one organizer → many events
-
   @@index([isActive])
   @@index([organizationId])
+}
+
+enum ticket_paymentStatus {
+  FREE
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum user_role {
+  STUDENT
+  ORGANIZER
+  ADMIN
+}
+
+enum event_ticketType {
+  FREE
+  PAID
+}
+
+enum event_status {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  COMPLETED
 }
