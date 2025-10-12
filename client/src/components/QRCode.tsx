@@ -14,7 +14,7 @@ type QRCodeProps = {
 };
 
 const padding = 32;
-const innerImageSizeFactor = 4;
+const innerImageSizeFactor = 8;
 
 function QRCode({link, size, title} : QRCodeProps){
 
