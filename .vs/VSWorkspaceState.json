@@ -2,16 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\client",
-    "\\client\\public",
     "\\client\\src",
-    "\\client\\src\\components",
     "\\client\\src\\context",
     "\\server",
+    "\\server\\prisma",
     "\\server\\src",
     "\\server\\src\\middleware",
     "\\server\\src\\middleware\\validators",
     "\\server\\src\\routes"
   ],
-  "SelectedNode": "\\client\\src\\components\\StudentDashboard.tsx",
+  "SelectedNode": "\\server\\prisma\\seed.ts",
   "PreviewInSolutionExplorer": false
 }
