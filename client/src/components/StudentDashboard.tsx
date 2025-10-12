@@ -4,6 +4,7 @@ import { Button } from "./ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { EventCard, type Event as EventCardEvent } from "./eventCard";
+import QRCode from "./QRCode";
 
 type TicketType = "FREE" | "PAID";
 type EventStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
