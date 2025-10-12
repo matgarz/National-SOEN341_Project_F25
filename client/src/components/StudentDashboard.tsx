@@ -4,6 +4,7 @@ import { Button } from "./ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { EventCard, type Event as EventCardEvent } from "./EventCard";
+import QRCode from "./QRCode";
 
 type TicketType = "FREE" | "PAID";
 type EventStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
@@ -162,6 +163,7 @@ export default function StudentDashboard() {
           )}
         </TabsContent>
       </Tabs>
+      <QRCode link="https://google.com" size={256} title="google"></QRCode>
     </div>
   );
 }
