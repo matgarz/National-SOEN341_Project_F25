@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\client\\src\\assets",
+    "\\server",
+    "\\server\\prisma",
+    "\\server\\prisma\\migrations",
+    "\\server\\prisma\\migrations\\20250929191740_init",
+    "\\server\\src",
+    "\\server\\src\\middleware",
+    "\\server\\src\\middleware\\validators",
+    "\\server\\src\\routes"
+  ],
+  "SelectedNode": "\\server\\prisma\\schema.prisma",
+  "PreviewInSolutionExplorer": false
+}
