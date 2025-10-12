@@ -25,7 +25,7 @@ router.get("/", async (req: Request, res: Response) => {
       include: {
         organization: { select: { id: true, name: true } },
         creator: { select: { id: true, name: true, email: true } },
-        // Organizer: { select: { id: true, name: true } },
+        // Organizer: { select: { id: true, name: true } }, organizer removed
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -34,7 +34,7 @@ router.get("/", async (req: Request, res: Response) => {
     res.json(events);
   } catch (err) {
     console.error("Error fetching events:", err);
-    res.status(500).json({ error: "Failed to fetch events 1" });
+      res.status(500).json({ error: "Failed to fetch events 1", details: err instanceof Error ? err.message : err });
   }
 });
 
@@ -77,9 +77,9 @@ try {
 });
 
 
-// GET /api/events = Get all upcoming events
+// GET /api/events/upcoming = Get all upcoming events
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/upcoming', async (req: Request, res: Response) => {
   try {
 
 
