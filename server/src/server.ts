@@ -2,7 +2,7 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import eventRoutes from './routes/events.routes';
+import eventRoutes from './routes/events.routes.js';
 
 dotenv.config(); //to access the .env data without leaking passwords
 
