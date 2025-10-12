@@ -1,52 +1,66 @@
-import { useState} from 'react'
-import { Header } from './components/Header';
+import { useState } from 'react';
+import Header from './components/Header';
 import StudentDashboard from './components/StudentDashboard';
+import OrganizerCreateEvent from './components/OrganizerCreateEvent';
+import { useAuth } from './context/AuthContext';
+import Register from './components/Register';
+import Login from './components/Login';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('discover');
-  const [userRole, setUserRole] = useState<'student' | 'organizer' | 'admin'>('student');
-  const [searchQuery, setSearchQuery] = useState('');
-  /* const [filters, setFilters] = useState<FilterState>({
-    categories: [],
-    ticketTypes: [],
-    dateRange: 'all',
-    location: '',
-    sortBy: 'date-asc'
-  });*/ 
+    const { user, logout } = useAuth(); // get logout from AuthContext
+    const [currentView, setCurrentView] = useState('login'); // default for guests
+    const [searchQuery, setSearchQuery] = useState('');
 
-  const getDefaultView = () => {
-    switch (userRole) {
-      case 'student':
-        return 'discover';
-      case 'organizer':
-        return 'events';
-      case 'admin':
-        return 'admin-dashboard';
-      default:
-        return 'discover';
+    const userRole = user ? (user.role.toLowerCase() as 'student' | 'organizer' | 'admin') : 'guest';
+
+    const handleRoleChange = (newRole: 'student' | 'organizer' | 'admin') => {
+        setCurrentView(getDefaultView(newRole));
+    };
+
+    function getDefaultView(role: string) {
+        switch (role) {
+            case 'student': return 'discover';
+            case 'organizer': return 'events';
+            case 'admin': return 'admin-dashboard';
+            default: return 'login';
+        }
     }
-  };
 
-  // Auto-switch to appropriate view when role changes
-  const handleRoleChange = (newRole: 'student' | 'organizer' | 'admin') => {
-    setUserRole(newRole);
-    setCurrentView(getDefaultView());
-  };
+    // --- ADD HANDLELOGOUT HERE ---
+    const handleLogout = () => {
+        logout(); // clear user from context + localStorage
+        setCurrentView('login'); // redirect to login page
+    };
+
+    console.log('Current user:', user);
 
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header
-        currentView={currentView}
-        userRole={userRole}
-        onViewChange={setCurrentView}
-        onRoleChange={handleRoleChange}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-      <StudentDashboard />
-      {/*<EventCard />*/}
-      </div>
-  )
+    return (
+        <div className="min-h-screen bg-background">
+            {/* Header always visible */}
+            <Header
+                user={user}
+                currentView={currentView}
+                userRole={userRole}
+                onViewChange={setCurrentView}
+                onRoleChange={handleRoleChange}
+                onLogout={handleLogout}   // <-- pass it here
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+            />
+
+            {/* Main content */}
+            <main className="p-4 max-w-7xl mx-auto">
+                {userRole === 'guest' && currentView === 'login' && <Login />}
+                {userRole === 'guest' && currentView === 'register' && <Register />}
+
+                {userRole === 'student' && <StudentDashboard />}
+
+                {userRole === 'organizer' && currentView === 'events' && <StudentDashboard />}
+                {userRole === 'organizer' && currentView === 'create-event' && <OrganizerCreateEvent />}
+
+                {userRole === 'admin' && <div>Admin dashboard placeholder</div>}
+            </main>
+        </div>
+    );
 }
-

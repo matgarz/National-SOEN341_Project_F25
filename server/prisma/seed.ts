@@ -24,7 +24,8 @@ async function main() {
       email: 'admin@concordia.ca',
       password: hashedPassword,
       name: 'Admin User',
-      role: 'ADMIN',
+          role: 'ADMIN',
+          updatedAt: new Date(),
     },
   });
 
@@ -34,7 +35,8 @@ async function main() {
       password: hashedPassword,
       name: 'John Smith',
       studentId: 'ORG001',
-      role: 'ORGANIZER',
+          role: 'ORGANIZER',
+          updatedAt: new Date(),
     },
   });
 
@@ -44,7 +46,8 @@ async function main() {
       password: hashedPassword,
       name: 'Sarah Johnson',
       studentId: 'ORG002',
-      role: 'ORGANIZER',
+          role: 'ORGANIZER',
+          updatedAt: new Date(),
     },
   });
 
@@ -55,7 +58,8 @@ async function main() {
         password: hashedPassword,
         name: 'Alice Brown',
         studentId: '40123456',
-        role: 'STUDENT',
+            role: 'STUDENT',
+            updatedAt: new Date(),
       },
     }),
 
@@ -65,7 +69,8 @@ async function main() {
         password: hashedPassword,
         name: 'Bob Wilson',
         studentId: '40234567',
-        role: 'STUDENT',
+            role: 'STUDENT',
+            updatedAt: new Date(),
       },
     }),
 
@@ -75,7 +80,8 @@ async function main() {
         password: hashedPassword,
         name: 'Carol Davis',
         studentId: '40345678',
-        role: 'STUDENT',
+            role: 'STUDENT',
+            updatedAt: new Date(),
       },
     }),
   ]);
@@ -89,7 +95,8 @@ async function main() {
         name: 'Computer Science Student Association',
         description: 'CSSA organizes tech talks, hackathons, and networking events for CS students.',
         contactEmail: 'cssa@concordia.ca',
-        isActive: true,
+            isActive: true,
+            updatedAt: new Date(),
       },
     }),
 
@@ -98,7 +105,8 @@ async function main() {
         name: 'Concordia Student Union',
         description: 'CSU represents undergraduate students and organizes campus-wide events.',
         contactEmail: 'csu@concordia.ca',
-        isActive: true,
+            isActive: true,
+            updatedAt: new Date(),
       },
     }),
 
@@ -107,7 +115,8 @@ async function main() {
         name: 'Athletics Department',
         description: 'Organizing sports events and competitions.',
         contactEmail: 'athletics@concordia.ca',
-        isActive: true,
+            isActive: true,
+            updatedAt: new Date(),
       },
     }),
 
@@ -116,7 +125,8 @@ async function main() {
         name: 'Engineering Society',
         description: 'Events for engineering students including workshops and social gatherings.',
         contactEmail: 'engsoc@concordia.ca',
-        isActive: true,
+            isActive: true,
+            updatedAt: new Date(),
       },
     }),
   ]);
@@ -141,7 +151,8 @@ async function main() {
         category: 'Academic',
         status: 'APPROVED',
         organizationId: orgs[0].id,
-        creatorId: organizer1.id,
+            creatorId: organizer1.id,
+            updatedAt: new Date(),
       },
     }),
     prisma.event.create({
@@ -155,7 +166,8 @@ async function main() {
         category: 'Social',
         status: 'APPROVED',
         organizationId: orgs[1].id,
-        creatorId: organizer2.id,
+            creatorId: organizer2.id,
+            updatedAt: new Date(),
       },
     }),
     prisma.event.create({
@@ -170,7 +182,8 @@ async function main() {
         category: 'Sports',
         status: 'APPROVED',
         organizationId: orgs[2].id,
-        creatorId: organizer1.id,
+            creatorId: organizer1.id,
+            updatedAt: new Date(),
       },
     }),
     prisma.event.create({
@@ -184,7 +197,8 @@ async function main() {
         category: 'Academic',
         status: 'APPROVED',
         organizationId: orgs[0].id,
-        creatorId: organizer1.id,
+            creatorId: organizer1.id,
+            updatedAt: new Date(),
       },
     }),
     prisma.event.create({
@@ -198,7 +212,8 @@ async function main() {
         category: 'Social',
         status: 'APPROVED',
         organizationId: orgs[1].id,
-        creatorId: organizer2.id,
+            creatorId: organizer2.id,
+            updatedAt: new Date(),
       },
     }),
   ]);
@@ -214,7 +229,8 @@ async function main() {
         checkedIn: false,
         paymentStatus: 'FREE',
         userId: students[0].id,
-        eventId: events[0].id,
+            eventId: events[0].id,
+            updatedAt: new Date(),
       },
     }),
     prisma.ticket.create({
@@ -224,7 +240,8 @@ async function main() {
         checkedIn: true,
         paymentStatus: 'FREE',
         userId: students[1].id,
-        eventId: events[1].id,
+            eventId: events[1].id,
+            updatedAt: new Date(),
       },
     }),
     prisma.ticket.create({
@@ -235,7 +252,8 @@ async function main() {
         paymentStatus: 'COMPLETED',
         paymentAmount: 15.99,
         userId: students[2].id,
-        eventId: events[2].id,
+            eventId: events[2].id,
+            updatedAt: new Date(),
       },
     }),
   ]);
@@ -247,13 +265,15 @@ async function main() {
     prisma.savedEvent.create({
       data: {
         userId: students[0].id,
-        eventId: events[3].id,
+            eventId: events[3].id,
+            updatedAt: new Date(),
       },
     }),
     prisma.savedEvent.create({
       data: {
         userId: students[1].id,
-        eventId: events[4].id,
+            eventId: events[4].id,
+            updatedAt: new Date(),
       },
     }),
   ]);
