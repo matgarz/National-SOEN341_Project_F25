@@ -1,16 +1,17 @@
 {
   "ExpandedNodes": [
     "",
-    "\\client\\src\\assets",
+    "\\client",
+    "\\client\\public",
+    "\\client\\src",
+    "\\client\\src\\components",
+    "\\client\\src\\context",
     "\\server",
-    "\\server\\prisma",
-    "\\server\\prisma\\migrations",
-    "\\server\\prisma\\migrations\\20250929191740_init",
     "\\server\\src",
     "\\server\\src\\middleware",
     "\\server\\src\\middleware\\validators",
     "\\server\\src\\routes"
   ],
-  "SelectedNode": "\\server\\prisma\\schema.prisma",
+  "SelectedNode": "\\client\\src\\components\\StudentDashboard.tsx",
   "PreviewInSolutionExplorer": false
 }
