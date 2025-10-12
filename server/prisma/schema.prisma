@@ -20,7 +20,7 @@ model Event {
   imageUrl    String?
   status      EventStatus     @default(APPROVED)
   createdAt   DateTime        @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime        @updatedAt
 
   organizationId Int
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
@@ -48,7 +48,7 @@ model Organization {
   contactEmail String?
   isActive     Boolean     @default(true)
   createdAt    DateTime    @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime    @updatedAt
   event        Event[]
   organizers   Organizer[]
 
@@ -60,7 +60,7 @@ model Review {
   rating    Int
   comment   String?  @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   eventId   Int
   userId    Int
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Review_eventId_fkey")
@@ -93,7 +93,7 @@ model Ticket {
   paymentStatus PaymentStatus @default(FREE)
   paymentAmount Decimal?      @db.Decimal(10, 2)
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime      @updatedAt
   eventId       Int
   userId        Int
   event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Ticket_eventId_fkey")
@@ -113,7 +113,7 @@ model User {
   studentId  String?      @unique(map: "User_studentId_key")
   role       UserRole     @default(STUDENT)
   createdAt  DateTime     @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime     @updatedAt
   event      Event[]
   review     Review[]
   savedevent SavedEvent[]
