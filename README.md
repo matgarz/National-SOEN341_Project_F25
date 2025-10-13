@@ -35,7 +35,7 @@ Role: <br><br>
 - Protip Nag (40308526 @Protip9)<br>
 Role: <br><br>
 - Tristan Ovesson (40113603 @RastaLink)<br>
-Role: <br><br>
+Role: Fullstack Developer <br><br>
 - Jasdeep Sandhu (40266557 @jasdeep-s-s)<br>
 Role: <br><br>
 
