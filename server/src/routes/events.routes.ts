@@ -25,7 +25,6 @@ router.get("/", async (req: Request, res: Response) => {
       include: {
         organization: { select: { id: true, name: true } },
         creator: { select: { id: true, name: true, email: true } },
-        // Organizer: { select: { id: true, name: true } },
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -76,38 +75,6 @@ try {
 }
 });
 
-
-// GET /api/events = Get all upcoming events
-
-router.get('/:id', async (req: Request, res: Response) => {
-  try {
-
-
-    const events = await prisma.event.findMany({
-      where: { 
-        status: 'APPROVED',
-        date: { gte: new Date() } // Only upcoming events are sorted
-      },
-      include: {
-        organization: true,
-        creator: {
-          select: { id: true, name: true, email: true }
-        },
-        _count: {
-          select: { ticket: true }
-        }
-      },
-      orderBy: { date: 'asc' }
-    });
-
-    res.json(events);
-    
-  } catch (error) {             // catching errors
-    console.error('Error fetching events:', error);
-    res.status(500).json({ error: 'Failed to fetch events 2' });
-  }
-});
-
 // GET /api/events/:id = Get single event by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
@@ -130,7 +97,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json(event);
-  } catch (error) {         // catching errors
+  } catch (error) {
     console.error('Error fetching event:', error);
     res.status(500).json({ error: 'Failed to fetch event 3' });
   }
