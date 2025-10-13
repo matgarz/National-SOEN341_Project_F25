@@ -5,7 +5,7 @@ const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export default function Login() {
     const { login } = useAuth();
-    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
@@ -17,7 +17,7 @@ export default function Login() {
             const res = await fetch(`${API}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ name, password }),
             });
 
             if (!res.ok) {
@@ -38,10 +38,10 @@ export default function Login() {
             {error && <div className="text-red-600 mb-2">{error}</div>}
             <form onSubmit={handleSubmit} className="space-y-4">
                 <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Username"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
                     className="w-full border rounded p-2"
                     required
                 />

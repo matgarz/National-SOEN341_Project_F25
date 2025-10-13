@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "watch": "nodemon --watch src --ext ts --exec tsx src/server.ts",
-    "seed": "tsx prisma/seed.ts"
+    "watch": "nodemon --watch src --ext ts --exec tsx src/server.ts"
+
   },
   "keywords": [],
   "author": "",

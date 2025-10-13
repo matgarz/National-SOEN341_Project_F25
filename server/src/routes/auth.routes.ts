@@ -9,12 +9,12 @@ const prisma = new PrismaClient();
 // Secret for JWT (in production, put in .env)
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-// POST /api/auth/register
+// Registration Endpoint: POST /api/auth/register
 router.post('/register', async (req, res) => {
-    const { name, password, role, organizationId, studentId } = req.body;
+    const { name, password, email, role, organizationId, studentId } = req.body;
 
-    if (!name || !password || !role) {
-        return res.status(400).json({ error: 'Name, password, and role are required' });
+    if (!name || !password || !email || !role) {
+        return res.status(400).json({ error: 'Username, password, email and role are required!' });
     }
 
     try {
@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generate a dummy email if schema requires it
-        const email = `${name.toLowerCase()}@example.com`;
+        // const email = `${name.toLowerCase()}@example.com`;
 
         
         const now = new Date();
@@ -46,30 +46,43 @@ router.post('/register', async (req, res) => {
         });
 
 
-        // Generate JWT token
+        // Create JWT token
         const token = jwt.sign(
             {
                 id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
                 role: newUser.role,
-                organizationId: newUser.organizationId || null,
+
             },
             JWT_SECRET,
             { expiresIn: '8h' }
         );
 
-        // Return created user + token
-        res.status(201).json({
-            id: newUser.id,
-            name: newUser.name,
-            role: newUser.role,
-            organizationId: newUser.organizationId || null,
-            studentId: newUser.studentId || null,
-            token,
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Registration failed' });
-    }
-});
+        res.json({ ...newUser, token });
+            } catch (err) {
+                res.status(500).json({ error: 'Registration failed', details: err });
+            }
+            });
+
+            // Login endpoint: POST /api/auth/login
+            router.post('/login', async (req, res) => {
+            const { name, password } = req.body;
+            if (!name || !password) {
+                return res.status(400).json({ error: 'Username and password are required' });
+            }
+            try {
+                const user = await prisma.user.findFirst({ where: { name } });
+                if (!user) return res.status(404).json({ error: 'User not found' });
+
+                const valid = await bcrypt.compare(password, user.password);
+                if (!valid) return res.status(401).json({ error: 'Invalid password' });
+
+                const token = jwt.sign({ id: user.id, name: user.name, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '8h' });
+                res.json({ ...user, token });
+            } catch (err) {
+                res.status(500).json({ error: 'Login failed', details: err });
+            }
+            });
 
 export default router;

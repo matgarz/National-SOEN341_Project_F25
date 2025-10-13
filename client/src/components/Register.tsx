@@ -5,6 +5,7 @@ export default function Register() {
     const [form, setForm] = useState({
         name: "",
         password: "",
+        email: "",
         role: "student", // default
         studentId: "",
         organizationId: "",
@@ -27,7 +28,7 @@ export default function Register() {
         setError(null);
 
         try {
-            // Prepare payload
+            // Prepare payload to send
             const payload: any = { ...form };
             if (form.role === "student") payload.organizationId = undefined;
             if (form.role === "organizer") payload.studentId = undefined;
@@ -68,6 +69,15 @@ export default function Register() {
                     required
                 />
                 <input
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full border rounded p-2"
+                    required
+                />
+                <input
                     name="password"
                     type="password"
                     placeholder="Password"
@@ -76,7 +86,7 @@ export default function Register() {
                     className="w-full border rounded p-2"
                     required
                 />
-                <select name="role" value={form.role} onChange={handleChange} className="w-full border rounded p-2">
+                <select title="role" name="role" value={form.role} onChange={handleChange} className="w-full border rounded p-2">
                     <option value="student">Student</option>
                     <option value="organizer">Organizer</option>
                 </select>
@@ -108,7 +118,7 @@ export default function Register() {
                     disabled={loading}
                     className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
                 >
-                    {loading ? "Registering…" : "Register"}
+                    {loading ? "Registering..." : "Register"}
                 </button>
             </form>
         </div>

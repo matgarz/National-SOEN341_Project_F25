@@ -49,9 +49,9 @@ export default function Header({ user, currentView, userRole, onViewChange, onRo
                         {/* Guest */}
                         {userRole === 'guest' && (
                             <div className="flex items-center space-x-2">
-                                <Button variant="default" size="sm" onClick={() => onViewChange('login')}>Login</Button>
-                                <Button variant="default" size="sm" onClick={() => onViewChange('register')}>Register</Button>
-                                <Badge className={`${getRoleColor(userRole)} shadow-sm`}>Guest</Badge>
+                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange('login')}>Login</Button>
+                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange('register')}>Register</Button>
+                                <Badge className={`${getRoleColor(userRole)} shadow-sm`} >Guest</Badge>
                             </div>
                         )}
 
