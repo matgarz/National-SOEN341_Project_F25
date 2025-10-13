@@ -1,6 +1,6 @@
-//Seed file creates example entities for the database
+
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt'; //to bycrpyt the passwords/ sensitive information
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +12,7 @@ async function main() {
   await prisma.savedEvent.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.event.deleteMany();
+  await prisma.organizer.deleteMany();
   await prisma.organization.deleteMany();
   await prisma.user.deleteMany();
 
@@ -58,7 +59,6 @@ async function main() {
         role: 'STUDENT',
       },
     }),
-
     prisma.user.create({
       data: {
         email: 'student2@concordia.ca',
@@ -68,7 +68,6 @@ async function main() {
         role: 'STUDENT',
       },
     }),
-
     prisma.user.create({
       data: {
         email: 'student3@concordia.ca',
@@ -92,7 +91,6 @@ async function main() {
         isActive: true,
       },
     }),
-
     prisma.organization.create({
       data: {
         name: 'Concordia Student Union',
@@ -101,7 +99,6 @@ async function main() {
         isActive: true,
       },
     }),
-
     prisma.organization.create({
       data: {
         name: 'Athletics Department',
@@ -110,7 +107,6 @@ async function main() {
         isActive: true,
       },
     }),
-
     prisma.organization.create({
       data: {
         name: 'Engineering Society',
@@ -122,6 +118,54 @@ async function main() {
   ]);
 
   console.log('Created 4 organizations');
+
+  const organizerProfiles = await Promise.all([
+    prisma.organizer.create({
+      data: {
+        name: 'CSSA Events Team',
+        email: 'cssa@concordia.ca',
+        phone: '514-848-2424',
+        website: 'https://cssa.concordia.ca',
+        department: 'Computer Science',
+        isActive: true,
+        organizationId: orgs[0].id,
+      },
+    }),
+    prisma.organizer.create({
+      data: {
+        name: 'CSU Events Team',
+        email: 'csu@concordia.ca',
+        phone: '514-848-7474',
+        website: 'https://csu.concordia.ca',
+        department: 'Student Life',
+        isActive: true,
+        organizationId: orgs[1].id,
+      },
+    }),
+    prisma.organizer.create({
+      data: {
+        name: 'Athletics Events',
+        email: 'athletics@concordia.ca',
+        phone: '514-848-2424',
+        department: 'Athletics',
+        isActive: true,
+        organizationId: orgs[2].id,
+      },
+    }),
+    prisma.organizer.create({
+      data: {
+        name: 'EngSoc Events',
+        email: 'engsoc@concordia.ca',
+        phone: '514-848-3333',
+        website: 'https://engsoc.concordia.ca',
+        department: 'Engineering',
+        isActive: true,
+        organizationId: orgs[3].id,
+      },
+    }),
+  ]);
+
+  console.log('Created 4 organizer profiles');
 
   //CREATE EVENTS
   const now = new Date();
@@ -141,6 +185,7 @@ async function main() {
         category: 'Academic',
         status: 'APPROVED',
         organizationId: orgs[0].id,
+        organizerId: organizerProfiles[0].id,
         creatorId: organizer1.id,
       },
     }),
@@ -155,6 +200,7 @@ async function main() {
         category: 'Social',
         status: 'APPROVED',
         organizationId: orgs[1].id,
+        organizerId: organizerProfiles[1].id,
         creatorId: organizer2.id,
       },
     }),
@@ -170,6 +216,7 @@ async function main() {
         category: 'Sports',
         status: 'APPROVED',
         organizationId: orgs[2].id,
+        organizerId: organizerProfiles[2].id,
         creatorId: organizer1.id,
       },
     }),
@@ -184,6 +231,7 @@ async function main() {
         category: 'Academic',
         status: 'APPROVED',
         organizationId: orgs[0].id,
+        organizerId: organizerProfiles[0].id,
         creatorId: organizer1.id,
       },
     }),
@@ -198,6 +246,7 @@ async function main() {
         category: 'Social',
         status: 'APPROVED',
         organizationId: orgs[1].id,
+        organizerId: organizerProfiles[1].id,
         creatorId: organizer2.id,
       },
     }),
@@ -260,16 +309,16 @@ async function main() {
 
   console.log('Created 2 saved events');
 
-  console.log('\nDatabase seed completed successfully!');
-  console.log('\nTest Accounts:');
-  console.log('Admin: admin@concordia.ca / password123');
-  console.log('Organizer: organizer1@concordia.ca / password123');
-  console.log('Student: student1@concordia.ca / password123');
+  console.log('\n Database seed completed successfully!');
+  console.log('\n Test Accounts (password: password123):');
+  console.log('  Admin: admin@concordia.ca');
+  console.log('  Organizer: organizer1@concordia.ca');
+  console.log('  Student: student1@concordia.ca');
 }
 
 main()
   .catch((e) => {
-    console.error('Seed failed:', e);
+    console.error(' Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {
