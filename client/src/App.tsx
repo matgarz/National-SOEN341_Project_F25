@@ -13,28 +13,10 @@ export default function App() {
     const { user, logout } = useAuth(); // get logout from AuthContext
     const [searchQuery, setSearchQuery] = useState('');
     const userRole = user ? (user.role.toLowerCase() as 'student' | 'organizer' | 'admin') : 'guest';
-    /* const [currentView, setCurrentView] = useState('login'); // default for guests
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const userRole = user ? (user.role.toLowerCase() as 'student' | 'organizer' | 'admin') : 'guest';
-
-    const handleRoleChange = (newRole: 'student' | 'organizer' | 'admin') => {
-        setCurrentView(getDefaultView(newRole));
-    };
-
-    function getDefaultView(role: string) {
-        switch (role) {
-            case 'student': return 'discover';
-            case 'organizer': return 'events';
-            case 'admin': return 'admin-dashboard';
-            default: return 'login';
-        }
-    } */
-
+    
     // logging user out
     const handleLogout = () => {
         logout(); 
-        // setCurrentView('login'); 
     };
 
     // for debugging
@@ -46,10 +28,7 @@ export default function App() {
             {/* Header always visible */}
             <Header
                 user={user}
-                // currentView={currentView}
                 userRole={userRole}
-                // onViewChange={setCurrentView}
-                // onRoleChange={handleRoleChange}
                 onLogout={handleLogout}   
                 searchQuery={searchQuery} //needed to be implemnented
                 onSearchChange={setSearchQuery}  //needed to be implemnented 
