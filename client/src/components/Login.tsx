@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export default function Login() {
+    const navigate = useNavigate();
+    
     const { login } = useAuth();
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
@@ -27,6 +32,10 @@ export default function Login() {
 
             const user = await res.json();
             login(user);
+            // go to the URL based on role
+            if (user.role === 'student') navigate('/dashboard');
+            else if (user.role === 'organizer') navigate('/'); // to /events
+            else if (user.role === 'admin') navigate('/'); // to /admin-dashboard
         } catch (err: any) {
             setError(err.message);
         }

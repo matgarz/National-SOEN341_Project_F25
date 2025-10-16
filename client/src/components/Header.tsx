@@ -1,16 +1,17 @@
-import { Bell, Calendar, Search, User } from "lucide-react";
+import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Badge } from "./ui/badge";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
     user: any;
-    currentView: string;
+    currentView?: string;
     userRole: 'student' | 'organizer' | 'admin' | 'guest';
-    onViewChange: (view: string) => void;
-    onRoleChange: (role: 'student' | 'organizer' | 'admin') => void;
+    onViewChange?: (view: string) => void;
+    onRoleChange?: (role: 'student' | 'organizer' | 'admin') => void;
     onLogout: () => void;
     searchQuery: string;
     onSearchChange: (query: string) => void;
@@ -40,17 +41,19 @@ export default function Header({ user, currentView, userRole, onViewChange, onRo
                     {/* Left: Logo and Role/Guest buttons */}
                     <div className="flex items-center space-x-4">
                         <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-                            <Calendar className="h-8 w-8 text-primary" />
+                                <Calendar className="h-8 w-8 text-primary" />
                         </motion.div>
-                        <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                        <Link to="/">
+                        <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-violet-700">
                             CampusEvents
                         </h1>
+                        </Link>
 
                         {/* Guest */}
                         {userRole === 'guest' && (
                             <div className="flex items-center space-x-2">
-                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange('login')}>Login</Button>
-                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange('register')}>Register</Button>
+                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange && onViewChange('login')}>Login</Button>
+                                <Button className="cursor-pointer" variant="default" size="sm" onClick={() => onViewChange && onViewChange('register')}>Register</Button>
                                 <Badge className={`${getRoleColor(userRole)} shadow-sm`} >Guest</Badge>
                             </div>
                         )}
@@ -63,7 +66,8 @@ export default function Header({ user, currentView, userRole, onViewChange, onRo
                                     <SelectTrigger className="w-32 border-primary/20 hover:border-primary/40 transition-colors">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
+
+                                    <SelectContent className="z-50 bg-white border-b-blue-600 shadow-md">
                                         <SelectItem value="student">Student</SelectItem>
                                         <SelectItem value="organizer">Organizer</SelectItem>
                                         <SelectItem value="admin">Admin</SelectItem>
@@ -84,7 +88,7 @@ export default function Header({ user, currentView, userRole, onViewChange, onRo
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-red-600 hover:bg-red-100 transition-colors"
+                                    className="text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
                                     onClick={onLogout}
                                 >
                                     Logout
@@ -116,9 +120,14 @@ export default function Header({ user, currentView, userRole, onViewChange, onRo
                     {/* Right: Notification/User icons */}
                     <nav className="flex items-center space-x-2">
                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                            <Button variant="ghost" size="sm" className="hover:bg-primary/10 transition-colors">
-                                <Bell className="h-4 w-4" />
-                            </Button>
+                            <Link
+                            to="/calendar"
+                            className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
+                            style={{ textDecoration: "none" }}
+                            >
+                                <Calendar className="h-4 w-4" />
+                                My Events
+                            </Link>
                         </motion.div>
                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                             <Button variant="ghost" size="sm" className="hover:bg-primary/10 transition-colors">
