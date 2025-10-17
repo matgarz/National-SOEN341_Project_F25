@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import eventRoutes from './routes/events.routes.js';
 import authRoutes from './routes/auth.routes.js'; 
+import adminRoutes from './routes/admin.routes.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.get('/', (_req: Request, res: Response) => {
 // Mount both routes
 app.use('/api/events', eventRoutes);
 app.use('/api/auth', authRoutes); 
+app.use('/api/admin', adminRoutes);
 
 console.log('Booting server...');
 

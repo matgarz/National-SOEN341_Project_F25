@@ -32,3 +32,12 @@ export const requireRole = (role: 'STUDENT' | 'ORGANIZER' | 'ADMIN') => {
         next();
     };
 };
+
+export const requireAdmin = requireRole('ADMIN')
+
+export const requireOrganizerOrAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+if (!req.user || (req.user.role !== 'ORGANIZER' && req.user.role !== 'ADMIN')) {
+        return res.status(403).json({ error: 'Forbidden: Organizer or Admin role required' });
+    }
+    next();
+};
