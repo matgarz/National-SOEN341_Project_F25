@@ -22,22 +22,22 @@ This project is to be developed using Agile Development methods over four sprint
   - Admin Global Stats 
   
 # Team Members
+- Jasdeep Sandhu (40266557 @jasdeep-s-s)<br>
+Role: Scrum Master & Developer<br><br>
 - Ariberto Bello Veras (40319600 @Aribertobello)<br>
-Role: <br><br>
+Role: Backend Developer <br><br>
 - Romain Corbel (40257534 @roma4in1)<br>
-Role: <br><br>
+Role: Backend & Database Developer <br><br>
 - Mateo Garzon Velasco (40277001 @Matgarz)<br>
-Role: <br><br>
+Role: Frontend Developer <br><br>
 - Jonathan Lebeau Lemieux (40251138 @BandoJo)<br>
 Role: Database Implementation and Management <br> <br>
 - Karim Mikhaeil (40233685 @Karimikhaeil)<br>
-Role: <br><br>
+Role: Testing and Automation Dev <br><br>
 - Protip Nag (40308526 @Protip9)<br>
-Role: <br><br>
+Role: Frontend developer <br><br>
 - Tristan Ovesson (40113603 @RastaLink)<br>
-Role: <br><br>
-- Jasdeep Sandhu (40266557 @jasdeep-s-s)<br>
-Role: <br><br>
+Role: Fullstack Developer <br><br>
 
 # Language and Frameworks
 ## Languages Used:
