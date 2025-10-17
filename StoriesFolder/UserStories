@@ -44,22 +44,7 @@ Confirmation: "the transaction is through message" after a good attempt
 Priority: low
 story points: 5
 
-US #10: As a user, I want to have a personal wallet where all my purchased tickets are accessible.
-Conversation:
-Wallet is like a “receipts” section where all pre-purchased tickets appear.
-From the wallet, the user can save tickets in exportable formats (at least PDF, maybe others later).
-Wallet might also include an “Interested In” section for bookmarked events.
-Should wallet be protected by a password/PIN? (discussion point).
-Confirmation:
-All purchased tickets appear in the wallet.
-Each ticket can be exported as a PDF.
-Bookmarked events appear under “Interested In.”
-Wallet is accessible only to the logged-in student account.
-
-Priority: High
-Story Points: 5
-
-US #11: As a student I need a unique qr-code for my ticket
+US #10: As a student I need a unique qr-code for my ticket
 Conversation:
 Each ticket must generate a unique QR code upon purchase.
 QR code contains enough info to validate at the event (ticket ID, event ID, student ID).
@@ -76,7 +61,10 @@ A used/expired ticket’s QR code is rejected.
 priority: low
 story points: 3
 
-US #12: As a user, I want my digital ticket to include event info
+Priority: High
+Story Points: 5
+
+US #11: As a user, I want my digital ticket to include event info
 Conversation:
 -A digital ticket should not only show the QR code (from US#10) but also display key event details.
 -Minimum required fields:
@@ -98,6 +86,18 @@ All ticket details are consistent across wallet view and exported PDF.
 Event info remains attached to the ticket even after the event has passed.
 Priority: high
 Story points: 3
+
+US #12: As a user, I want to have a personal wallet where all my purchased tickets are accessible.
+Conversation:
+Wallet is like a “receipts” section where all pre-purchased tickets appear.
+From the wallet, the user can save tickets in exportable formats (at least PDF, maybe others later).
+Wallet might also include an “Interested In” section for bookmarked events.
+Should wallet be protected by a password/PIN? (discussion point).
+Confirmation:
+All purchased tickets appear in the wallet.
+Each ticket can be exported as a PDF.
+Bookmarked events appear under “Interested In.”
+Wallet is accessible only to the logged-in student account.
 
 US #13: As an organizer I need to create events with their attributes/info for students
 Conversation: forms to submit events must have all criteria described

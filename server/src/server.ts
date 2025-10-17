@@ -2,34 +2,35 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import eventRoutes from './routes/events.routes';
+import eventRoutes from './routes/events.routes.js';
+import authRoutes from './routes/auth.routes.js'; 
 
-dotenv.config(); //to access the .env data without leaking passwords
+dotenv.config();
 
 const app = express();
 const PORT = 3001;
 
-// allowing Vite frontend to access the backend
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN ?? "http://localhost:5173";
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
 
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
-  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"],
-  credentials: false // true if we are using cookies in website
+    origin: FRONTEND_ORIGIN,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false
 }));
+
 app.use(express.json());
 
-
-
 app.get('/', (_req: Request, res: Response) => {
-  res.json({ message: 'Hello from Express + TypeScript!' });
+    res.json({ message: 'Hello from Express + TypeScript!' });
 });
 
+// Mount both routes
 app.use('/api/events', eventRoutes);
+app.use('/api/auth', authRoutes); 
 
-console.log("booting server")
+console.log('Booting server...');
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });

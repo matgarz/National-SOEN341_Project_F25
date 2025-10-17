@@ -36,3 +36,4 @@ dist-ssr/
 # Test coverage (maybe for later)
 coverage/
 .nyc_output/
+.vs/

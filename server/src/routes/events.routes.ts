@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { PrismaClient, type Prisma } from '@prisma/client';
+import { emit } from 'process';
 import { createEventValidation } from '../middleware/validators/event.validator.js';
 import { handleValidationErrors } from '../middleware/validationHandler.js';
 
@@ -23,6 +24,7 @@ router.get("/", async (req: Request, res: Response) => {
       include: {
         organization: { select: { id: true, name: true } },
         creator: { select: { id: true, name: true, email: true } },
+        // Organizer: { select: { id: true, name: true } }, organizer removed
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -31,27 +33,59 @@ router.get("/", async (req: Request, res: Response) => {
     res.json(events);
   } catch (err) {
     console.error("Error fetching events:", err);
-    res.status(500).json({ error: "Failed to fetch events" });
+      res.status(500).json({ error: "Failed to fetch events 1", details: err instanceof Error ? err.message : err });
   }
 });
 
 // GET /api/events/search?keyword=yourKeyword
-router.get('/search', async (req: Request, res: Response) => {
-  try {
-    const keyword = req.query.keyword as string;
+router.get('/search', async (req : Request, res : Response) => {
+try {
+  const keyword = req.query.keyword as string;
 
-    if (!keyword) { 
-      return res.status(400).json({ error: 'Search query is required' })
-    }
+  if (!keyword) { 
+    return res.status(400).json({ error: 'Search query is required'})
+  }
+
+  const events = await prisma.event.findMany({
+    where: {
+      status: 'APPROVED',
+      date: { gte: new Date() },
+      OR: [ // Searches title and description
+        { title: { contains: keyword }}, 
+        {description: { contains: keyword }}
+      ]
+    },
+
+    include: {
+      organization : true,
+      creator: {
+        select: { id : true, name : true, email : true}
+      },
+      _count: { 
+        select: { ticket: true}
+      }
+    },
+    orderBy: { date: 'asc'}
+  });
+  res.json(events);
+
+} catch (error) { 
+  console.error('Error searching events: ', error);
+  res.status(500).json({ error: 'Failed to search events', details: error instanceof Error ? error.message : error  });
+}
+});
+
+
+// GET /api/events/upcoming = Get all upcoming events
+
+router.get('/upcoming', async (req: Request, res: Response) => {
+  try {
+
 
     const events = await prisma.event.findMany({
-      where: {
+      where: { 
         status: 'APPROVED',
-        date: { gte: new Date() },
-        OR: [
-          { title: { contains: keyword }}, 
-          { description: { contains: keyword }}
-        ]
+        date: { gte: new Date() } // Only upcoming events are sorted
       },
       include: {
         organization: true,
@@ -64,12 +98,12 @@ router.get('/search', async (req: Request, res: Response) => {
       },
       orderBy: { date: 'asc' }
     });
-    
-    res.json(events);
 
-  } catch (error) { 
-    console.error('Error searching events:', error);
-    res.status(500).json({ error: 'Failed to search events' });
+    res.json(events);
+    
+  } catch (error) {             // catching errors
+    console.error('Error fetching events:', error);
+    res.status(500).json({ error: 'Failed to fetch events 2', details: error instanceof Error ? error.message : error  });
   }
 });
 
@@ -96,11 +130,10 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json(event);
   } catch (error) {
     console.error('Error fetching event:', error);
-    res.status(500).json({ error: 'Failed to fetch event' });
+    res.status(500).json({ error: 'Failed to fetch event 3', details: error instanceof Error ? error.message : error  });
   }
 });
-
-// POST /api/events - Create new Event
+//POST /api/events (Create new Event)
 router.post(
   '/',
   createEventValidation,
@@ -122,40 +155,31 @@ router.post(
         status,
         creatorId
       } = req.body;
-
       if (!creatorId) {
         return res.status(400).json({ error: 'Creator ID is required' });
       }
-
       const organization = await prisma.organization.findUnique({
         where: { id: parseInt(organizationId) }
       });
-
       if (!organization) {
         return res.status(404).json({ error: 'Organization not found' });
       }
-
       if (!organization.isActive) {
         return res.status(400).json({ error: 'Organization is not active' });
       }
-
       const creator = await prisma.user.findUnique({
         where: { id: parseInt(creatorId) }
       });
-
       if (!creator) {
         return res.status(404).json({ error: 'Creator not found' });
       }
-
       if (organizerId) {
         const organizer = await prisma.organizer.findUnique({
           where: { id: parseInt(organizerId) }
         });
-
         if (!organizer) {
           return res.status(404).json({ error: 'Organizer not found' });
         }
-
         if (!organizer.isActive) {
           return res.status(400).json({ error: 'Organizer is not active' });
         }
@@ -194,12 +218,10 @@ router.post(
           }
         }
       });
-
       res.status(201).json({
         message: 'Event created successfully',
         event: newEvent
       });
-
     } catch (error) {
       console.error('Error creating event:', error);
       if (error instanceof Error) {
