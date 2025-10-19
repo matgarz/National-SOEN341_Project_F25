@@ -1,0 +1,12 @@
+POST http://localhost:3001/api/auth/signup
+Content-Type: application/json
+Accept: application/json
+
+{
+    "firstName" : "Hello",
+    "lastName" : "World 3",
+    "email" : "j@mail.com",
+    "password" : "123456",
+    "role" : "STUDENT",
+    "studentId" : "40022221"
+}

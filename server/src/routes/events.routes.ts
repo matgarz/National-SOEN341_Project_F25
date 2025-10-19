@@ -72,7 +72,7 @@ try {
 
 } catch (error) { 
   console.error('Error searching events: ', error);
-  res.status(500).json({ error: 'Failed to search events' });
+  res.status(500).json({ error: 'Failed to search events', details: error instanceof Error ? error.message : error  });
 }
 });
 
@@ -104,7 +104,7 @@ router.get('/upcoming', async (req: Request, res: Response) => {
     
   } catch (error) {             // catching errors
     console.error('Error fetching events:', error);
-    res.status(500).json({ error: 'Failed to fetch events 2' });
+    res.status(500).json({ error: 'Failed to fetch events 2', details: error instanceof Error ? error.message : error  });
   }
 });
 
@@ -132,7 +132,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json(event);
   } catch (error) {         // catching errors
     console.error('Error fetching event:', error);
-    res.status(500).json({ error: 'Failed to fetch event 3' });
+    res.status(500).json({ error: 'Failed to fetch event 3', details: error instanceof Error ? error.message : error  });
   }
 });
 //POST /api/events (Create new Event)
