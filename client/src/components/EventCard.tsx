@@ -9,8 +9,7 @@ export interface Event {
   id: string;
   title: string;
   description: string;
-  date: string;
-  time: string;
+  start: string;
   location: string;
   organizer: string;
   category: string;
@@ -31,12 +30,14 @@ interface EventCardProps {
   onClaimTicket?: (eventId: string) => void;
   onViewDetails?: (eventId: string) => void;
   onEdit?: (eventId: string) => void;
-}
+  onAddToCalendar?: (event: Event) => void;
+} 
 
 export function EventCard({ 
   event, 
   userRole, 
   onBookmark, 
+  onAddToCalendar,
   onClaimTicket, 
   onViewDetails, 
   onEdit 
@@ -70,6 +71,7 @@ export function EventCard({
   };
 
   const availability = getAvailabilityStatus();
+
 
   return (
     <motion.div
@@ -151,9 +153,9 @@ export function EventCard({
       <CardContent className="space-y-3">
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <Calendar className="h-4 w-4" />
-          <span>{formatDate(event.date)}</span>
+          <span>{formatDate(event.start)}</span>
           <Clock className="h-4 w-4 ml-2" />
-          <span>{event.time}</span>
+          <span>{new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}</span>
         </div>
         
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -188,6 +190,7 @@ export function EventCard({
                 Details
               </Button>
             </motion.div>
+
             {!event.hasTicket && event.capacity > event.attendees ? (
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
                 <Button 
@@ -199,6 +202,7 @@ export function EventCard({
                   {event.ticketType === 'free' ? 'Claim Ticket' : 'Buy Ticket'}
                 </Button>
               </motion.div>
+
             ) : event.hasTicket ? (
               <Button size="sm" className="flex-1 gradient-secondary text-white" disabled>
                 <Ticket className="h-4 w-4 mr-1" />
@@ -208,7 +212,19 @@ export function EventCard({
               <Button size="sm" className="flex-1" disabled variant="secondary">
                 Sold Out
               </Button>
-            )}
+            )} 
+
+            <motion.div whileHover={{scale : 1.02 }} whileTap={{ scale : 0.98 }} className = "flex-1">
+              <Button
+              variant = "outline"
+              size = "sm" 
+              className="w-full transitional-all duration-200 hover:border-primary/50"
+              onClick={() => onAddToCalendar?.(event)}
+              >
+                <Calendar className="h-4 w-4 mr-1" />
+                Save to Calendar
+                </Button>
+                </motion.div>
           </>
         )}
 
