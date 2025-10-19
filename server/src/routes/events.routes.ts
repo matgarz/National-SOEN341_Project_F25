@@ -9,8 +9,7 @@ import { handleValidationErrors } from '../middleware/validationHandler.js';
 const router = Router();
 const prisma = new PrismaClient();
 
-//These GET comments describe what GET page they are requesting from
-// this is for the events api
+// GET /api/events - Get all events (with optional upcoming filter)
 router.get("/", async (req: Request, res: Response) => {
   try {
     const upcomingOnly = String(req.query.upcoming ?? "").toLowerCase() === "true";
@@ -72,7 +71,7 @@ try {
 
 } catch (error) { 
   console.error('Error searching events: ', error);
-  res.status(500).json({ error: 'Failed to search events' });
+  res.status(500).json({ error: 'Failed to search events', details: error instanceof Error ? error.message : error  });
 }
 });
 
@@ -93,7 +92,7 @@ router.get('/upcoming', async (req: Request, res: Response) => {
         creator: {
           select: { id: true, name: true, email: true }
         },
-        _count: {
+        _count: { 
           select: { ticket: true }
         }
       },
@@ -104,14 +103,13 @@ router.get('/upcoming', async (req: Request, res: Response) => {
     
   } catch (error) {             // catching errors
     console.error('Error fetching events:', error);
-    res.status(500).json({ error: 'Failed to fetch events 2' });
+    res.status(500).json({ error: 'Failed to fetch events 2', details: error instanceof Error ? error.message : error  });
   }
 });
 
-// GET /api/events/:id = Get single event by ID
+// GET /api/events/:id - Get single event by ID
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-
     const event = await prisma.event.findUnique({
       where: { id: parseInt(req.params.id) },
       include: {
@@ -130,9 +128,9 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json(event);
-  } catch (error) {         // catching errors
+  } catch (error) {
     console.error('Error fetching event:', error);
-    res.status(500).json({ error: 'Failed to fetch event 3' });
+    res.status(500).json({ error: 'Failed to fetch event 3', details: error instanceof Error ? error.message : error  });
   }
 });
 //POST /api/events (Create new Event)
