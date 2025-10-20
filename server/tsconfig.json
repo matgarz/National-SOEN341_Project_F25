@@ -13,6 +13,7 @@
     "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
 
     // Stricter Typechecking
     "strict": true,

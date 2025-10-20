@@ -1,5 +1,5 @@
 import * as TokenAuth from "./jwtAuth.js"
-import { UserPublic } from "./authTypes.js";
+import { UserPublic, RequestUser } from "../../types/authTypes.js";
 import { NextFunction } from 'express';
 import { Request, Response } from "express";
 import { PrismaClient, UserRole, User} from '@prisma/client';
@@ -25,6 +25,9 @@ async function logUserIn(req : Request, res : Response, next : NextFunction){
             },
         }
     );
+    console.log(user);
+    console.log(userToLogin.emailOrStudentID);
+    console.log(userToLogin.password);
     if(!user){
         return res.status(400).json({error : "Email or Student Id was not found"})
     }
@@ -36,8 +39,9 @@ async function logUserIn(req : Request, res : Response, next : NextFunction){
     }
     
     const userPublic : UserPublic = {...user};
+    const requestUser : RequestUser = {...user};
 
-    res.status(200).json({message:"Succesfully logged in", ...TokenAuth.createTokens(userPublic)});
+    res.status(200).json({message:"Succesfully logged in", userPublic,...TokenAuth.createTokens(requestUser)});
 }
 
 export {logUserIn}

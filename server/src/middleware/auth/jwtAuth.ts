@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction} from "express";
-import * as jwt from 'jsonwebtoken';
-import { UserPublic } from "./authTypes.js";
+import jwt from 'jsonwebtoken';
+import { UserPublic, RequestUser } from "../../types/authTypes.js";
 
 const ACCESS_SECRET = process.env.ACCESS_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
@@ -8,22 +8,36 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
   throw new Error("Missing JWT secret token environment variables");
 }
 
-function createTokens(user : UserPublic) : {accessToken : string, refreshToken : string} {
-    const accessToken = jwt.sign(user, ACCESS_SECRET!, {expiresIn : "30m"});
-    const refreshToken = jwt.sign(user, REFRESH_SECRET!, {expiresIn: "30d"});
-    return {accessToken, refreshToken};
+function createAccessToken(user : RequestUser) : string{
+    return jwt.sign(user, ACCESS_SECRET!, {expiresIn : "30m"});
+}
+
+function createRefreshToken(user : RequestUser) : string{
+    return jwt.sign(user, REFRESH_SECRET!, {expiresIn : "14d"});
+}
+
+function createTokens(user : RequestUser) : {accessToken : string, refreshToken : string} {
+    return { 
+        accessToken : createAccessToken(user),
+        refreshToken : createRefreshToken(user)
+    };
+}
+
+function readBearer(req : Request) : string | null{
+    const authHeader = req.headers["authorization"];
+    if(!authHeader) return null;
+    const token = authHeader?.split(" ")[1] || null;
+    return token;
 }
 
 function authenticateToken(req : Request, res : Response, next : NextFunction){
-    const authHeader = req.headers["authorization"];
-    const token = authHeader?.split(" ")[1] || null;
-    if (token == null) return res.sendStatus(401);
-
+    const token = readBearer(req);
+    if (token == null) return res.status(401).json({error:"Missing Access Token"});
 
     //TODO maybe use callback instead of trycatch ---------- fpor this block
     try {
         const user = jwt.verify(token, ACCESS_SECRET!);
-        req.user = user as UserPublic;
+        req.user = user as RequestUser;
         next();
     } catch (err) {
         res.status(403).json({ error: "Invalid Token" });
@@ -33,7 +47,7 @@ function authenticateToken(req : Request, res : Response, next : NextFunction){
 
 
 function newAccessToken(req : Request, res : Response) {
-    const refreshtoken = req.body.token;
+    const refreshtoken = req.body.refreshToken;
     if(!refreshtoken){
         return res.status(401).json({message:"missing token"});
     }
