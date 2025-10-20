@@ -24,6 +24,7 @@
     "@schedule-x/react": "^3.3.0",
     "@schedule-x/theme-default": "^3.3.0",
     "@schedule-x/theme-shadcn": "^3.3.0",
+    "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
