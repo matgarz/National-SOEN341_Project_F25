@@ -1,0 +1,39 @@
+name: CI Pipeline for Campus Events Web Platform
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        directory: [client, server]  # runs for both client and server directories
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: use Node.js
+        uses: actions/checkout@v3
+        with: 
+          node-version: '20'
+
+      - name: Install dependencies
+        run: cd ${{ matrix.directory }} && npm ci
+
+      # - name: Run ESLint
+      #   run: cd ${{ matrix.directory }} && npx eslint .
+        
+      - name: Run Prettier Check
+        run: cd ${{ matrix.directory }} && npx prettier --check .
+
+      - name: Run Tests
+        run: cd ${{ matrix.directory }} && npm test
+
+      - name: Build Project
+        if: matrix.directory == 'client'
+        run: cd ${{ matrix.directory }} && npm run build
+
