@@ -78,7 +78,7 @@ export default function StudentDashboard() {
   const [filters, setFilters] = useState(initialFilters);
 
   // Filtered events (client-side filtering)
-  const filteredEvents = useMemo(() => {
+  /*const filteredEvents = useMemo(() => {
     return events.filter((ev) => {
       // Categories
       if (
@@ -110,7 +110,7 @@ export default function StudentDashboard() {
       }
       return true;
     });
-  }, [events, filters]);
+  }, [events, filters]);*/
 
   // to be used and commented now for CI test integration
   /* const sortedEvents = useMemo(() => {
