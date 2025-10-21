@@ -126,7 +126,7 @@ export default function StudentDashboard() {
     }
     // Add more sort logic as needed
     return arr;
-  }, [filteredEvents, filters.sortBy]);*/ 
+  }, [filteredEvents, filters.sortBy]);*/
 
   useEffect(() => {
     const ctrl = new AbortController();
