@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "format": "prettier --check .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
