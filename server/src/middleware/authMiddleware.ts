@@ -19,11 +19,11 @@ export const authenticate = (
   if (!token) return res.status(401).json({ error: "Missing token" });
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as ;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Invalid token", details: err } );
+    return res.status(401).json({ error: "Invalid token", details: err });
   }
 };
 

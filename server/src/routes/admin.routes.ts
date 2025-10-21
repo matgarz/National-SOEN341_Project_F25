@@ -41,12 +41,10 @@ router.get("/users", async (req: AuthRequest, res) => {
     res.json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
-    res
-      .status(500)
-      .json({
-        error: "Failed to fetch users",
-        details: error instanceof Error ? error.message : error,
-      });
+    res.status(500).json({
+      error: "Failed to fetch users",
+      details: error instanceof Error ? error.message : error,
+    });
   }
 });
 
@@ -120,11 +118,9 @@ router.patch("/users/:id/role", async (req: AuthRequest, res) => {
     }
     // Validate role
     if (!Object.values(UserRole).includes(role)) {
-      return res
-        .status(400)
-        .json({
-          error: "Invalid role. Must be one of: STUDENT, ORGANIZER, ADMIN",
-        });
+      return res.status(400).json({
+        error: "Invalid role. Must be one of: STUDENT, ORGANIZER, ADMIN",
+      });
     }
     // Prevent admin from demoting themselves
     if (userId === req.user!.id && role !== "ADMIN") {
