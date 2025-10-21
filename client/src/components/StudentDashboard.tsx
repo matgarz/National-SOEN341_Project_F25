@@ -112,7 +112,8 @@ export default function StudentDashboard() {
     });
   }, [events, filters]);
 
-  const sortedEvents = useMemo(() => {
+  // to be used and commented now for CI test integration
+  /* const sortedEvents = useMemo(() => {
     const arr = [...filteredEvents];
     if (filters.sortBy === "date-asc") {
       arr.sort(
@@ -125,7 +126,7 @@ export default function StudentDashboard() {
     }
     // Add more sort logic as needed
     return arr;
-  }, [filteredEvents, filters.sortBy]);
+  }, [filteredEvents, filters.sortBy]);*/ 
 
   useEffect(() => {
     const ctrl = new AbortController();

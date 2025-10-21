@@ -1,4 +1,4 @@
-import { Calendar, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Checkbox } from "./ui/checkbox";
