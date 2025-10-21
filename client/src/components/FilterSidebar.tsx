@@ -4,9 +4,21 @@ import { Button } from "./ui/Button";
 import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Separator } from "./ui/separator";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
 export interface FilterState {
   categories: string[];
@@ -22,36 +34,49 @@ interface FilterSidebarProps {
   isMobile?: boolean;
 }
 
-const categories = ['Academic', 'Social', 'Sports', 'Cultural', 'Career', 'Workshop'];
-const ticketTypes = ['Free', 'Paid'];
+const categories = [
+  "Academic",
+  "Social",
+  "Sports",
+  "Cultural",
+  "Career",
+  "Workshop",
+];
+const ticketTypes = ["Free", "Paid"];
 const dateRanges = [
-  { value: 'all', label: 'All Dates' },
-  { value: 'today', label: 'Today' },
-  { value: 'this-week', label: 'This Week' },
-  { value: 'this-month', label: 'This Month' },
-  { value: 'next-month', label: 'Next Month' }
+  { value: "all", label: "All Dates" },
+  { value: "today", label: "Today" },
+  { value: "this-week", label: "This Week" },
+  { value: "this-month", label: "This Month" },
+  { value: "next-month", label: "Next Month" },
 ];
 const sortOptions = [
-  { value: 'date-asc', label: 'Date (Earliest First)' },
-  { value: 'date-desc', label: 'Date (Latest First)' },
-  { value: 'popularity', label: 'Most Popular' },
-  { value: 'alphabetical', label: 'Alphabetical' }
+  { value: "date-asc", label: "Date (Earliest First)" },
+  { value: "date-desc", label: "Date (Latest First)" },
+  { value: "popularity", label: "Most Popular" },
+  { value: "alphabetical", label: "Alphabetical" },
 ];
 
-function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onFiltersChange: (filters: FilterState) => void; }) {
+function FilterContent({
+  filters,
+  onFiltersChange,
+}: {
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
+}) {
   const handleCategoryChange = (category: string, checked: boolean) => {
     const newCategories = checked
       ? [...filters.categories, category]
-      : filters.categories.filter(c => c !== category);
-    
+      : filters.categories.filter((c) => c !== category);
+
     onFiltersChange({ ...filters, categories: newCategories });
   };
 
   const handleTicketTypeChange = (ticketType: string, checked: boolean) => {
     const newTicketTypes = checked
       ? [...filters.ticketTypes, ticketType]
-      : filters.ticketTypes.filter(t => t !== ticketType);
-    
+      : filters.ticketTypes.filter((t) => t !== ticketType);
+
     onFiltersChange({ ...filters, ticketTypes: newTicketTypes });
   };
 
@@ -59,17 +84,17 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
     onFiltersChange({
       categories: [],
       ticketTypes: [],
-      dateRange: 'all',
-      location: '',
-      sortBy: 'date-asc'
+      dateRange: "all",
+      location: "",
+      sortBy: "date-asc",
     });
   };
 
-  const hasActiveFilters = 
-    filters.categories.length > 0 || 
-    filters.ticketTypes.length > 0 || 
-    filters.dateRange !== 'all' || 
-    filters.location !== '';
+  const hasActiveFilters =
+    filters.categories.length > 0 ||
+    filters.ticketTypes.length > 0 ||
+    filters.dateRange !== "all" ||
+    filters.location !== "";
 
   return (
     <div className="space-y-6">
@@ -89,9 +114,11 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
       {/* Sort By */}
       <div className="space-y-2">
         <Label>Sort By</Label>
-        <Select 
-          value={filters.sortBy} 
-          onValueChange={(value) => onFiltersChange({ ...filters, sortBy: value })}
+        <Select
+          value={filters.sortBy}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, sortBy: value })
+          }
         >
           <SelectTrigger>
             <SelectValue />
@@ -111,9 +138,11 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
       {/* Date Range */}
       <div className="space-y-2">
         <Label>Date Range</Label>
-        <Select 
-          value={filters.dateRange} 
-          onValueChange={(value) => onFiltersChange({ ...filters, dateRange: value })}
+        <Select
+          value={filters.dateRange}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, dateRange: value })
+          }
         >
           <SelectTrigger>
             <SelectValue />
@@ -139,10 +168,12 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
               <Checkbox
                 id={category}
                 checked={filters.categories.includes(category)}
-                onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleCategoryChange(category, checked as boolean)
+                }
               />
-              <Label 
-                htmlFor={category} 
+              <Label
+                htmlFor={category}
                 className="text-sm font-normal cursor-pointer"
               >
                 {category}
@@ -163,10 +194,12 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
               <Checkbox
                 id={ticketType}
                 checked={filters.ticketTypes.includes(ticketType)}
-                onCheckedChange={(checked) => handleTicketTypeChange(ticketType, checked as boolean)}
+                onCheckedChange={(checked) =>
+                  handleTicketTypeChange(ticketType, checked as boolean)
+                }
               />
-              <Label 
-                htmlFor={ticketType} 
+              <Label
+                htmlFor={ticketType}
                 className="text-sm font-normal cursor-pointer"
               >
                 {ticketType}
@@ -184,14 +217,20 @@ function FilterContent({ filters, onFiltersChange }: { filters: FilterState; onF
         <Input
           placeholder="Search by location..."
           value={filters.location}
-          onChange={(e) => onFiltersChange({ ...filters, location: e.target.value })}
+          onChange={(e) =>
+            onFiltersChange({ ...filters, location: e.target.value })
+          }
         />
       </div>
     </div>
   );
 }
 
-export function FilterSidebar({ filters, onFiltersChange, isMobile = false }: FilterSidebarProps) {
+export function FilterSidebar({
+  filters,
+  onFiltersChange,
+  isMobile = false,
+}: FilterSidebarProps) {
   if (isMobile) {
     return (
       <Sheet>
@@ -206,7 +245,10 @@ export function FilterSidebar({ filters, onFiltersChange, isMobile = false }: Fi
             <SheetTitle>Filter Events</SheetTitle>
           </SheetHeader>
           <div className="mt-6">
-            <FilterContent filters={filters} onFiltersChange={onFiltersChange} />
+            <FilterContent
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+            />
           </div>
         </SheetContent>
       </Sheet>
@@ -214,7 +256,7 @@ export function FilterSidebar({ filters, onFiltersChange, isMobile = false }: Fi
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="hidden lg:block w-80 bg-white/70 backdrop-blur-sm border-r border-gray-200/50 p-6 h-full overflow-y-auto shadow-sm"
       initial={{ x: -320, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
