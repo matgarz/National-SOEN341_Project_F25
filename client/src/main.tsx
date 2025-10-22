@@ -1,16 +1,22 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
-import App from "./App.tsx";
-import Login from "./lib/pages/Login";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-function Root() {
-  const path = window.location.pathname;
-  return path === "/login" ? <Login /> : <App />;
-}
+import App from "./App";
+import Login from "./lib/pages/Login";
+import Register from "./lib/pages/Register";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Root />
+    <BrowserRouter>
+      <Routes>
+        {/* Home */}
+        <Route path="/" element={<App />} />
+
+        {/* Auth routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );

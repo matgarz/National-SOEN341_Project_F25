@@ -7,13 +7,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState('discover');
   const [userRole, setUserRole] = useState<'student' | 'organizer' | 'admin'>('student');
   const [searchQuery, setSearchQuery] = useState('');
-  /* const [filters, setFilters] = useState<FilterState>({
-    categories: [],
-    ticketTypes: [],
-    dateRange: 'all',
-    location: '',
-    sortBy: 'date-asc'
-  });*/ 
+
 
   const getDefaultView = () => {
     switch (userRole) {
@@ -28,7 +22,7 @@ export default function App() {
     }
   };
 
-  // Auto-switch to appropriate view when role changes
+  //auto-switch to appropriate view when role changes
   const handleRoleChange = (newRole: 'student' | 'organizer' | 'admin') => {
     setUserRole(newRole);
     setCurrentView(getDefaultView());
