@@ -55,9 +55,9 @@ export default function Login() {
       login(data.userPublic);
 
       const user = data.userPublic;
-      if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
-      else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
-      else navigate("/");
+      if (user.role === "STUDENT") navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER") navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN") navigate("/admin-dashboard", { replace: true });
 
     } catch (err: any) {
       setError(err?.message || "Login failed");

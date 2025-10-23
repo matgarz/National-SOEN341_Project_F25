@@ -31,6 +31,7 @@ export default function Register() {
 
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
+  const isAdmin = form.role === "ADMIN";
 
   const isValid = useMemo(() => {
     if (!form.firstName || !form.lastName) return false;
@@ -98,9 +99,9 @@ export default function Register() {
       login(data.userPublic);
 
       const user = data.userPublic;
-      if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
-      else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
-      else navigate("/");
+      if (user.role === "STUDENT") navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER") navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN") navigate("/admin-dashboard", { replace: true });
       
     } catch (err) {
       console.error(err);
