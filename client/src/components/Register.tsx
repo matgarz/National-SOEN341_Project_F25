@@ -1,7 +1,11 @@
-import { useState } from "react";
+
+
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenAuth";
 import { useAuth } from "../auth/AuthContext";
+
+type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -9,8 +13,12 @@ export default function Register() {
     lastName: "",
     email: "",
     password: "",
-    role: "STUDENT",
+    role: "STUDENT" as Role,
+
+    //student only
     studentId: "",
+
+    //organizer only
     phone: "",
     website: "",
     department: "",
@@ -18,52 +26,65 @@ export default function Register() {
 
   const {login} = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const isStudent = form.role === "STUDENT";
+  const isOrganizer = form.role === "ORGANIZER";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const isValid = useMemo(() => {
+    if (!form.firstName || !form.lastName) return false;
+    if (!/^[^@]+@[^@]+\.[^@]+$/.test(form.email)) return false;
+    if (form.password.length < 6) return false;
 
+    if (form.role === "STUDENT") {
+      if (!/^\d{6,}$/.test(form.studentId)) return false;
+    }
+    if (form.role === "ORGANIZER") {
+      if (!/^\d{3}-?\d{3}-?\d{4}$/.test(form.phone)) return false; //10 digit
+      if (!(form.website.startsWith("http://") || form.website.startsWith("https://"))) return false;
+      if (!form.department) return false;
+    }
+    return true;
+  }, [form]);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    if (!isValid) { setError("Please complete all required fields."); return; }
 
-    // Prepare payload
-    const payload: Record<string, string> = {
+    const payload: any = {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
       password: form.password,
       role: form.role,
     };
-
-    // Conditionally add fields
-    if (form.role === "STUDENT") payload.studentId = form.studentId;
-    if (form.role === "ORGANIZER") {
-      payload.phone = form.phone;
-      payload.website = form.website;
-      payload.department = form.department;
+    if (isStudent) payload.studentId = form.studentId.trim();
+    if (isOrganizer) {
+      payload.phone = form.phone.trim();
+      payload.website = form.website.trim();
+      payload.department = form.department.trim();
     }
 
     try {
+        setLoading(true);
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        alert("User created successfully!");
-      } else {
+      if (!res.ok) {
         const data = await res.json();
-        alert(`Error: ${data.error || "Something went wrong"}`);
+        setError(`Error: ${data.error || "Something went wrong"}`);
       }
 
-      // Step 2: Automatically log in
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          emailOrStudentID:
+          emailOrStudentId:
             form.role === "STUDENT" ? form.studentId || form.email : form.email,
           password: form.password,
         }),
@@ -80,45 +101,94 @@ export default function Register() {
       if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
       else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
       else navigate("/");
-
+      
     } catch (err) {
       console.error(err);
-      alert("Network error");
+      setError("Network error");
+    } finally{
+        setLoading(false);
     }
-  };
+  }
+
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full p-2 border rounded" required />
-        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} className="w-full p-2 border rounded" required />
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 16 }}>
+      <form
+        onSubmit={onSubmit}
+        style={{ width: "100%", maxWidth: 560, border: "1px solid #ddd", borderRadius: 16, padding: 24, boxShadow: "0 4px 16px rgba(0,0,0,0.05)" }}
+      >
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>Create your account</h1>
 
-        <select name="role" value={form.role} onChange={handleChange} className="w-full p-2 border rounded">
-          <option value="STUDENT">Student</option>
-          <option value="ORGANIZER">Organizer</option>
-          <option value="ADMIN">Admin</option>
-        </select>
+        {error && <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 12 }}>{error}</div>}
 
-        {form.role === "STUDENT" && (
-          <input name="studentId" placeholder="Student ID" value={form.studentId} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}>
+          <label>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>First name</span>
+            <input required value={form.firstName} onChange={set("firstName")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+          </label>
+          <label>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Last name</span>
+            <input required value={form.lastName} onChange={set("lastName")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+          </label>
+        </div>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Email</span>
+          <input type="email" required value={form.email} onChange={set("email")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+        </label>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Password (min 6 chars)</span>
+          <input type="password" required value={form.password} onChange={set("password")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+        </label>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Role</span>
+          <select value={form.role} onChange={set("role")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }}>
+            <option value="STUDENT">STUDENT</option>
+            <option value="ORGANIZER">ORGANIZER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </label>
+
+        {isStudent && (
+          <label style={{ display: "block", marginTop: 12 }}>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Student ID</span>
+            <input required value={form.studentId} onChange={set("studentId")} placeholder="40XXXXXX" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+          </label>
         )}
 
-        {form.role === "ORGANIZER" && (
-          <>
-            <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} className="w-full p-2 border rounded" required />
-            <input name="website" placeholder="Website" value={form.website} onChange={handleChange} className="w-full p-2 border rounded" />
-            <input name="department" placeholder="Department" value={form.department} onChange={handleChange} className="w-full p-2 border rounded" required />
-          </>
+        {isOrganizer && (
+          <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}>
+            <label>
+              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Phone (10 digits)</span>
+              <input required value={form.phone} onChange={set("phone")} placeholder="514-555-1212" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+            </label>
+            <label>
+              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Website (http/https)</span>
+              <input required value={form.website} onChange={set("website")} placeholder="https://example.com" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+            </label>
+            <label style={{ gridColumn: "1 / -1" }}>
+              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Department</span>
+              <input required value={form.department} onChange={set("department")} placeholder="Marketing" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+            </label>
+          </div>
         )}
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Register
+        <button
+          type="submit"
+          disabled={loading || !isValid}
+          style={{ width: "100%", marginTop: 16, padding: "10px 12px", borderRadius: 12, border: "1px solid #111", background: "#111", color: "#fff", fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
+        >
+          {loading ? "Creating account…" : "Create account"}
         </button>
+
+        <div style={{ fontSize: 13, marginTop: 12, color: "#555" }}>
+          Already have an account? <a href="/login">Sign in</a>
+        </div>
       </form>
     </div>
   );
 }
-
