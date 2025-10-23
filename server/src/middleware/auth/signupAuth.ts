@@ -258,6 +258,9 @@ async function addUserToDB(userToCreate : UserSignUp, studentToCreate : StudentS
             }
         }
     );
+
+    console.log("usercreated");
+    console.log(newUser);
 }
 
 async function addOrganizerToDB(userToCreate : UserSignUp, organizerToCreate : OrganizerSignUp) : Promise<OrganizerMinimal> {
