@@ -176,18 +176,18 @@ export default function StudentDashboard() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        =
-        <Button variant="outline">
+        {/*<Button variant="outline">
           <Filter className="h-4 w-4 mr-2" />
           Filters
-        </Button>
+        </Button>*/}
       </div>
 
+      <div className="flex justify-between gap-6">
       <FilterSidebar
         filters={filters}
         onFiltersChange={(newFilters) => setFilters(newFilters)}
       />
-
+      <div>
       {error && <div className="text-red-600 text-sm">Error: {error}</div>}
       {loading && <div className="text-sm opacity-70">Loading…</div>}
 
@@ -243,6 +243,8 @@ export default function StudentDashboard() {
           )}
         </TabsContent>
       </Tabs> 
+      </div>
+      </div>
     </div>
   );
 }
