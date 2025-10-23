@@ -1,5 +1,3 @@
-
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenAuth";
@@ -19,18 +17,21 @@ export default function Register() {
     studentId: "",
 
     //organizer only
-    phone: "",
-    website: "",
-    department: "",
+    organizerId: "",
+
+    // admin only
+    adminId: ""
   });
 
   const {login} = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
+  const isAdmin = form.role === "ADMIN";
 
   const isValid = useMemo(() => {
     if (!form.firstName || !form.lastName) return false;
@@ -41,9 +42,10 @@ export default function Register() {
       if (!/^\d{6,}$/.test(form.studentId)) return false;
     }
     if (form.role === "ORGANIZER") {
-      if (!/^\d{3}-?\d{3}-?\d{4}$/.test(form.phone)) return false; //10 digit
-      if (!(form.website.startsWith("http://") || form.website.startsWith("https://"))) return false;
-      if (!form.department) return false;
+      if (!/^\d{6,}$/.test(form.organizerId)) return false;
+    }
+    if (form.role === "ADMIN") {
+      if (!/^\d{6,}$/.test(form.adminId)) return false;
     }
     return true;
   }, [form]);
@@ -61,11 +63,8 @@ export default function Register() {
       role: form.role,
     };
     if (isStudent) payload.studentId = form.studentId.trim();
-    if (isOrganizer) {
-      payload.phone = form.phone.trim();
-      payload.website = form.website.trim();
-      payload.department = form.department.trim();
-    }
+    if (isOrganizer) payload.organizerId = form.organizerId.trim();
+    if(isAdmin) payload.adminId = form.adminId.trim();
 
     try {
         setLoading(true);
@@ -98,8 +97,9 @@ export default function Register() {
       login(data.userPublic);
 
       const user = data.userPublic;
-      if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
-      else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
+      if (user.role === "STUDENT") navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER") navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN") navigate("/admin-dashboard", { replace: true });
       else navigate("/");
       
     } catch (err) {
@@ -141,7 +141,17 @@ export default function Register() {
 
         <label style={{ display: "block", marginTop: 12 }}>
           <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Password (min 6 chars)</span>
-          <input type="password" required value={form.password} onChange={set("password")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+            <div style={{ display: "flex", gap: 8 }}>
+              <input type={showPassword ? "text" : "password"} required value={form.password} onChange={set("password")} style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} 
+                placeholder="••••••••"/>
+                <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc", background: "#f8f8f8", cursor: "pointer" }}
+                >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
         </label>
 
         <label style={{ display: "block", marginTop: 12 }}>
@@ -161,20 +171,17 @@ export default function Register() {
         )}
 
         {isOrganizer && (
-          <div style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}>
-            <label>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Phone (10 digits)</span>
-              <input required value={form.phone} onChange={set("phone")} placeholder="514-555-1212" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
-            </label>
-            <label>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Website (http/https)</span>
-              <input required value={form.website} onChange={set("website")} placeholder="https://example.com" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
-            </label>
-            <label style={{ gridColumn: "1 / -1" }}>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Department</span>
-              <input required value={form.department} onChange={set("department")} placeholder="Marketing" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
-            </label>
-          </div>
+          <label style={{ display: "block", marginTop: 12 }}>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Organizer ID</span>
+            <input required value={form.organizerId} onChange={set("organizerId")} placeholder="40XXXXXX" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+          </label>
+        )}
+
+        {isAdmin && (
+          <label style={{ display: "block", marginTop: 12 }}>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Admin ID</span>
+            <input required value={form.adminId} onChange={set("adminId")} placeholder="40XXXXXX" style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }} />
+          </label>
         )}
 
         <button

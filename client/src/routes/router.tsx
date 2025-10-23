@@ -11,6 +11,8 @@ import StudentDashboard from "../components/StudentDashboard";
 import OrganizerCreateEvent from "../components/OrganizerCreateEvent";
 import Calendar from "../components/Calendar";
 import { useAuth } from "../auth/AuthContext";
+import OrganizerDashboard from "../components/OrganizerDashboard";
+import AdminDashboard from "../components/AdminDashboard";
 
 
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
@@ -31,9 +33,9 @@ function IndexRedirect() {
     if (!user) return <Navigate to="/login" replace />;
 
     const role = (user.role ?? "").toUpperCase();
-    if (role === "STUDENT") return <Navigate to="/dashboard" replace />;
-    if (role === "ORGANIZER") return <Navigate to="/create-event" replace />;
-    if (role === "ADMIN") return <Navigate to="/dashboard" replace />;
+    if (role === "STUDENT") return <Navigate to="/student-dashboard" replace />;
+    if (role === "ORGANIZER") return <Navigate to="/organizer-dashboard" replace />;
+    if (role === "ADMIN") return <Navigate to="/admin-dashboard" replace />;
 
     return <Navigate to="/login" replace />;
 }
@@ -50,10 +52,28 @@ export const router = createBrowserRouter([
       { path: "register", element: <Register /> },
 
       {
-        path: "dashboard",
+        path: "student-dashboard",
         element: (
-          <ProtectedRoute allowedRoles={["STUDENT", "ADMIN"]}>
+          <ProtectedRoute allowedRoles={["STUDENT"]}>
             <StudentDashboard />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "organizer-dashboard",
+        element: (
+          <ProtectedRoute allowedRoles={["ORGANIZER"]}>
+            <OrganizerDashboard />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "admin-dashboard",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <AdminDashboard />
           </ProtectedRoute>
         ),
       },

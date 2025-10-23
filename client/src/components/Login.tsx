@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const isEmail = (v: string) => v.includes("@");
-const isStudentId = (v: string) => /^\d{6,}$/.test(v);
+// const isStudentId = (v: string) => /^\d{6,}$/.test(v);
 
 
 export default function Login() {
@@ -24,10 +24,10 @@ export default function Login() {
 
     const body: Record<string, string> = { password };
 
-    if (isEmail(identifier)) body.emailOrStudentId = identifier.trim();
-    else if (isStudentId(identifier)) body.emailOrStudentId = identifier.trim();
+    if (isEmail(identifier)) body.email = identifier.trim();
+    // else if (isStudentId(identifier)) body.emailOrStudentId = identifier.trim();
     else {
-      setError("Enter a valid email or student ID.");
+      setError("Enter a valid email.");
       return;
     }
 
@@ -55,8 +55,9 @@ export default function Login() {
       login(data.userPublic);
 
       const user = data.userPublic;
-      if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
-      else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
+      if (user.role === "STUDENT") navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER") navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN") navigate("/admin-dashboard", { replace: true });
       else navigate("/");
 
     } catch (err: any) {
@@ -77,13 +78,13 @@ export default function Login() {
         {error && <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 12 }}>{error}</div>}
 
         <label style={{ display: "block", marginBottom: 12 }}>
-          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Email or Student ID</span>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>Email</span>
           <input
-            type="text"
+            type="email"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
-            placeholder="you@school.ca or 40XXXXXX"
+            placeholder="you@school.ca"
             style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ccc" }}
             autoComplete="username"
           />
