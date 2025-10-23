@@ -135,7 +135,12 @@ function validateUserSignUpFields(userToCreate : UserSignUp) : string{
         typeof userToCreate.email !== "string" ||
         typeof userToCreate.password !== "string"
     ){
-    return "Invalid sign up fields"; //TODO more precise error message maybe
+        console.log(userToCreate);
+        console.log(userToCreate.firstName);
+        console.log(typeof userToCreate.lastName)
+        console.log(typeof userToCreate.password)
+        console.log(typeof userToCreate.email)
+        return "Invalid sign up fields"; //TODO more precise error message maybe
     }
     if(!Object.values(UserRole).includes(userToCreate.role)){
         return "invalid role"

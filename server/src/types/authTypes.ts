@@ -5,7 +5,8 @@ import { UserRole } from "@prisma/client"
 type UserPublic = {
     name : string,
     email : string,
-    studentId : string | null
+    studentId : string | null,
+    role: UserRole
 }
 
 /**
@@ -15,6 +16,7 @@ type UserPublic = {
 type RequestUser = {
     id : number,
     role : UserRole,
+    orgnizationId?: number,
     authv? : number
 }
 

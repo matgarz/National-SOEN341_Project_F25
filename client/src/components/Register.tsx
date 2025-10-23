@@ -1,126 +1,124 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { setTokens } from "../auth/tokenAuth";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Register() {
-    const [form, setForm] = useState({
-        name: "",
-        password: "",
-        email: "",
-        role: "student", // default
-        studentId: "",
-        organizationId: "",
-    });
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    role: "STUDENT",
+    studentId: "",
+    phone: "",
+    website: "",
+    department: "",
+  });
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const { login } = useAuth();
+  const {login} = useAuth();
+  const navigate = useNavigate();
 
-    const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+  const handleSubmit = async (e: React.FormEvent) => {
+
+    e.preventDefault();
+
+    // Prepare payload
+    const payload: Record<string, string> = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      password: form.password,
+      role: form.role,
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+    // Conditionally add fields
+    if (form.role === "STUDENT") payload.studentId = form.studentId;
+    if (form.role === "ORGANIZER") {
+      payload.phone = form.phone;
+      payload.website = form.website;
+      payload.department = form.department;
+    }
 
-        try {
-            // Prepare payload to send
-            const payload: any = { ...form };
-            if (form.role === "student") payload.organizationId = undefined;
-            if (form.role === "organizer") payload.studentId = undefined;
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-            const res = await fetch(`${API}/api/auth/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
+      if (res.ok) {
+        alert("User created successfully!");
+      } else {
+        const data = await res.json();
+        alert(`Error: ${data.error || "Something went wrong"}`);
+      }
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || data.message || `HTTP ${res.status}`);
-            }
+      // Step 2: Automatically log in
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailOrStudentID:
+            form.role === "STUDENT" ? form.studentId || form.email : form.email,
+          password: form.password,
+        }),
+      });
 
-            const data = await res.json();
+      const data = await loginRes.json();
+      if (!loginRes.ok) throw new Error(data.error || "Auto-login failed");
 
-            // Auto-login after register
-            login(data);
-        } catch (err: any) {
-            setError(err.message || "Registration failed");
-        } finally {
-            setLoading(false);
-        }
-    };
+      // Step 3: Store tokens + user
+      setTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken });
+      login(data.userPublic);
 
-    return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded shadow mt-6">
-            <h2 className="text-xl font-bold mb-4">Register</h2>
-            {error && <div className="text-red-600 mb-4">{error}</div>}
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    name="name"
-                    placeholder="Username"
-                    value={form.name}
-                    onChange={handleChange}
-                    className="w-full border rounded p-2"
-                    required
-                />
-                <input
-                    name="email"
-                    type="email"
-                    placeholder="Email"
-                    value={form.email}
-                    onChange={handleChange}
-                    className="w-full border rounded p-2"
-                    required
-                />
-                <input
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={handleChange}
-                    className="w-full border rounded p-2"
-                    required
-                />
-                <select title="role" name="role" value={form.role} onChange={handleChange} className="w-full border rounded p-2">
-                    <option value="student">Student</option>
-                    <option value="organizer">Organizer</option>
-                </select>
+      const user = data.userPublic;
+      if (user.role === "STUDENT") navigate("/dashboard", { replace: true });
+      else if (user.role === "ORGANIZER") navigate("/create-event", { replace: true });
+      else navigate("/");
 
-                {form.role === "student" && (
-                    <input
-                        name="studentId"
-                        placeholder="Student ID"
-                        value={form.studentId}
-                        onChange={handleChange}
-                        className="w-full border rounded p-2"
-                        required
-                    />
-                )}
+    } catch (err) {
+      console.error(err);
+      alert("Network error");
+    }
+  };
 
-                {form.role === "organizer" && (
-                    <input
-                        name="organizationId"
-                        placeholder="Organization ID"
-                        value={form.organizationId}
-                        onChange={handleChange}
-                        className="w-full border rounded p-2"
-                        required
-                    />
-                )}
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} className="w-full p-2 border rounded" required />
+        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} className="w-full p-2 border rounded" required />
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                    {loading ? "Registering..." : "Register"}
-                </button>
-            </form>
-        </div>
-    );
+        <select name="role" value={form.role} onChange={handleChange} className="w-full p-2 border rounded">
+          <option value="STUDENT">Student</option>
+          <option value="ORGANIZER">Organizer</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+
+        {form.role === "STUDENT" && (
+          <input name="studentId" placeholder="Student ID" value={form.studentId} onChange={handleChange} className="w-full p-2 border rounded" required />
+        )}
+
+        {form.role === "ORGANIZER" && (
+          <>
+            <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} className="w-full p-2 border rounded" required />
+            <input name="website" placeholder="Website" value={form.website} onChange={handleChange} className="w-full p-2 border rounded" />
+            <input name="department" placeholder="Department" value={form.department} onChange={handleChange} className="w-full p-2 border rounded" required />
+          </>
+        )}
+
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Register
+        </button>
+      </form>
+    </div>
+  );
 }
+
