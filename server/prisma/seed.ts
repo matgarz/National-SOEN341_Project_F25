@@ -165,10 +165,10 @@ async function main() {
   const events = await Promise.all([
     prisma.event.create({
       data: {
-        title: "Hackathon",
-        description: "Coding competition",
-        date: new Date(now.getTime() + 604800000),
-        location: "Building A",
+        title: "ChatGPT doesn't want you to attend this talk!",
+        description: "What happens when we let machines make decisions for us: about what we see, who we meet, what we’re worth?",
+        date: new Date("2025-10-29T17:30:00Z"),
+        location: "Concordia University",
         capacity: 100,
         ticketType: "FREE",
         status: "APPROVED",
@@ -180,10 +180,10 @@ async function main() {
     }),
     prisma.event.create({
       data: {
-        title: "Welcome Week",
-        description: "Orientation",
-        date: new Date(now.getTime() + 86400000),
-        location: "Building B",
+        title: "AI Executive Lab",
+        description: "Reimagine billable hours - learn how to turn expertise into scalable, AI-powered products and services.",
+        date: new Date("2025-10-23T14:00:00Z"),
+        location: "Online",
         capacity: 200,
         ticketType: "FREE",
         status: "APPROVED",
@@ -195,10 +195,10 @@ async function main() {
     }),
     prisma.event.create({
       data: {
-        title: "Basketball Finals",
-        description: "Finals event",
-        date: new Date(now.getTime() + 2592000000),
-        location: "Gym",
+        title: "McGill Ventures",
+        description: "After a sold-out event last year, we're excited to bring back our dynamic startup showcase & networking event!",
+        date: new Date("2025-11-07T13:00:00Z"),
+        location: "Espace CDPQ Montreal",
         capacity: 150,
         ticketType: "PAID",
         ticketPrice: 15.99,
