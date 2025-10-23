@@ -32,7 +32,9 @@ type StudentSignUp = {
  * when user is an organizer
  */
 type OrganizerSignUp = {
-    OrganizerId : string
+    phone : string,
+    website : string,
+    department : string
 }
 
 type UserMinimal = {
@@ -46,9 +48,9 @@ type UserMinimal = {
 type OrganizerMinimal = {
     name: string;
     email: string | null;
-    // phone: string | null;
-    // website: string | null;
-    // department: string | null;
+    phone: string | null;
+    website: string | null;
+    department: string | null;
 }
 
 async function validateUserCreation(req : Request, res : Response, next : NextFunction) {
@@ -94,15 +96,15 @@ async function validateOrganizerCreation(req : Request, res : Response, next : N
     const organizerToCreate : OrganizerSignUp =  {...req.body};
 
     const validFields : string = validateNewOrganizerFields(organizerToCreate);
-    //const validPhone : string = await validateNewOrganizerPhone(organizerToCreate.phone);
+    const validPhone : string = await validateNewOrganizerPhone(organizerToCreate.phone);
 
     //TODO maybe reduce the number of db operations by merging validate email and validate id
     if(validFields){
         return res.status(400).json({ error: validFields }); 
     }
-    /*if(validPhone){
+    if(validPhone){
         return res.status(400).json({ error: validPhone });
-    }*/
+    }
     next();
     //maybe using strings like this is bad maybe the functions should return a {message:string, isValid:boolean}
 }
@@ -173,11 +175,11 @@ async function validateNewStudentId(studentId : string) : Promise<string>{
 }
 
 function validateNewOrganizerFields(organizerToCreate : OrganizerSignUp) : string{
-    /*if(
+    if(
         typeof organizerToCreate.department !== "string" ||
         typeof organizerToCreate.website !== "string" ||
         typeof organizerToCreate.phone !== "string" 
-    ) return "Invalid organizer signup request";*/
+    ) return "Invalid organizer signup request";
 
     //TODO validate Website, potentiallly move this to front end idk yet
 
@@ -227,9 +229,9 @@ async function createOrganizer( userToCreate : UserSignUp, organizerToCreate : O
     const newOrganizer : OrganizerMinimal = {
         name: userToCreate.firstName + " " + userToCreate.lastName,
         email: userToCreate.email,
-        //phone: organizerToCreate.phone,
-        //website : organizerToCreate.website,
-        // department : organizerToCreate.department
+        phone: organizerToCreate.phone,
+        website : organizerToCreate.website,
+        department : organizerToCreate.department
     }
 
     return newOrganizer;
@@ -269,9 +271,9 @@ async function addOrganizerToDB(userToCreate : UserSignUp, organizerToCreate : O
             data: {
                 name : newOrganizer.name,
                 email : newOrganizer.email,
-                // phone : newOrganizer.phone,
-                // website : newOrganizer.website,
-                // department : newOrganizer.department,
+                phone : newOrganizer.phone,
+                website : newOrganizer.website,
+                department : newOrganizer.department,
                 createdAt: now,
                 updatedAt: now,
                 isActive: true

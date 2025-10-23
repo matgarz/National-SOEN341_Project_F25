@@ -8,7 +8,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 type UserLogin = {
-    email : string,
+    emailOrStudentId : string,
     password : string
 }
 
@@ -19,14 +19,14 @@ async function logUserIn(req : Request, res : Response, next : NextFunction){
         {
             where : {
                 OR: [
-                    { email: userToLogin.email },
-                    // { studentId: userToLogin.email } 
+                    { email: userToLogin.emailOrStudentId },
+                    { studentId: userToLogin.emailOrStudentId }
                 ]
             },
         }
     );
     console.log(user);
-    console.log(userToLogin.email);
+    console.log(userToLogin.emailOrStudentId);
     console.log(userToLogin.password);
     if(!user){
         return res.status(400).json({error : "Email or Student Id was not found"})
