@@ -187,6 +187,7 @@ export function EventCard({
           <div className="text-sm text-muted-foreground">
             <span>by {event.organizer}</span>
           </div>
+        
         </CardContent>
 
         <CardFooter className="flex gap-2 pt-4">
@@ -241,8 +242,8 @@ export function EventCard({
                   variant="secondary"
                 >
                   Sold Out
-                </Button>
-              )}
+              </Button>
+            )}
             </>
           )}
 

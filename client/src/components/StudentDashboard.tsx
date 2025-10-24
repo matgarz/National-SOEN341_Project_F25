@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 // import { Filter } from "lucide-react";
-// import { Button } from "./ui/Button";
+ import { Button } from "./ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { EventCard, type Event as EventCardEvent } from "./EventCard";
