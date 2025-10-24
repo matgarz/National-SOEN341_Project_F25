@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth} from "../auth/AuthContext";
-import type {User} from "../auth/AuthContext" 
+import { useAuth } from "../auth/AuthContext";
+import type { User } from "../auth/AuthContext";
 
 interface EventForm {
   title: string;
@@ -16,9 +16,9 @@ interface EventForm {
 
 // Replace this with your actual user context / auth state
 const currentUser = {
-    id : 3, // logged-in user ID
-    organizationId: 1, // logged-in user's organization ID
-  };
+  id: 3, // logged-in user ID
+  organizationId: 1, // logged-in user's organization ID
+};
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -35,8 +35,8 @@ export default function OrganizerCreateEvent() {
     imageUrl: "",
   });
   const { user } = useAuth();
-  
-    currentUser.id = user?.id ?? 3; // logged-in user ID
+
+  currentUser.id = user?.id ?? 3; // logged-in user ID
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);

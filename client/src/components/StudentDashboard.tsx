@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 // import { Filter } from "lucide-react";
- import { Button } from "./ui/Button";
+import { Button } from "./ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { EventCard, type Event as EventCardEvent } from "./EventCard";
@@ -183,67 +183,67 @@ export default function StudentDashboard() {
       </div>
 
       <div className="flex justify-between gap-6">
-      <FilterSidebar
-        filters={filters}
-        onFiltersChange={(newFilters) => setFilters(newFilters)}
-      />
-      <div>
-      {error && <div className="text-red-600 text-sm">Error: {error}</div>}
-      {loading && <div className="text-sm opacity-70">Loading…</div>}
+        <FilterSidebar
+          filters={filters}
+          onFiltersChange={(newFilters) => setFilters(newFilters)}
+        />
+        <div>
+          {error && <div className="text-red-600 text-sm">Error: {error}</div>}
+          {loading && <div className="text-sm opacity-70">Loading…</div>}
 
-      <Tabs defaultValue="upcoming" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
-          <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="upcoming" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="past">Past</TabsTrigger>
+              <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="upcoming">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {upcoming.map((ev) => (
-              <EventCard
-                key={ev.id}
-                event={ev}
-                userRole="student"
-                onBookmark={(id) => console.log("bookmark", id)}
-                onClaimTicket={(id) => console.log("claim/buy", id)}
-                onViewDetails={(id) => console.log("details", id)}
-              />
-            ))}
-          </div>
-        </TabsContent>
+            <TabsContent value="upcoming">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {upcoming.map((ev) => (
+                  <EventCard
+                    key={ev.id}
+                    event={ev}
+                    userRole="student"
+                    onBookmark={(id) => console.log("bookmark", id)}
+                    onClaimTicket={(id) => console.log("claim/buy", id)}
+                    onViewDetails={(id) => console.log("details", id)}
+                  />
+                ))}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="past">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {past.map((ev) => (
-              <EventCard
-                key={ev.id}
-                event={ev}
-                userRole="student"
-                onViewDetails={(id) => console.log("details", id)}
-              />
-            ))}
-          </div>
-        </TabsContent>
+            <TabsContent value="past">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {past.map((ev) => (
+                  <EventCard
+                    key={ev.id}
+                    event={ev}
+                    userRole="student"
+                    onViewDetails={(id) => console.log("details", id)}
+                  />
+                ))}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="bookmarked">
-          {bookmarkedEvents.length ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {bookmarkedEvents.map((ev) => (
-                <EventCard
-                  key={ev.id}
-                  event={ev}
-                  userRole="student"
-                  onViewDetails={(id) => console.log("details", id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm opacity-70">No bookmarks yet.</div>
-          )}
-        </TabsContent>
-      </Tabs> 
-      </div>
+            <TabsContent value="bookmarked">
+              {bookmarkedEvents.length ? (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {bookmarkedEvents.map((ev) => (
+                    <EventCard
+                      key={ev.id}
+                      event={ev}
+                      userRole="student"
+                      onViewDetails={(id) => console.log("details", id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm opacity-70">No bookmarks yet.</div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

@@ -14,36 +14,42 @@ import { useAuth } from "../auth/AuthContext";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
 
-
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 
-function ProtectedRoute({children, allowedRoles,} : {children : React.ReactNode; allowedRoles? : Role[];}){
-    
-    const {user} = useAuth();
-    if (!user) return <Navigate to="/login" replace />;
+function ProtectedRoute({
+  children,
+  allowedRoles,
+}: {
+  children: React.ReactNode;
+  allowedRoles?: Role[];
+}) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
 
-    const role = (user.role ?? "").toUpperCase() as Role;
-    if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/no-access" replace />;
+  const role = (user.role ?? "").toUpperCase() as Role;
+  if (allowedRoles && !allowedRoles.includes(role))
+    return <Navigate to="/no-access" replace />;
 
-    return <>{children}</>;
+  return <>{children}</>;
 }
 
 function IndexRedirect() {
-    const {user} = useAuth();
-    if (!user) return <Navigate to="/login" replace />;
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
 
-    const role = (user.role ?? "").toUpperCase();
-    if (role === "STUDENT") return <Navigate to="/student-dashboard" replace />;
-    if (role === "ORGANIZER") return <Navigate to="/organizer-dashboard" replace />;
-    if (role === "ADMIN") return <Navigate to="/admin-dashboard" replace />;
+  const role = (user.role ?? "").toUpperCase();
+  if (role === "STUDENT") return <Navigate to="/student-dashboard" replace />;
+  if (role === "ORGANIZER")
+    return <Navigate to="/organizer-dashboard" replace />;
+  if (role === "ADMIN") return <Navigate to="/admin-dashboard" replace />;
 
-    return <Navigate to="/login" replace />;
+  return <Navigate to="/login" replace />;
 }
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />, 
+    element: <App />,
     errorElement: <ErrorHandler />,
     children: [
       { index: true, element: <IndexRedirect /> },
@@ -90,9 +96,7 @@ export const router = createBrowserRouter([
       {
         path: "calendar",
         element: (
-          <ProtectedRoute
-            allowedRoles={["STUDENT", "ORGANIZER", "ADMIN"]}
-          >
+          <ProtectedRoute allowedRoles={["STUDENT", "ORGANIZER", "ADMIN"]}>
             <Calendar />
           </ProtectedRoute>
         ),

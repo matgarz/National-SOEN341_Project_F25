@@ -27,11 +27,11 @@ export type Event = {
   date: string;
   location: string;
   capacity: number;
-  ticketType: 'FREE' | 'PAID';
+  ticketType: "FREE" | "PAID";
   ticketPrice?: string | null;
   category?: string | null;
   imageUrl?: string | null;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
   organization: Organization;
   creator: Creator;
   organizer?: Organizer | null;

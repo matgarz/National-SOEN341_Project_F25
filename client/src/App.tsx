@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import { useAuth } from "./auth/AuthContext";
-
+import QRCode from "./components/QRCode";
 
 export default function App() {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const userRole  = user?.role ? user.role.toLowerCase() : "guest";
+  const userRole = user?.role ? user.role.toLowerCase() : "guest";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
