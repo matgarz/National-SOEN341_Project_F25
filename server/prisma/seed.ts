@@ -9,7 +9,6 @@ async function main() {
   await prisma.savedEvent.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.organizer.deleteMany();
   await prisma.organization.deleteMany();
   await prisma.user.deleteMany();
 
@@ -116,58 +115,23 @@ async function main() {
     }),
   ]);
 
-  // ORGANIZER PROFILES
-  const organizerProfiles = await Promise.all([
-    prisma.organizer.create({
-      data: {
-        name: "CSSA Events",
-        email: "cssa@concordia.ca",
-        phone: "123",
-        department: "CS",
-        isActive: true,
-        organizationId: orgs[0].id,
-      },
-    }),
-
-    prisma.organization.create({
-      data: {
-        name: "CSU Events",
-        email: "csu@concordia.ca",
-        phone: "456",
-        department: "Student Life",
-        isActive: true,
-        organizationId: orgs[1].id,
-      },
-    }),
-
-    prisma.organization.create({
-      data: {
-        name: "Athletics Events",
-        email: "athletics@concordia.ca",
-        phone: "789",
-        department: "Athletics",
-        isActive: true,
-        organizationId: orgs[2].id,
-      },
-    }),
-
-    prisma.organization.create({
-      data: {
-        name: "EngSoc Events",
-        email: "engsoc@concordia.ca",
-        phone: "321",
-        department: "Engineering",
-        isActive: true,
-        organizationId: orgs[3].id,
-      },
-    }),
-  ]);
-
-  console.log('Created 4 organizations');
-
   //CREATE EVENTS
   const now = new Date();
   const events = await Promise.all([
+    prisma.event.create({
+    data: {
+      title: "Admin Test Event",
+      description: "Event created by admin for testing",
+      date: new Date(now.getTime() + 604800000),
+      location: "Admin Office",
+      capacity: 50,
+      ticketType: "FREE",
+      status: "PENDING",
+      organizationId: orgs[0].id,
+      creatorId: admin.id,
+      updatedAt: new Date(),
+    },
+  }),
     prisma.event.create({
       data: {
         title: "Hackathon",
@@ -178,7 +142,6 @@ async function main() {
         ticketType: "FREE",
         status: "APPROVED",
         organizationId: orgs[0].id,
-        organizerId: organizerProfiles[0].id,
         creatorId: organizer1.id,
         updatedAt: new Date(),
       },
@@ -193,7 +156,6 @@ async function main() {
         ticketType: "FREE",
         status: "APPROVED",
         organizationId: orgs[1].id,
-        organizerId: organizerProfiles[1].id,
         creatorId: organizer2.id,
         updatedAt: new Date(),
       },
@@ -209,7 +171,6 @@ async function main() {
         ticketPrice: 15.99,
         status: "APPROVED",
         organizationId: orgs[2].id,
-        organizerId: organizerProfiles[2].id,
         creatorId: organizer1.id,
       },
     }),
