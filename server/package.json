@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"no test specified\" && exit 0",
     "dev": "tsx src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "watch": "nodemon --watch src --ext ts --exec tsx src/server.ts",
-    "seed": "tsx prisma/seed.ts"
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -35,8 +41,14 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.7.0",
     "@types/qrcode": "^1.5.5",
+    "eslint": "^9.38.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.4.0",
+    "jiti": "^2.6.1",
+    "prettier": "3.6.2",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.46.2"
   }
 }

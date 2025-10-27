@@ -1,38 +1,55 @@
-import { Bell, Calendar, LayoutDashboard, PlusCircle, Search, User, Users } from "lucide-react";
+import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Badge } from "./ui/badge";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
-  currentView: string;
-  userRole: 'student' | 'organizer' | 'admin';
-  onViewChange: (view: string) => void;
-  onRoleChange: (role: 'student' | 'organizer' | 'admin') => void;
+  user: any;
+  currentView?: string;
+  userRole: "student" | "organizer" | "admin" | "guest";
+  onViewChange?: (view: string) => void;
+  onRoleChange?: (role: "student" | "organizer" | "admin") => void;
+  onLogout: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
-export function Header({ 
-  currentView, 
-  userRole, 
-  onViewChange, 
-  onRoleChange, 
-  searchQuery, 
-  onSearchChange 
+export default function Header({
+  user,
+  currentView,
+  userRole,
+  onViewChange,
+  onRoleChange,
+  onLogout,
+  searchQuery,
+  onSearchChange,
 }: HeaderProps) {
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'student': return 'bg-blue-100 text-blue-800';
-      case 'organizer': return 'bg-green-100 text-green-800';
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "student":
+        return "bg-blue-100 text-blue-800";
+      case "organizer":
+        return "bg-green-100 text-green-800";
+      case "admin":
+        return "bg-purple-100 text-purple-800";
+      case "guest":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
-    <motion.header 
+    <motion.header
       className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm"
       initial={{ y: -64 }}
       animate={{ y: 0 }}
@@ -40,56 +57,87 @@ export function Header({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Brand */}
+          {/* Left: Logo and Role/Guest buttons */}
           <div className="flex items-center space-x-4">
-            <motion.div 
-              className="flex items-center space-x-2"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
             >
-              <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-              >
-                <Calendar className="h-8 w-8 text-primary" />
-              </motion.div>
-              <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <Calendar className="h-8 w-8 text-primary" />
+            </motion.div>
+            <Link to="/">
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-violet-700">
                 CampusEvents
               </h1>
-            </motion.div>
-            
-            {/* Role Switcher for Demo */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Select value={userRole} onValueChange={onRoleChange}>
-                <SelectTrigger className="w-32 border-primary/20 hover:border-primary/40 transition-colors">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="organizer">Organizer</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-            
-            <motion.div
-              key={userRole}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Badge className={`${getRoleColor(userRole)} shadow-sm`}>
-                {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-              </Badge>
-            </motion.div>
+            </Link>
+
+            {/* Guest */}
+            {userRole === "guest" && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  className="cursor-pointer"
+                  variant="default"
+                  size="sm"
+                  onClick={() => onViewChange && onViewChange("login")}
+                >
+                  Login
+                </Button>
+                <Button
+                  className="cursor-pointer"
+                  variant="default"
+                  size="sm"
+                  onClick={() => onViewChange && onViewChange("register")}
+                >
+                  Register
+                </Button>
+                <Badge className={`${getRoleColor(userRole)} shadow-sm`}>
+                  Guest
+                </Badge>
+              </div>
+            )}
+
+            {/* Logged-in user */}
+            {userRole !== "guest" && user && (
+              <div className="flex items-center gap-4">
+                {/* Role selector */}
+                <Select value={userRole} onValueChange={onRoleChange}>
+                  <SelectTrigger className="w-32 border-primary/20 hover:border-primary/40 transition-colors">
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent className="z-50 bg-white border-b-blue-600 shadow-md">
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="organizer">Organizer</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Role badge */}
+                <Badge className={`${getRoleColor(userRole)} shadow-sm`}>
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                </Badge>
+
+                {/* Username */}
+                <Badge className="bg-gray-200 text-gray-800 shadow-sm">
+                  {user.name}
+                </Badge>
+
+                {/* Logout button with red text */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                  onClick={onLogout}
+                >
+                  Logout
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Search Bar */}
-          {(currentView === 'discover' || currentView === 'events') && (
-            <motion.div 
+          {/* Center: Search */}
+          {(currentView === "discover" || currentView === "events") && (
+            <motion.div
               className="flex-1 max-w-md mx-8"
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
@@ -107,136 +155,24 @@ export function Header({
             </motion.div>
           )}
 
-          {/* Navigation */}
+          {/* Right: Notification/User icons */}
           <nav className="flex items-center space-x-2">
-            {userRole === 'student' && (
-              <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'discover' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('discover')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'discover' 
-                        ? 'gradient-primary text-white shadow-md' 
-                        : 'hover:bg-primary/10'
-                    }`}
-                  >
-                    <Search className="h-4 w-4" />
-                    <span>Discover</span>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'my-events' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('my-events')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'my-events' 
-                        ? 'gradient-primary text-white shadow-md' 
-                        : 'hover:bg-primary/10'
-                    }`}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    <span>My Events</span>
-                  </Button>
-                </motion.div>
-              </>
-            )}
-
-            {userRole === 'organizer' && (
-              <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'events' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('events')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'events' 
-                        ? 'gradient-secondary text-white shadow-md' 
-                        : 'hover:bg-green-50'
-                    }`}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    <span>Events</span>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'create-event' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('create-event')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'create-event' 
-                        ? 'gradient-secondary text-white shadow-md' 
-                        : 'hover:bg-green-50'
-                    }`}
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                    <span>Create</span>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'analytics' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('analytics')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'analytics' 
-                        ? 'gradient-secondary text-white shadow-md' 
-                        : 'hover:bg-green-50'
-                    }`}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Analytics</span>
-                  </Button>
-                </motion.div>
-              </>
-            )}
-
-            {userRole === 'admin' && (
-              <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'admin-dashboard' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('admin-dashboard')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'admin-dashboard' 
-                        ? 'gradient-accent text-white shadow-md' 
-                        : 'hover:bg-orange-50'
-                    }`}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    variant={currentView === 'moderate' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => onViewChange('moderate')}
-                    className={`flex items-center space-x-1 transition-all duration-200 ${
-                      currentView === 'moderate' 
-                        ? 'gradient-accent text-white shadow-md' 
-                        : 'hover:bg-orange-50'
-                    }`}
-                  >
-                    <Users className="h-4 w-4" />
-                    <span>Moderate</span>
-                  </Button>
-                </motion.div>
-              </>
-            )}
-
-            {/* User Actions */}
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="ghost" size="sm" className="hover:bg-primary/10 transition-colors">
-                <Bell className="h-4 w-4" />
-              </Button>
+              <Link
+                to="/calendar"
+                className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
+                style={{ textDecoration: "none" }}
+              >
+                <Calendar className="h-4 w-4" />
+                My Events
+              </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="ghost" size="sm" className="hover:bg-primary/10 transition-colors">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hover:bg-primary/10 transition-colors"
+              >
                 <User className="h-4 w-4" />
               </Button>
             </motion.div>
