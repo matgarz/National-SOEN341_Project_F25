@@ -110,19 +110,28 @@ router.get("/users/:id", async (req: AuthRequest, res) => {
 
 // GET /api/admin/organizations - List all organizations
 router.get("/organizations", async (req, res) => {
-  const orgs = await prisma.organization.findMany({
-    include: {
-      _count: { select: { event: true, organizers: true } }
-    }
-  });
-  res.json(orgs);
+  try {
+    const orgs = await prisma.organization.findMany({
+      include: {
+        _count: { select: { event: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(orgs);
+  } catch (error) {
+    console.error("Error fetching organizations:", error);
+    res.status(500).json({
+      error: "Failed to fetch organizations",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
 });
 
 // POST /api/admin/organizations - Create organization
 router.post("/organizations", async (req, res) => {
   const { name, description, contactEmail } = req.body;
   const org = await prisma.organization.create({
-    data: { name, description, contactEmail, isActive: true }
+    data: { name, description, contactEmail, isActive: true },
   });
   res.json(org);
 });
@@ -132,7 +141,7 @@ router.patch("/organizations/:id", async (req, res) => {
   const { name, description, contactEmail, isActive } = req.body;
   const org = await prisma.organization.update({
     where: { id: parseInt(req.params.id) },
-    data: { name, description, contactEmail, isActive }
+    data: { name, description, contactEmail, isActive },
   });
   res.json(org);
 });
@@ -140,7 +149,7 @@ router.patch("/organizations/:id", async (req, res) => {
 // DELETE /api/admin/organizations/:id - Delete organization
 router.delete("/organizations/:id", async (req, res) => {
   await prisma.organization.delete({
-    where: { id: parseInt(req.params.id) }
+    where: { id: parseInt(req.params.id) },
   });
   res.json({ message: "Organization deleted" });
 });
@@ -331,8 +340,8 @@ router.delete("/events/:id", async (req: AuthRequest, res) => {
 // GET /api/admin/analytics/participation
 router.get("/analytics/participation", async (req, res) => {
   const ticketStats = await prisma.ticket.groupBy({
-    by: ['checkedIn'],
-    _count: true
+    by: ["checkedIn"],
+    _count: true,
   });
   const monthlyEvents = await prisma.$queryRaw`
     SELECT DATE_FORMAT(date, '%Y-%m') as month, COUNT(*) as count
