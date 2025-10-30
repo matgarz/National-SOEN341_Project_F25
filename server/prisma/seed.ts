@@ -9,7 +9,6 @@ async function main() {
   await prisma.savedEvent.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.organizer.deleteMany();
   await prisma.organization.deleteMany();
   await prisma.user.deleteMany();
 
@@ -116,53 +115,23 @@ async function main() {
     }),
   ]);
 
-  // ORGANIZER PROFILES
-  const organizerProfiles = await Promise.all([
-    prisma.organizer.create({
-      data: {
-        name: "CSSA Events",
-        email: "cssa@concordia.ca",
-        phone: "123",
-        department: "CS",
-        isActive: true,
-        organizationId: orgs[0].id,
-      },
-    }),
-    prisma.organizer.create({
-      data: {
-        name: "CSU Events",
-        email: "csu@concordia.ca",
-        phone: "456",
-        department: "Student Life",
-        isActive: true,
-        organizationId: orgs[1].id,
-      },
-    }),
-    prisma.organizer.create({
-      data: {
-        name: "Athletics Events",
-        email: "athletics@concordia.ca",
-        phone: "789",
-        department: "Athletics",
-        isActive: true,
-        organizationId: orgs[2].id,
-      },
-    }),
-    prisma.organizer.create({
-      data: {
-        name: "EngSoc Events",
-        email: "engsoc@concordia.ca",
-        phone: "321",
-        department: "Engineering",
-        isActive: true,
-        organizationId: orgs[3].id,
-      },
-    }),
-  ]);
-
-  // EVENTS
+  //CREATE EVENTS
   const now = new Date();
   const events = await Promise.all([
+    prisma.event.create({
+      data: {
+        title: "Admin Test Event",
+        description: "Event created by admin for testing",
+        date: new Date(now.getTime() + 604800000),
+        location: "Admin Office",
+        capacity: 50,
+        ticketType: "FREE",
+        status: "PENDING",
+        organizationId: orgs[0].id,
+        creatorId: admin.id,
+        updatedAt: new Date(),
+      },
+    }),
     prisma.event.create({
       data: {
         title: "Hackathon",
@@ -173,7 +142,6 @@ async function main() {
         ticketType: "FREE",
         status: "APPROVED",
         organizationId: orgs[0].id,
-        organizerId: organizerProfiles[0].id,
         creatorId: organizer1.id,
         updatedAt: new Date(),
       },
@@ -188,7 +156,6 @@ async function main() {
         ticketType: "FREE",
         status: "APPROVED",
         organizationId: orgs[1].id,
-        organizerId: organizerProfiles[1].id,
         creatorId: organizer2.id,
         updatedAt: new Date(),
       },
@@ -204,9 +171,37 @@ async function main() {
         ticketPrice: 15.99,
         status: "APPROVED",
         organizationId: orgs[2].id,
-        organizerId: organizerProfiles[2].id,
         creatorId: organizer1.id,
-        updatedAt: new Date(),
+      },
+    }),
+    prisma.event.create({
+      data: {
+        title: "Career Fair 2025",
+        description:
+          "Meet top tech companies and explore internship opportunities.",
+        date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+        location: "MB Building, 9th Floor",
+        capacity: 300,
+        ticketType: "FREE",
+        category: "Academic",
+        status: "APPROVED",
+        organizationId: orgs[0].id,
+        creatorId: organizer1.id,
+      },
+    }),
+    prisma.event.create({
+      data: {
+        title: "Pizza Night & Movie Screening",
+        description:
+          "Free pizza and watch a classic movie with fellow students!",
+        date: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+        location: "H-110",
+        capacity: 80,
+        ticketType: "FREE",
+        category: "Social",
+        status: "APPROVED",
+        organizationId: orgs[1].id,
+        creatorId: organizer2.id,
       },
     }),
   ]);
@@ -258,11 +253,19 @@ async function main() {
       data: { userId: students[1].id, eventId: events[1].id },
     }),
   ]);
+
+  console.log("Created 2 saved events");
+
+  console.log("\nDatabase seed completed successfully!");
+  console.log("\nTest Accounts:");
+  console.log("Admin: admin@concordia.ca / password123");
+  console.log("Organizer: organizer1@concordia.ca / password123");
+  console.log("Student: student1@concordia.ca / password123");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Seed failed:", e);
     process.exit(1);
   })
   .finally(async () => {
