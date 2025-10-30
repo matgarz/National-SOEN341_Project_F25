@@ -2,7 +2,7 @@ import * as TokenAuth from "./jwtAuth.js";
 import { UserPublic, RequestUser } from "../../types/authTypes.js";
 import { NextFunction } from "express";
 import { Request, Response } from "express";
-import { PrismaClient, UserRole, User } from "@prisma/client";
+import { PrismaClient, user_role, user } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -14,7 +14,7 @@ type UserLogin = {
 
 async function logUserIn(req: Request, res: Response, next: NextFunction) {
   const userToLogin: UserLogin = req.body;
-  const user: User | null = await prisma.user.findFirst({
+  const user: user | null = await prisma.user.findFirst({
     where: {
       OR: [
         { email: userToLogin.emailOrStudentId },

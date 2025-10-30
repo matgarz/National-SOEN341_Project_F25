@@ -7,29 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Event {
-  id          Int             @id @default(autoincrement())
-  title       String
-  description String          @db.Text
-  date        DateTime
-  location    String
-  capacity    Int
-  ticketType  EventTicketType @default(FREE)
-  ticketPrice Decimal?        @db.Decimal(10, 2)
-  category    String?
-  imageUrl    String?
-  status      EventStatus     @default(APPROVED)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
+model event {
+  id             Int              @id @default(autoincrement())
+  title          String
+  description    String           @db.Text
+  date           DateTime
+  location       String
+  capacity       Int
+  ticketType     event_ticketType @default(FREE)
+  ticketPrice    Decimal?         @db.Decimal(10, 2)
+  category       String?
+  imageUrl       String?
+  status         event_status     @default(PENDING)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
-
-  creatorId Int
-  creator   User         @relation(fields: [creatorId], references: [id], onDelete: Cascade, map: "Event_creatorId_fkey")
-  reviews   Review[]
-  savedBy   SavedEvent[]
-  ticket    Ticket[]
+  creatorId      Int
+  user           user             @relation(fields: [creatorId], references: [id], onDelete: Cascade, map: "Event_creatorId_fkey")
+  organization   organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
+  review         review[]
+  savedevent     savedevent[]
+  ticket         ticket[]
 
   @@index([category], map: "Event_category_idx")
   @@index([creatorId], map: "Event_creatorId_idx")
@@ -38,7 +36,7 @@ model Event {
   @@index([status], map: "Event_status_idx")
 }
 
-model Organization {
+model organization {
   id           Int      @id @default(autoincrement())
   name         String   @unique(map: "Organization_name_key")
   description  String?  @db.Text
@@ -46,54 +44,55 @@ model Organization {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  event        Event[]
+  event        event[]
+  users        user[]
 
   @@index([isActive], map: "Organization_isActive_idx")
 }
 
-model Review {
+model review {
   id        Int      @id @default(autoincrement())
   rating    Int
   comment   String?  @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime
   eventId   Int
   userId    Int
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Review_eventId_fkey")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
+  event     event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Review_eventId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Review_userId_fkey")
 
   @@unique([userId, eventId], map: "Review_userId_eventId_key")
   @@index([eventId], map: "Review_eventId_idx")
   @@index([rating], map: "Review_rating_idx")
 }
 
-model SavedEvent {
+model savedevent {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   userId    Int
   eventId   Int
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "SavedEvent_eventId_fkey")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SavedEvent_userId_fkey")
+  event     event    @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "SavedEvent_eventId_fkey")
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "SavedEvent_userId_fkey")
 
   @@unique([userId, eventId], map: "SavedEvent_userId_eventId_key")
   @@index([eventId], map: "SavedEvent_eventId_idx")
   @@index([userId], map: "SavedEvent_userId_idx")
 }
 
-model Ticket {
-  id            Int           @id @default(autoincrement())
-  qrCode        String        @unique(map: "Ticket_qrCode_key")
-  claimed       Boolean       @default(true)
-  checkedIn     Boolean       @default(false)
+model ticket {
+  id            Int                  @id @default(autoincrement())
+  qrCode        String               @unique(map: "Ticket_qrCode_key")
+  claimed       Boolean              @default(true)
+  checkedIn     Boolean              @default(false)
   checkedInAt   DateTime?
-  paymentStatus PaymentStatus @default(FREE)
-  paymentAmount Decimal?      @db.Decimal(10, 2)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  paymentStatus ticket_paymentStatus @default(FREE)
+  paymentAmount Decimal?             @db.Decimal(10, 2)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime
   eventId       Int
   userId        Int
-  event         Event         @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Ticket_eventId_fkey")
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Ticket_userId_fkey")
+  event         event                @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "Ticket_eventId_fkey")
+  user          user                 @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Ticket_userId_fkey")
 
   @@unique([userId, eventId], map: "Ticket_userId_eventId_key")
   @@index([eventId, claimed], map: "Ticket_eventId_claimed_idx")
@@ -101,25 +100,27 @@ model Ticket {
   @@index([userId], map: "Ticket_userId_idx")
 }
 
-model User {
-  id         Int          @id @default(autoincrement())
-  email      String       @unique(map: "User_email_key")
-  password   String
-  name       String
-  studentId  String?      @unique(map: "User_studentId_key")
-  role       UserRole     @default(STUDENT)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  event      Event[]
-  review     Review[]
-  savedevent SavedEvent[]
-  ticket     Ticket[]
+model user {
+  id             Int           @id @default(autoincrement())
+  email          String        @unique(map: "User_email_key")
+  password       String
+  name           String
+  studentId      String?       @unique(map: "User_studentId_key")
+  role           user_role     @default(STUDENT)
+  organizationId Int?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime
+  event          event[]
+  review         review[]
+  savedevent     savedevent[]
+  ticket         ticket[]
+  organization   organization? @relation(fields: [organizationId], references: [id])
 
   @@index([email], map: "User_email_idx")
   @@index([role], map: "User_role_idx")
 }
 
-enum PaymentStatus {
+enum ticket_paymentStatus {
   FREE
   PENDING
   COMPLETED
@@ -127,18 +128,18 @@ enum PaymentStatus {
   REFUNDED
 }
 
-enum UserRole {
+enum user_role {
   STUDENT
   ORGANIZER
   ADMIN
 }
 
-enum EventTicketType {
+enum event_ticketType {
   FREE
   PAID
 }
 
-enum EventStatus {
+enum event_status {
   PENDING
   APPROVED
   REJECTED

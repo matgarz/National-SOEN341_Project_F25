@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRole } from "@prisma/client";
+import { user_role } from "@prisma/client";
 
 /**
  * Important
@@ -8,20 +8,20 @@ import { UserRole } from "@prisma/client";
 
 function authStudent(req: Request, res: Response, next: NextFunction) {
   const user = req.user;
-  if (user?.role != UserRole.STUDENT)
+  if (user?.role != user_role.STUDENT)
     res.status(403).json({ error: "unauthorized action" });
   next();
 }
 
 function authOrganizer(req: Request, res: Response, next: NextFunction) {
   const user = req.user;
-  if (user?.role != UserRole.ORGANIZER)
+  if (user?.role != user_role.ORGANIZER)
     res.status(403).json({ error: "unauthorized action" });
   next();
 }
 function authAdmin(req: Request, res: Response, next: NextFunction) {
   const user = req.user;
-  if (user?.role != UserRole.ADMIN)
+  if (user?.role != user_role.ADMIN)
     res.status(403).json({ error: "unauthorized action" });
   next();
 }

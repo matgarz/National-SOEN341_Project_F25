@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { Request, Response } from "express";
-import { PrismaClient, UserRole, User } from "@prisma/client";
+import { PrismaClient, user_role } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ type UserSignUp = {
   lastName: string;
   email: string;
   password: string;
-  role: UserRole;
+  role: user_role;
 };
 
 /**
@@ -43,7 +43,7 @@ type UserMinimal = {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
+  role: user_role;
   studentId: string | null;
 };
 
@@ -72,7 +72,7 @@ async function validateStudentCreation(
   res: Response,
   next: NextFunction,
 ) {
-  if (req.body.role != UserRole.STUDENT) {
+  if (req.body.role != user_role.STUDENT) {
     next();
     return;
   }
@@ -93,7 +93,7 @@ async function validateOrganizerCreation(
   res: Response,
   next: NextFunction,
 ) {
-  if (req.body.role != UserRole.ORGANIZER) {
+  if (req.body.role != user_role.ORGANIZER) {
     next();
     return;
   }
@@ -138,7 +138,7 @@ function validateUserSignUpFields(userToCreate: UserSignUp): string {
     console.log(typeof userToCreate.email);
     return "Invalid sign up fields"; //TODO more precise error message maybe
   }
-  if (!Object.values(UserRole).includes(userToCreate.role)) {
+  if (!Object.values(user_role).includes(userToCreate.role)) {
     return "invalid role";
   }
   return "";
@@ -174,10 +174,10 @@ async function createUser(
   let name = "";
   let studentId = null;
   let OrganizationId = null;
-  if (userToCreate.role === UserRole.STUDENT) {
+  if (userToCreate.role === user_role.STUDENT) {
     studentId = studentToCreate.studentId;
   }
-  if (userToCreate.role === UserRole.ORGANIZER) {
+  if (userToCreate.role === user_role.ORGANIZER) {
     OrganizationId = organizerToCreate.organization_Id;
   }
 

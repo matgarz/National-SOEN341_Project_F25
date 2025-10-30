@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Request, Response } from "express";
-import { PrismaClient, UserRole, EventStatus } from "@prisma/client";
+import { PrismaClient, user_role, event_status } from "@prisma/client";
 import { authenticateToken } from "../middleware/auth/jwtAuth.js";
 import { authAdmin } from "../middleware/auth/roleAuth.js";
 const router = Router();
@@ -13,7 +13,7 @@ router.get("/users", async (req: Request, res: Response) => {
 
     const users = await prisma.user.findMany({
       where: {
-        ...(role && { role: role as UserRole }),
+        ...(role && { role: role as user_role }),
         ...(search && {
           OR: [
             { name: { contains: search as string } },
@@ -160,7 +160,7 @@ router.patch("/users/:id/role", async (req: Request, res) => {
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    if (!Object.values(UserRole).includes(role)) {
+    if (!Object.values(user_role).includes(role)) {
       return res.status(400).json({
         error: "Invalid role. Must be one of: STUDENT, ORGANIZER, ADMIN",
       });
@@ -234,7 +234,7 @@ router.get("/events", async (req: Request, res) => {
 
     const events = await prisma.event.findMany({
       where: {
-        ...(status && { status: status as EventStatus }),
+        ...(status && { status: status as event_status }),
         ...(organizationId && {
           organizationId: parseInt(organizationId as string),
         }),
@@ -244,14 +244,14 @@ router.get("/events", async (req: Request, res) => {
         organization: {
           select: { id: true, name: true, isActive: true },
         },
-        creator: {
+        user: {
           select: { id: true, name: true, email: true, role: true },
         },
         _count: {
           select: {
             ticket: true,
-            reviews: true,
-            savedBy: true,
+            review: true,
+            savedevent: true,
           },
         },
       },
@@ -276,7 +276,7 @@ router.patch("/events/:id/status", async (req: Request, res) => {
     if (isNaN(eventId)) {
       return res.status(400).json({ error: "Invalid event ID" });
     }
-    const validStatuses = Object.values(EventStatus);
+    const validStatuses = Object.values(event_status);
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
@@ -287,7 +287,7 @@ router.patch("/events/:id/status", async (req: Request, res) => {
       data: { status, updatedAt: new Date() },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true },
         },
       },
@@ -475,7 +475,7 @@ router.get("/stats", async (req: Request, res) => {
           status: true,
           date: true,
           createdAt: true,
-          creator: {
+          user: {
             select: { name: true },
           },
         },

@@ -14,7 +14,7 @@ router.get("/", async (req: Request, res: Response) => {
     const upcomingOnly =
       String(req.query.upcoming ?? "").toLowerCase() === "true";
 
-    const where: Prisma.EventWhereInput = {
+    const where: Prisma.eventWhereInput = {
       status: "APPROVED",
       ...(upcomingOnly ? { date: { gte: new Date() } } : {}),
     };
@@ -23,7 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
       where,
       include: {
         organization: { select: { id: true, name: true } },
-        creator: { select: { id: true, name: true, email: true } },
+        user: { select: { id: true, name: true, email: true } },
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -61,7 +61,7 @@ router.get("/search", async (req: Request, res: Response) => {
 
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true },
         },
         _count: {
@@ -91,7 +91,7 @@ router.get("/upcoming", async (req: Request, res: Response) => {
       },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true },
         },
         _count: {
@@ -119,7 +119,7 @@ router.get("/:id", async (req: Request, res: Response) => {
       where: { id: parseInt(req.params.id) },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true },
         },
         _count: {
@@ -202,7 +202,7 @@ router.post(
           organization: {
             select: { id: true, name: true, description: true },
           },
-          creator: {
+          user: {
             select: { id: true, name: true, email: true },
           },
           _count: {

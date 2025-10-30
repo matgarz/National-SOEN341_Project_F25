@@ -63,7 +63,7 @@ export default function Register() {
     };
     if (isStudent) payload.studentId = form.studentId.trim();
     if (isOrganizer) {
-      payload.organizationID;
+      payload.organizationID = null;
     }
 
     try {
