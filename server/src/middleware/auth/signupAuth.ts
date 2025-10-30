@@ -37,8 +37,7 @@ type OrganizerSignUp = {
 
 type AdminSignUp = {
   adminKey: string;
-}
-
+};
 
 type UserMinimal = {
   name: string;
@@ -103,7 +102,6 @@ async function validateOrganizerCreation(
   //TODO validate organizationId;
 
   next();
-
 }
 
 async function addNewUser(req: Request, res: Response, next: NextFunction) {
@@ -165,7 +163,6 @@ async function validateNewStudentId(studentId: string): Promise<string> {
   }
   return "";
 }
-
 
 async function createUser(
   userToCreate: UserSignUp,
@@ -229,5 +226,5 @@ export {
   addNewUser,
   validateUserCreation,
   validateStudentCreation,
-  validateOrganizerCreation
+  validateOrganizerCreation,
 };

@@ -17,7 +17,7 @@ export default function Register() {
     studentId: "",
 
     //organizer only
-    organizationId: ""
+    organizationId: "",
   });
 
   const { login } = useAuth();
@@ -40,7 +40,7 @@ export default function Register() {
     if (form.role === "ORGANIZER") {
       // TODO add constraints for organizer ie organization Id;
     }
-    if (form.role === "ADMIN"){
+    if (form.role === "ADMIN") {
       // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
     }
     return true;
@@ -63,7 +63,7 @@ export default function Register() {
     };
     if (isStudent) payload.studentId = form.studentId.trim();
     if (isOrganizer) {
-      payload.organizationID
+      payload.organizationID;
     }
 
     try {
