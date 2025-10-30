@@ -22,7 +22,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: cd ${{ matrix.directory }} && npm ci
+        run: cd ${{ matrix.directory }} && npm install
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
