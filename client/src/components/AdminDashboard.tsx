@@ -64,12 +64,12 @@ interface Event {
   category: string;
   status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
-  organization: {
+  organization?: {
     id: number;
     name: string;
     isActive: boolean;
   };
-  creator: {
+  user: {
     id: number;
     name: string;
     email: string;
@@ -507,8 +507,8 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{event.organization.name}</TableCell>
-                      <TableCell>{event.creator.name}</TableCell>
+                      <TableCell>{event.organization?.name}</TableCell>
+                      <TableCell>{event.user?.name}</TableCell>
                       <TableCell>
                         {new Date(event.date).toLocaleDateString()}
                       </TableCell>
