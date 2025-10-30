@@ -55,6 +55,16 @@ interface AdminStats {
   };
 }
 
+interface Organization {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  _count?: {
+    event: number;
+  };
+}
+
 interface Event {
   id: number;
   title: string;
@@ -87,6 +97,11 @@ interface User {
   email: string;
   studentId: string;
   role: "STUDENT" | "ORGANIZER" | "ADMIN";
+  organizationId: number | null;  
+  organization?: {                 
+    id: number;
+    name: string;
+  };
   createdAt: string;
   _count?: {
     event: number;
@@ -107,6 +122,11 @@ export default function AdminDashboard() {
 
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [editForm, setEditForm] = useState({
+  role: "",
+  organizationId: null as number | null,
+});
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -116,6 +136,7 @@ export default function AdminDashboard() {
     fetchStats();
     fetchEvents();
     fetchUsers();
+    fetchOrganizations();
   }, []);
 
   useEffect(() => {
@@ -148,6 +169,19 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  const fetchOrganizations = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error("Failed to fetch organizations");
+    const data = await response.json();
+    setOrganizations(data);
+  } catch (error) {
+    console.error("Error fetching organizations:", error);
+  }
+};
 
   const fetchEvents = async () => {
     try {
@@ -245,33 +279,31 @@ export default function AdminDashboard() {
   };
 
   // User actions
-  const handleRoleChange = async (userId: number, role: string) => {
-    if (
-      !confirm(`Are you sure you want to change this user's role to ${role}?`)
-    ) {
-      return;
-    }
+  const handleRoleChange = async (userId: number, role: string, organizationId?: number | null) => {
+  if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
+    return;
+  }
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/${userId}/role`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ role }),
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to update role");
-      alert("User role updated successfully");
-      setEditingUser(null);
-      fetchUsers();
-      fetchStats();
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      alert("Failed to update user role");
-    }
-  };
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ 
+        role,
+        organizationId: role === "ORGANIZER" ? organizationId : null
+      }),
+    });
+    
+    if (!response.ok) throw new Error("Failed to update role");
+    alert("User role updated successfully");
+    setEditingUser(null);
+    fetchUsers();
+    fetchStats();
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    alert("Failed to update user role");
+  }
+};
 
   const handleDeleteUser = async (userId: number, userName: string) => {
     if (
@@ -333,14 +365,11 @@ export default function AdminDashboard() {
   };
 
   // Filter functions
-  const filteredEvents = events.filter(
-    (event) =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.organization.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredEvents = events.filter((event) =>
+  event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  event.organization?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  event.category?.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   const filteredUsers = users.filter(
     (user) =>
@@ -507,7 +536,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{event.organization?.name}</TableCell>
+                      <TableCell>{event.organization?.name || 'N/A'}</TableCell>
                       <TableCell>{event.user?.name}</TableCell>
                       <TableCell>
                         {new Date(event.date).toLocaleDateString()}
@@ -663,43 +692,7 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>{user.studentId}</TableCell>
-                      <TableCell>
-                        {editingUser === user.id ? (
-                          <div className="flex gap-2">
-                            <select
-                              value={newRole}
-                              onChange={(e) => setNewRole(e.target.value)}
-                              className="text-sm border rounded px-2 py-1"
-                            >
-                              <option value="">Select</option>
-                              <option value="STUDENT">Student</option>
-                              <option value="ORGANIZER">Organizer</option>
-                              <option value="ADMIN">Admin</option>
-                            </select>
-                            <Button
-                              size="sm"
-                              onClick={() => handleRoleChange(user.id, newRole)}
-                              disabled={!newRole}
-                            >
-                              Save
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingUser(null);
-                                setNewRole("");
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        ) : (
-                          <Badge className={getRoleColor(user.role)}>
-                            {user.role}
-                          </Badge>
-                        )}
-                      </TableCell>
+                      
                       <TableCell>
                         <div className="text-xs">
                           {user._count?.event && (
@@ -710,6 +703,73 @@ export default function AdminDashboard() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell>
+  {editingUser === user.id ? (
+    <div className="flex flex-col gap-2">
+      {/* Role selector */}
+      <select
+        value={newRole}
+        onChange={(e) => setNewRole(e.target.value)}
+        className="text-sm border rounded px-2 py-1"
+      >
+        <option value="">Select Role</option>
+        <option value="STUDENT">Student</option>
+        <option value="ORGANIZER">Organizer</option>
+        <option value="ADMIN">Admin</option>
+      </select>
+      
+      {/* Organization selector - only show for organizers */}
+      {newRole === "ORGANIZER" && (
+        <select
+          value={user.organizationId || ""}
+          onChange={(e) => {
+            const orgId = e.target.value ? parseInt(e.target.value) : null;
+            user.organizationId = orgId;
+          }}
+          className="text-sm border rounded px-2 py-1"
+        >
+          <option value="">No Organization</option>
+          {organizations.map(org => (
+            <option key={org.id} value={org.id}>
+              {org.name}
+            </option>
+          ))}
+        </select>
+      )}
+      
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          onClick={() => handleRoleChange(user.id, newRole, user.organizationId)}
+          disabled={!newRole}
+        >
+          Save
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            setEditingUser(null);
+            setNewRole("");
+          }}
+        >
+          Cancel
+        </Button>
+      </div>
+    </div>
+  ) : (
+    <div className="flex flex-col gap-1">
+      <Badge className={getRoleColor(user.role)}>
+        {user.role}
+      </Badge>
+      {user.organization && (
+        <span className="text-xs text-gray-600">
+          {user.organization.name}
+        </span>
+      )}
+    </div>
+  )}
+</TableCell>
                       <TableCell>
                         {new Date(user.createdAt).toLocaleDateString()}
                       </TableCell>
