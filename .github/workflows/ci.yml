@@ -43,4 +43,4 @@ jobs:
 
       - name: Build Project
         if: matrix.directory == 'client'
-        run: cd ${{ matrix.directory }} && npm run build
+        run: cd client && npm run build
