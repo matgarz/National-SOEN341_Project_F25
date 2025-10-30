@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../auth/AuthContext";
 // import { Button } from '@/components/ui/button';
 import "@schedule-x/theme-shadcn/dist/index.css";
 import { useCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
@@ -17,7 +18,8 @@ import "@schedule-x/theme-default/dist/index.css";
 
 export default function CalendarApp() {
   const eventsService = useState(() => createEventsServicePlugin())[0];
-
+  const { user } = useAuth();
+  const [events, setEvents] = useState([]);
   const calendar = useCalendarApp({
     views: [
       createViewDay(),
@@ -25,37 +27,49 @@ export default function CalendarApp() {
       createViewMonthGrid(),
       createViewMonthAgenda(),
     ],
-    events: [
-      {
-        id: "1",
-        title: "Nationa brothers",
-        start: Temporal.ZonedDateTime.from({
-          timeZone: "-00:00",
-          year: 2025,
-          month: 10,
-          day: 7,
-          hour: 12,
-          minute: 34,
-          second: 56,
-        }),
-        end: Temporal.ZonedDateTime.from({
-          timeZone: "-00:00",
-          year: 2025,
-          month: 10,
-          day: 7,
-          hour: 13,
-          minute: 34,
-          second: 56,
-        }),
-      },
-    ],
     plugins: [eventsService, createDragAndDropPlugin, createEventModalPlugin],
   });
 
   useEffect(() => {
-    // get all events
-    eventsService.getAll();
-  }, []);
+  const loadAdminEvents = async () => {
+    if (user?.role !== 'ADMIN') return;
+    
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_BASE_URL}/api/admin/events?status=APPROVED`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const events = await response.json();
+        
+        events.forEach((ev: any) => {
+          const start = Temporal.Instant.from(ev.date).toZonedDateTimeISO('UTC');
+          const end = start.add({ hours: 2 });
+          
+          const calendarEvent = {
+            id: ev.id.toString(),
+            title: ev.title,
+            start,
+            end,
+          };
+          
+          if (calendar?.events?.add) {
+            calendar.events.add(calendarEvent);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error loading admin events:', error);
+    }
+  };
+  
+  if (calendar && user) {
+    loadAdminEvents();
+  }
+}, [calendar, user]);
 
   return (
     <div id="calendario">

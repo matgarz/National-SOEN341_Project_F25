@@ -146,15 +146,15 @@ export default function Header({
           {/* Right: Notification/User icons */}
           <nav className="flex items-center space-x-2">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Link
-                to="/calendar"
-                className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
-                style={{ textDecoration: "none" }}
-              >
-                <Calendar className="h-4 w-4" />
-                My Events
-              </Link>
-            </motion.div>
+  <Link
+    to={userRole === "admin" ? "/admin/events-calendar" : "/calendar"}
+    className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
+    style={{ textDecoration: "none" }}
+  >
+    <Calendar className="h-4 w-4" />
+    {userRole === "admin" ? "All Events" : "My Events"}
+  </Link>
+</motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 variant="ghost"
