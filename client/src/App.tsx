@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import { useAuth } from "./auth/AuthContext";
-import QRCode from "./components/QRCode";
+//import QRCode from "./components/QRCode";
 
 export default function App() {
   const { user, logout } = useAuth();

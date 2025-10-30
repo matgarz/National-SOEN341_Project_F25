@@ -38,13 +38,11 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
   const userPublic: UserPublic = { ...user };
   const requestUser: RequestUser = { ...user };
 
-  res
-    .status(200)
-    .json({
-      message: "Succesfully logged in",
-      userPublic,
-      ...TokenAuth.createTokens(requestUser),
-    });
+  res.status(200).json({
+    message: "Succesfully logged in",
+    userPublic,
+    ...TokenAuth.createTokens(requestUser),
+  });
 }
 
 export { logUserIn };

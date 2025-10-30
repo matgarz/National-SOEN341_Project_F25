@@ -106,6 +106,52 @@ router.get("/users/:id", async (req: Request, res) => {
   }
 });
 
+// GET /api/admin/organizations - List all organizations
+router.get("/organizations", async (req, res) => {
+  try {
+    const orgs = await prisma.organization.findMany({
+      include: {
+        _count: { select: { event: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(orgs);
+  } catch (error) {
+    console.error("Error fetching organizations:", error);
+    res.status(500).json({
+      error: "Failed to fetch organizations",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// POST /api/admin/organizations - Create organization
+router.post("/organizations", async (req, res) => {
+  const { name, description, contactEmail } = req.body;
+  const org = await prisma.organization.create({
+    data: { name, description, contactEmail, isActive: true },
+  });
+  res.json(org);
+});
+
+// PATCH /api/admin/organizations/:id - Update organization
+router.patch("/organizations/:id", async (req, res) => {
+  const { name, description, contactEmail, isActive } = req.body;
+  const org = await prisma.organization.update({
+    where: { id: parseInt(req.params.id) },
+    data: { name, description, contactEmail, isActive },
+  });
+  res.json(org);
+});
+
+// DELETE /api/admin/organizations/:id - Delete organization
+router.delete("/organizations/:id", async (req, res) => {
+  await prisma.organization.delete({
+    where: { id: parseInt(req.params.id) },
+  });
+  res.json({ message: "Organization deleted" });
+});
+
 // PATCH /api/admin/users/:id/role - Update user role
 router.patch("/users/:id/role", async (req: Request, res) => {
   try {
@@ -114,13 +160,11 @@ router.patch("/users/:id/role", async (req: Request, res) => {
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    // Validate role
     if (!Object.values(UserRole).includes(role)) {
       return res.status(400).json({
         error: "Invalid role. Must be one of: STUDENT, ORGANIZER, ADMIN",
       });
     }
-    // Prevent admin from demoting themselves
     if (userId === req.user!.id && role !== "ADMIN") {
       return res.status(400).json({
         error: "Cannot change your own admin role",
@@ -156,20 +200,17 @@ router.delete("/users/:id", async (req: Request, res) => {
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    // Prevent admin from deleting themselves
     if (userId === req.user!.id) {
       return res.status(400).json({
         error: "Cannot delete your own account",
       });
     }
-    // Check if user exists
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    // Delete user
     await prisma.user.delete({
       where: { id: userId },
     });
@@ -203,9 +244,6 @@ router.get("/events", async (req: Request, res) => {
         organization: {
           select: { id: true, name: true, isActive: true },
         },
-        organizer: {
-          select: { id: true, name: true, email: true },
-        },
         creator: {
           select: { id: true, name: true, email: true, role: true },
         },
@@ -238,7 +276,6 @@ router.patch("/events/:id/status", async (req: Request, res) => {
     if (isNaN(eventId)) {
       return res.status(400).json({ error: "Invalid event ID" });
     }
-    // Validate status
     const validStatuses = Object.values(EventStatus);
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
@@ -275,7 +312,6 @@ router.delete("/events/:id", async (req: Request, res) => {
     if (isNaN(eventId)) {
       return res.status(400).json({ error: "Invalid event ID" });
     }
-    // Check if event exists
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       select: { id: true, title: true },
@@ -283,7 +319,6 @@ router.delete("/events/:id", async (req: Request, res) => {
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
-    // Delete event
     await prisma.event.delete({
       where: { id: eventId },
     });
@@ -298,6 +333,23 @@ router.delete("/events/:id", async (req: Request, res) => {
       details: error instanceof Error ? error.message : error,
     });
   }
+});
+
+// GET /api/admin/analytics/participation
+router.get("/analytics/participation", async (req, res) => {
+  const ticketStats = await prisma.ticket.groupBy({
+    by: ["checkedIn"],
+    _count: true,
+  });
+  const monthlyEvents = await prisma.$queryRaw`
+    SELECT DATE_FORMAT(date, '%Y-%m') as month, COUNT(*) as count
+    FROM Event
+    WHERE status = 'COMPLETED'
+    GROUP BY month
+    ORDER BY month DESC
+    LIMIT 12
+  `;
+  res.json({ ticketStats, monthlyEvents });
 });
 
 // GET /api/admin/stats - Get platform statistics

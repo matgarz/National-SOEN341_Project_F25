@@ -66,9 +66,9 @@ const toCard = (e: ApiEvent): EventCardEvent => {
 };
 
 export default function OrganizerDashboard() {
-  const [bookmarkedEvents, setBookmarkedEvents] = useState<EventCardEvent[]>(
-    [],
-  );
+  const [bookmarkedEvents /*, setBookmarkedEvents*/] = useState<
+    EventCardEvent[]
+  >([]);
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventCardEvent[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,7 +115,7 @@ export default function OrganizerDashboard() {
   const now = Date.now();
   const upcoming = filtered.filter((e) => new Date(e.date).getTime() > now);
   const past = filtered.filter((e) => new Date(e.date).getTime() <= now);
-  const pending = filtered.filter((e) => e.status === "PENDING");
+  //const pending = filtered.filter((e) => e.status === "PENDING"); TODO fix this line
 
   return (
     <div className=" space-y-6">
