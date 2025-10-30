@@ -66,9 +66,9 @@ const toCard = (e: ApiEvent): EventCardEvent => {
 };
 
 export default function OrganizerDashboard() {
-  const [bookmarkedEvents/*, setBookmarkedEvents*/] = useState<EventCardEvent[]>(
-    [],
-  );
+  const [bookmarkedEvents /*, setBookmarkedEvents*/] = useState<
+    EventCardEvent[]
+  >([]);
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventCardEvent[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
