@@ -3,16 +3,16 @@ import { getAuthHeader } from "../auth/tokenAuth";
 import {
   Check,
   X,
-  Eye,
+  //Eye,
   Users,
   Calendar,
   AlertTriangle,
   TrendingUp,
   Trash2,
   Edit2,
-  Building2,
+  //Building2,
   Search,
-  Filter,
+  //Filter,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import {
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
   }, [userRoleFilter]);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
+    //const token = localStorage.getItem("token");
     return {
       ...getAuthHeader(),
       "Content-Type": "application/json",

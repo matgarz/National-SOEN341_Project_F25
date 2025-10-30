@@ -1,14 +1,14 @@
-import { Calendar, Search, User, Shield } from "lucide-react";
+import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+//import {
+//Select,
+//SelectContent,
+//SelectItem,
+//SelectTrigger,
+//SelectValue,
+//} from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Link } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export default function Header({
   currentView,
   userRole,
   onViewChange,
-  onRoleChange,
+  //onRoleChange,
   onLogout,
   searchQuery,
   onSearchChange,
