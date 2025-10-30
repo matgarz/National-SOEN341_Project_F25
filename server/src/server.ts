@@ -9,7 +9,6 @@ import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import organizationRoutes from "./routes/organizations.routes.js";
 
-
 const app = express();
 const PORT = 3001;
 
@@ -35,7 +34,6 @@ app.use("/api/events", eventRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/organizations", organizationRoutes);
-
 
 console.log("Booting server...");
 

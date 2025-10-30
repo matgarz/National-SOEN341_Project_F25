@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Search, Building2, Mail, Calendar, Users, Edit, Trash2, Eye } from "lucide-react";
+import {
+  Search,
+  Building2,
+  Mail,
+  Calendar,
+  Users,
+  Edit,
+  Trash2,
+  Eye,
+} from "lucide-react";
 import { getAuthHeader } from "../auth/tokenAuth";
 
 interface Organization {
@@ -35,14 +44,14 @@ export default function AdminOrganizations() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterActive, setFilterActive] = useState<string>("all");
-  
-  // Modal states
-  const [selectedOrg, setSelectedOrg] = useState<OrganizationDetails | null>(null);
+
+  const [selectedOrg, setSelectedOrg] = useState<OrganizationDetails | null>(
+    null,
+  );
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
-  // Edit form state
+
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -50,7 +59,8 @@ export default function AdminOrganizations() {
     isActive: true,
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const getAuthHeaders = () => {
     return {
@@ -81,23 +91,24 @@ export default function AdminOrganizations() {
 
   const fetchOrganizationDetails = async (orgId: number) => {
     try {
-      // Fetch organization details
-      const orgResponse = await fetch(`${API_BASE_URL}/api/admin/organizations/${orgId}`, {
-        headers: getAuthHeaders(),
-      });
-      
-      // Fetch events for this organization
+      const orgResponse = await fetch(
+        `${API_BASE_URL}/api/admin/organizations/${orgId}`,
+        {
+          headers: getAuthHeaders(),
+        },
+      );
+
       const eventsResponse = await fetch(
         `${API_BASE_URL}/api/admin/organizations/${orgId}/events`,
         {
           headers: getAuthHeaders(),
-        }
+        },
       );
 
       if (orgResponse.ok && eventsResponse.ok) {
         const orgData = await orgResponse.json();
         const eventsData = await eventsResponse.json();
-        
+
         setSelectedOrg({
           ...orgData,
           events: eventsData,
@@ -130,7 +141,7 @@ export default function AdminOrganizations() {
           method: "PATCH",
           headers: getAuthHeaders(),
           body: JSON.stringify(editForm),
-        }
+        },
       );
 
       if (response.ok) {
@@ -153,7 +164,7 @@ export default function AdminOrganizations() {
         {
           method: "DELETE",
           headers: getAuthHeaders(),
-        }
+        },
       );
 
       if (response.ok) {
@@ -169,9 +180,10 @@ export default function AdminOrganizations() {
   };
 
   const filteredOrganizations = organizations.filter((org) => {
-    const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         org.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch =
+      org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesFilter =
       filterActive === "all" ||
       (filterActive === "active" && org.isActive) ||
@@ -311,7 +323,9 @@ export default function AdminOrganizations() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{selectedOrg.name}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selectedOrg.name}
+                  </h2>
                   <span
                     className={`inline-block px-3 py-1 text-sm rounded-full mt-2 ${
                       selectedOrg.isActive
@@ -334,22 +348,34 @@ export default function AdminOrganizations() {
             <div className="p-6 space-y-6">
               {/* Organization Info */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Organization Information</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  Organization Information
+                </h3>
                 <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
                   {selectedOrg.description && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Description:</span>
-                      <p className="text-gray-900 mt-1">{selectedOrg.description}</p>
+                      <span className="text-sm font-medium text-gray-600">
+                        Description:
+                      </span>
+                      <p className="text-gray-900 mt-1">
+                        {selectedOrg.description}
+                      </p>
                     </div>
                   )}
                   {selectedOrg.contactEmail && (
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Contact Email:</span>
-                      <p className="text-gray-900 mt-1">{selectedOrg.contactEmail}</p>
+                      <span className="text-sm font-medium text-gray-600">
+                        Contact Email:
+                      </span>
+                      <p className="text-gray-900 mt-1">
+                        {selectedOrg.contactEmail}
+                      </p>
                     </div>
                   )}
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Created:</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Created:
+                    </span>
                     <p className="text-gray-900 mt-1">
                       {new Date(selectedOrg.createdAt).toLocaleDateString()}
                     </p>
@@ -368,7 +394,9 @@ export default function AdminOrganizations() {
                         <div className="text-2xl font-bold text-blue-900">
                           {selectedOrg._count.event}
                         </div>
-                        <div className="text-sm text-blue-600">Total Events</div>
+                        <div className="text-sm text-blue-600">
+                          Total Events
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -379,7 +407,9 @@ export default function AdminOrganizations() {
                         <div className="text-2xl font-bold text-purple-900">
                           {selectedOrg.organizerCount || 0}
                         </div>
-                        <div className="text-sm text-purple-600">Organizers</div>
+                        <div className="text-sm text-purple-600">
+                          Organizers
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -397,9 +427,13 @@ export default function AdminOrganizations() {
                         className="bg-gray-50 p-4 rounded-lg flex items-center justify-between"
                       >
                         <div>
-                          <h4 className="font-medium text-gray-900">{event.title}</h4>
+                          <h4 className="font-medium text-gray-900">
+                            {event.title}
+                          </h4>
                           <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
-                            <span>{new Date(event.date).toLocaleDateString()}</span>
+                            <span>
+                              {new Date(event.date).toLocaleDateString()}
+                            </span>
                             <span>•</span>
                             <span className="capitalize">{event.category}</span>
                           </div>
@@ -409,8 +443,8 @@ export default function AdminOrganizations() {
                             event.status === "APPROVED"
                               ? "bg-green-100 text-green-700"
                               : event.status === "PENDING"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
                           }`}
                         >
                           {event.status}
@@ -454,8 +488,12 @@ export default function AdminOrganizations() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Edit Organization</h2>
-              <p className="text-sm text-gray-600 mt-1">Update organization details</p>
+              <h2 className="text-xl font-bold text-gray-900">
+                Edit Organization
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Update organization details
+              </p>
             </div>
 
             <div className="p-6 space-y-4">
@@ -466,7 +504,9 @@ export default function AdminOrganizations() {
                 <input
                   type="text"
                   value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
                   placeholder="Organization name"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -478,7 +518,9 @@ export default function AdminOrganizations() {
                 </label>
                 <textarea
                   value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
                   placeholder="Organization description"
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -505,10 +547,15 @@ export default function AdminOrganizations() {
                   type="checkbox"
                   id="isActive"
                   checked={editForm.isActive}
-                  onChange={(e) => setEditForm({ ...editForm, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, isActive: e.target.checked })
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="isActive"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Active Organization
                 </label>
               </div>
@@ -542,15 +589,20 @@ export default function AdminOrganizations() {
                   <Trash2 className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">Delete Organization</h3>
-                  <p className="text-sm text-gray-600">This action cannot be undone</p>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Delete Organization
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    This action cannot be undone
+                  </p>
                 </div>
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                 <p className="text-sm text-red-800">
-                  Are you sure you want to delete <strong>{selectedOrg.name}</strong>?
-                  This will also delete all associated events ({selectedOrg._count.event}).
+                  Are you sure you want to delete{" "}
+                  <strong>{selectedOrg.name}</strong>? This will also delete all
+                  associated events ({selectedOrg._count.event}).
                 </p>
               </div>
 

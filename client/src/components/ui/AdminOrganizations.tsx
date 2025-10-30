@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Building2, Search } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Building2, Search } from "lucide-react";
 
 interface Organization {
   id: number;
@@ -14,7 +14,7 @@ interface Organization {
 export default function AdminOrganizations() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchOrganizations();
@@ -22,31 +22,32 @@ export default function AdminOrganizations() {
 
   const fetchOrganizations = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/organizations`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      if (!response.ok) throw new Error('Failed to fetch organizations');
-      
+      if (!response.ok) throw new Error("Failed to fetch organizations");
+
       const data = await response.json();
       setOrganizations(data);
     } catch (error) {
-      console.error('Error fetching organizations:', error);
-      alert('Failed to fetch organizations');
+      console.error("Error fetching organizations:", error);
+      alert("Failed to fetch organizations");
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredOrganizations = organizations.filter(org =>
-    org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    org.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrganizations = organizations.filter(
+    (org) =>
+      org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.description.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -82,7 +83,9 @@ export default function AdminOrganizations() {
                   <Building2 className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900">{org.name}</h3>
+                  <h3 className="font-semibold text-lg text-gray-900">
+                    {org.name}
+                  </h3>
                   <p className="text-xs text-gray-500">
                     Since {new Date(org.createdAt).toLocaleDateString()}
                   </p>
@@ -99,7 +102,7 @@ export default function AdminOrganizations() {
                 <div>
                   <span className="font-semibold text-gray-900">
                     {org._count?.event || 0}
-                  </span>{' '}
+                  </span>{" "}
                   Events
                 </div>
               </div>
@@ -125,8 +128,11 @@ export default function AdminOrganizations() {
               </span>
             </div>
             <div className="text-sm text-blue-700">
-              Total Events:{' '}
-              {organizations.reduce((sum, org) => sum + (org._count?.event || 0), 0)}
+              Total Events:{" "}
+              {organizations.reduce(
+                (sum, org) => sum + (org._count?.event || 0),
+                0,
+              )}
             </div>
           </div>
         </div>

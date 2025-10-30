@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Trash2, Search, Filter } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { CheckCircle, XCircle, Trash2, Search, Filter } from "lucide-react";
 
 interface Event {
   id: number;
@@ -8,7 +8,7 @@ interface Event {
   date: string;
   location: string;
   category: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
   organization: {
     name: string;
@@ -21,8 +21,8 @@ interface Event {
 export default function AdminEventModeration() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   useEffect(() => {
     fetchEvents();
@@ -30,115 +30,126 @@ export default function AdminEventModeration() {
 
   const fetchEvents = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       let url = `${import.meta.env.VITE_API_BASE_URL}/api/admin/events`;
-      
-      if (statusFilter !== 'ALL') {
+
+      if (statusFilter !== "ALL") {
         url += `?status=${statusFilter}`;
       }
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch events');
-      
+      if (!response.ok) throw new Error("Failed to fetch events");
+
       const data = await response.json();
       setEvents(data);
     } catch (error) {
-      console.error('Error fetching events:', error);
-      alert('Failed to fetch events');
+      console.error("Error fetching events:", error);
+      alert("Failed to fetch events");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusChange = async (eventId: number, newStatus: string, eventTitle: string) => {
+  const handleStatusChange = async (
+    eventId: number,
+    newStatus: string,
+    eventTitle: string,
+  ) => {
     const statusActions: Record<string, string> = {
-      APPROVED: 'approve',
-      REJECTED: 'reject',
-      CANCELLED: 'cancel',
+      APPROVED: "approve",
+      REJECTED: "reject",
+      CANCELLED: "cancel",
     };
 
-    const action = statusActions[newStatus] || 'change status of';
-    
+    const action = statusActions[newStatus] || "change status of";
+
     if (!confirm(`Are you sure you want to ${action} "${eventTitle}"?`)) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/events/${eventId}/status`,
         {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ status: newStatus }),
-        }
+        },
       );
 
-      if (!response.ok) throw new Error('Failed to update event status');
-      
+      if (!response.ok) throw new Error("Failed to update event status");
+
       alert(`Event ${action}d successfully`);
-      fetchEvents(); // Refresh the list
+      fetchEvents();
     } catch (error) {
-      console.error('Error updating event status:', error);
-      alert('Failed to update event status');
+      console.error("Error updating event status:", error);
+      alert("Failed to update event status");
     }
   };
 
   const handleDeleteEvent = async (eventId: number, eventTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${eventTitle}"? This action cannot be undone and will delete all associated tickets.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${eventTitle}"? This action cannot be undone and will delete all associated tickets.`,
+      )
+    ) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/events/${eventId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      if (!response.ok) throw new Error('Failed to delete event');
-      
-      alert('Event deleted successfully');
-      fetchEvents(); // Refresh the list
+      if (!response.ok) throw new Error("Failed to delete event");
+
+      alert("Event deleted successfully");
+      fetchEvents();
     } catch (error) {
-      console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event");
     }
   };
 
-  const filteredEvents = events.filter(event =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.organization.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.organization.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      event.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'APPROVED':
-        return 'bg-green-100 text-green-800';
-      case 'REJECTED':
-        return 'bg-red-100 text-red-800';
-      case 'CANCELLED':
-        return 'bg-gray-100 text-gray-800';
-      case 'COMPLETED':
-        return 'bg-blue-100 text-blue-800';
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800";
+      case "APPROVED":
+        return "bg-green-100 text-green-800";
+      case "REJECTED":
+        return "bg-red-100 text-red-800";
+      case "CANCELLED":
+        return "bg-gray-100 text-gray-800";
+      case "COMPLETED":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -178,12 +189,13 @@ export default function AdminEventModeration() {
       </div>
 
       {/* Pending Events Alert */}
-      {events.filter(e => e.status === 'PENDING').length > 0 && (
+      {events.filter((e) => e.status === "PENDING").length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center">
             <Filter className="h-5 w-5 text-yellow-600 mr-2" />
             <span className="text-sm font-medium text-yellow-800">
-              {events.filter(e => e.status === 'PENDING').length} event(s) awaiting moderation
+              {events.filter((e) => e.status === "PENDING").length} event(s)
+              awaiting moderation
             </span>
           </div>
         </div>
@@ -218,15 +230,21 @@ export default function AdminEventModeration() {
             {filteredEvents.map((event) => (
               <tr key={event.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{event.title}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {event.title}
+                  </div>
                   <div className="text-sm text-gray-500">{event.category}</div>
-                  <div className="text-xs text-gray-400 mt-1">{event.location}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {event.location}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {event.organization.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(event.status)}`}>
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(event.status)}`}
+                  >
                     {event.status}
                   </span>
                 </td>
@@ -238,17 +256,29 @@ export default function AdminEventModeration() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end gap-2">
-                    {event.status === 'PENDING' && (
+                    {event.status === "PENDING" && (
                       <>
                         <button
-                          onClick={() => handleStatusChange(event.id, 'APPROVED', event.title)}
+                          onClick={() =>
+                            handleStatusChange(
+                              event.id,
+                              "APPROVED",
+                              event.title,
+                            )
+                          }
                           className="text-green-600 hover:text-green-900"
                           title="Approve Event"
                         >
                           <CheckCircle className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleStatusChange(event.id, 'REJECTED', event.title)}
+                          onClick={() =>
+                            handleStatusChange(
+                              event.id,
+                              "REJECTED",
+                              event.title,
+                            )
+                          }
                           className="text-red-600 hover:text-red-900"
                           title="Reject Event"
                         >
@@ -256,9 +286,11 @@ export default function AdminEventModeration() {
                         </button>
                       </>
                     )}
-                    {event.status === 'APPROVED' && (
+                    {event.status === "APPROVED" && (
                       <button
-                        onClick={() => handleStatusChange(event.id, 'CANCELLED', event.title)}
+                        onClick={() =>
+                          handleStatusChange(event.id, "CANCELLED", event.title)
+                        }
                         className="text-orange-600 hover:text-orange-900"
                         title="Cancel Event"
                       >

@@ -1,4 +1,4 @@
-import { useEffect , useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuthHeader } from "../auth/tokenAuth";
 import {
   Check,
@@ -100,17 +100,16 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Filters
+
   const [eventStatusFilter, setEventStatusFilter] = useState<string>("PENDING");
   const [userRoleFilter, setUserRoleFilter] = useState<string>("ALL");
   const [searchTerm, setSearchTerm] = useState("");
-  
-  // Editing states
+
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   // Fetch all data
   useEffect(() => {
@@ -181,7 +180,11 @@ export default function AdminDashboard() {
   };
 
   // Event actions
-  const handleEventAction = async (eventId: number, newStatus: string, eventTitle: string) => {
+  const handleEventAction = async (
+    eventId: number,
+    newStatus: string,
+    eventTitle: string,
+  ) => {
     const statusActions: Record<string, string> = {
       APPROVED: "approve",
       REJECTED: "reject",
@@ -194,11 +197,14 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/events/${eventId}/status`, {
-        method: "PATCH",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/events/${eventId}/status`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status: newStatus }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to update event status");
       alert(`Event ${action}d successfully`);
@@ -211,15 +217,22 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteEvent = async (eventId: number, eventTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${eventTitle}"? This cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${eventTitle}"? This cannot be undone.`,
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/events/${eventId}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/events/${eventId}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to delete event");
       alert("Event deleted successfully");
@@ -233,16 +246,21 @@ export default function AdminDashboard() {
 
   // User actions
   const handleRoleChange = async (userId: number, role: string) => {
-    if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
+    if (
+      !confirm(`Are you sure you want to change this user's role to ${role}?`)
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
-        method: "PATCH",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ role }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ role }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to update role");
       alert("User role updated successfully");
@@ -256,15 +274,22 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (userId: number, userName: string) => {
-    if (!confirm(`Are you sure you want to delete user "${userName}"? This cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete user "${userName}"? This cannot be undone.`,
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}`,
+        {
+          method: "DELETE",
+          headers: getAuthHeaders(),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to delete user");
       alert("User deleted successfully");
@@ -308,19 +333,23 @@ export default function AdminDashboard() {
   };
 
   // Filter functions
-  const filteredEvents = events.filter((event) =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.organization.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.organization.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      event.category.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const pendingEventsCount = stats?.eventsByStatus?.PENDING || 0;
-  const flaggedEventsCount = 0; // You can implement flagging logic later
+  const flaggedEventsCount = 0;
 
   if (loading) {
     return (
@@ -358,14 +387,18 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Events</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Events
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingEventsCount}</div>
             <p className="text-xs text-muted-foreground">
               {flaggedEventsCount > 0 && (
-                <span className="text-red-600">{flaggedEventsCount} flagged</span>
+                <span className="text-red-600">
+                  {flaggedEventsCount} flagged
+                </span>
               )}
             </p>
           </CardContent>
@@ -386,7 +419,9 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tickets Issued</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tickets Issued
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -401,8 +436,8 @@ export default function AdminDashboard() {
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            {pendingEventsCount} event{pendingEventsCount > 1 ? "s" : ""} awaiting approval.
-            Please review the moderation queue.
+            {pendingEventsCount} event{pendingEventsCount > 1 ? "s" : ""}{" "}
+            awaiting approval. Please review the moderation queue.
           </AlertDescription>
         </Alert>
       )}
@@ -467,14 +502,21 @@ export default function AdminDashboard() {
                       <TableCell>
                         <div>
                           <span className="font-medium">{event.title}</span>
-                          <div className="text-xs text-gray-500">{event.category}</div>
+                          <div className="text-xs text-gray-500">
+                            {event.category}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>{event.organization.name}</TableCell>
                       <TableCell>{event.creator.name}</TableCell>
-                      <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={getStatusColor(event.status)}>
+                        {new Date(event.date).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getStatusColor(event.status)}
+                        >
                           {event.status}
                         </Badge>
                       </TableCell>
@@ -485,21 +527,35 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleEventAction(event.id, "APPROVED", event.title)}
+                              onClick={() =>
+                                handleEventAction(
+                                  event.id,
+                                  "APPROVED",
+                                  event.title,
+                                )
+                              }
                             >
                               <Check className="h-4 w-4" />
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleEventAction(event.id, "REJECTED", event.title)}
+                              onClick={() =>
+                                handleEventAction(
+                                  event.id,
+                                  "REJECTED",
+                                  event.title,
+                                )
+                              }
                             >
                               <X className="h-4 w-4" />
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDeleteEvent(event.id, event.title)}
+                              onClick={() =>
+                                handleDeleteEvent(event.id, event.title)
+                              }
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -509,14 +565,22 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleEventAction(event.id, "CANCELLED", event.title)}
+                              onClick={() =>
+                                handleEventAction(
+                                  event.id,
+                                  "CANCELLED",
+                                  event.title,
+                                )
+                              }
                             >
                               Cancel
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDeleteEvent(event.id, event.title)}
+                              onClick={() =>
+                                handleDeleteEvent(event.id, event.title)
+                              }
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>
@@ -525,7 +589,9 @@ export default function AdminDashboard() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => handleDeleteEvent(event.id, event.title)}
+                            onClick={() =>
+                              handleDeleteEvent(event.id, event.title)
+                            }
                           >
                             <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
@@ -591,7 +657,9 @@ export default function AdminDashboard() {
                       <TableCell>
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="text-xs text-gray-500">{user.email}</div>
+                          <div className="text-xs text-gray-500">
+                            {user.email}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>{user.studentId}</TableCell>
@@ -627,16 +695,24 @@ export default function AdminDashboard() {
                             </Button>
                           </div>
                         ) : (
-                          <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
+                          <Badge className={getRoleColor(user.role)}>
+                            {user.role}
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
-                          {user._count?.event && <div>Events: {user._count.event}</div>}
-                          {user._count?.ticket && <div>Tickets: {user._count.ticket}</div>}
+                          {user._count?.event && (
+                            <div>Events: {user._count.event}</div>
+                          )}
+                          {user._count?.ticket && (
+                            <div>Tickets: {user._count.ticket}</div>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </TableCell>
                       <TableCell>
                         {editingUser !== user.id && (
                           <div className="flex gap-2">
@@ -653,7 +729,9 @@ export default function AdminDashboard() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleDeleteUser(user.id, user.name)}
+                              onClick={() =>
+                                handleDeleteUser(user.id, user.name)
+                              }
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />
                             </Button>

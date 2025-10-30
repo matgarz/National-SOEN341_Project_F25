@@ -378,33 +378,34 @@ router.get("/analytics/comprehensive", async (req: Request, res) => {
     const totalCapacity = await prisma.event.aggregate({
       _sum: { capacity: true },
     });
-    
-    const avgAttendance = totalCapacity._sum.capacity && totalCapacity._sum.capacity > 0
-      ? (totalTickets / totalCapacity._sum.capacity) * 100 
-      : 0;
+
+    const avgAttendance =
+      totalCapacity._sum.capacity && totalCapacity._sum.capacity > 0
+        ? (totalTickets / totalCapacity._sum.capacity) * 100
+        : 0;
 
     res.json({
-  totalEvents,
-  totalTickets,
-  totalRevenue: Number(totalRevenue._sum.ticketPrice) || 0,
-  avgAttendance: avgAttendance.toFixed(1),
-  eventsByCategory: eventsByCategory.map(e => ({
-    name: e.category,
-    value: e._count.category,
-  })),
-  topEvents: topEvents.map(e => ({
-    name: e.title,
-    attendees: e._count.ticket,
-    capacity: e.capacity,
-    revenue: Number(e.ticketPrice) || 0,
-    organization: e.organization.name,
-  })),
-  monthlyTrends: (monthlyStats as any[]).map((stat: any) => ({
-    month: stat.month,
-    eventCount: Number(stat.eventCount),
-    attendees: Number(stat.attendees),  
-  })),
-});
+      totalEvents,
+      totalTickets,
+      totalRevenue: Number(totalRevenue._sum.ticketPrice) || 0,
+      avgAttendance: avgAttendance.toFixed(1),
+      eventsByCategory: eventsByCategory.map((e) => ({
+        name: e.category,
+        value: e._count.category,
+      })),
+      topEvents: topEvents.map((e) => ({
+        name: e.title,
+        attendees: e._count.ticket,
+        capacity: e.capacity,
+        revenue: Number(e.ticketPrice) || 0,
+        organization: e.organization.name,
+      })),
+      monthlyTrends: (monthlyStats as any[]).map((stat: any) => ({
+        month: stat.month,
+        eventCount: Number(stat.eventCount),
+        attendees: Number(stat.attendees),
+      })),
+    });
   } catch (error) {
     console.error("Error fetching comprehensive analytics:", error);
     res.status(500).json({
@@ -509,7 +510,5 @@ router.get("/stats", async (req: Request, res) => {
     });
   }
 });
-
-
 
 export default router;

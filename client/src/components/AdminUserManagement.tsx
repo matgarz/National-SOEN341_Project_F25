@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Trash2, Edit2, Search } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Trash2, Edit2, Search } from "lucide-react";
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: 'STUDENT' | 'ORGANIZER' | 'ADMIN';
+  role: "STUDENT" | "ORGANIZER" | "ADMIN";
   createdAt: string;
   _count?: {
     Event?: number;
@@ -17,10 +17,10 @@ interface User {
 export default function AdminUserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [editingUser, setEditingUser] = useState<number | null>(null);
-  const [newRole, setNewRole] = useState<string>('');
+  const [newRole, setNewRole] = useState<string>("");
 
   useEffect(() => {
     fetchUsers();
@@ -28,91 +28,98 @@ export default function AdminUserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       let url = `${import.meta.env.VITE_API_BASE_URL}/api/admin/users`;
-      
-      if (roleFilter !== 'ALL') {
+
+      if (roleFilter !== "ALL") {
         url += `?role=${roleFilter}`;
       }
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch users');
-      
+      if (!response.ok) throw new Error("Failed to fetch users");
+
       const data = await response.json();
       setUsers(data);
     } catch (error) {
-      console.error('Error fetching users:', error);
-      alert('Failed to fetch users');
+      console.error("Error fetching users:", error);
+      alert("Failed to fetch users");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRoleChange = async (userId: number, role: string) => {
-    if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
+    if (
+      !confirm(`Are you sure you want to change this user's role to ${role}?`)
+    ) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}/role`,
         {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ role }),
-        }
+        },
       );
 
-      if (!response.ok) throw new Error('Failed to update role');
-      
-      alert('User role updated successfully');
+      if (!response.ok) throw new Error("Failed to update role");
+
+      alert("User role updated successfully");
       setEditingUser(null);
-      fetchUsers(); // Refresh the list
+      fetchUsers();
     } catch (error) {
-      console.error('Error updating user role:', error);
-      alert('Failed to update user role');
+      console.error("Error updating user role:", error);
+      alert("Failed to update user role");
     }
   };
 
   const handleDeleteUser = async (userId: number, username: string) => {
-    if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete user "${username}"? This action cannot be undone.`,
+      )
+    ) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-      if (!response.ok) throw new Error('Failed to delete user');
-      
-      alert('User deleted successfully');
-      fetchUsers(); // Refresh the list
+      if (!response.ok) throw new Error("Failed to delete user");
+
+      alert("User deleted successfully");
+      fetchUsers();
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Failed to delete user');
+      console.error("Error deleting user:", error);
+      alert("Failed to delete user");
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -171,7 +178,9 @@ export default function AdminUserManagement() {
             {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {user.username}
+                  </div>
                   <div className="text-sm text-gray-500">{user.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -197,7 +206,7 @@ export default function AdminUserManagement() {
                       <button
                         onClick={() => {
                           setEditingUser(null);
-                          setNewRole('');
+                          setNewRole("");
                         }}
                         className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded hover:bg-gray-400"
                       >
@@ -205,19 +214,27 @@ export default function AdminUserManagement() {
                       </button>
                     </div>
                   ) : (
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
-                      user.role === 'ORGANIZER' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.role === "ADMIN"
+                          ? "bg-red-100 text-red-800"
+                          : user.role === "ORGANIZER"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-green-100 text-green-800"
+                      }`}
+                    >
                       {user.role}
                     </span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user._count?.Event && <div>Events: {user._count.Event}</div>}
-                  {user._count?.Ticket && <div>Tickets: {user._count.Ticket}</div>}
-                  {user._count?.Review && <div>Reviews: {user._count.Review}</div>}
+                  {user._count?.Ticket && (
+                    <div>Tickets: {user._count.Ticket}</div>
+                  )}
+                  {user._count?.Review && (
+                    <div>Reviews: {user._count.Review}</div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString()}

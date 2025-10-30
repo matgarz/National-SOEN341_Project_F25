@@ -4,7 +4,6 @@ import { authenticateToken } from "../middleware/auth/jwtAuth.js";
 import { authAdmin } from "../middleware/auth/roleAuth.js";
 import { Request, Response } from "express";
 
-
 const router = express.Router();
 const prisma = new PrismaClient();
 
@@ -16,13 +15,13 @@ router.get("/", async (req: Request, res) => {
   try {
     const orgs = await prisma.organization.findMany({
       include: {
-        _count: { 
-          select: { 
-            event: true 
-          } 
+        _count: {
+          select: {
+            event: true,
+          },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
     res.json(orgs);
   } catch (error) {
@@ -38,7 +37,7 @@ router.get("/", async (req: Request, res) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const orgId = parseInt(req.params.id);
-    
+
     if (isNaN(orgId)) {
       return res.status(400).json({ error: "Invalid organization ID" });
     }
@@ -87,7 +86,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.get("/:id/events", async (req: Request, res: Response) => {
   try {
     const orgId = parseInt(req.params.id);
-    
+
     if (isNaN(orgId)) {
       return res.status(400).json({ error: "Invalid organization ID" });
     }
@@ -108,7 +107,7 @@ router.get("/:id/events", async (req: Request, res: Response) => {
           },
         },
       },
-      orderBy: { date: 'desc' },
+      orderBy: { date: "desc" },
     });
 
     res.json(events);
@@ -158,7 +157,7 @@ router.post("/", async (req: Request, res) => {
 router.patch("/:id", async (req: Request, res: Response) => {
   try {
     const orgId = parseInt(req.params.id);
-    
+
     if (isNaN(orgId)) {
       return res.status(400).json({ error: "Invalid organization ID" });
     }
@@ -167,7 +166,9 @@ router.patch("/:id", async (req: Request, res: Response) => {
 
     // Validation
     if (name !== undefined && name.trim().length === 0) {
-      return res.status(400).json({ error: "Organization name cannot be empty" });
+      return res
+        .status(400)
+        .json({ error: "Organization name cannot be empty" });
     }
 
     if (contactEmail && !contactEmail.includes("@")) {
@@ -187,8 +188,12 @@ router.patch("/:id", async (req: Request, res: Response) => {
       where: { id: orgId },
       data: {
         ...(name !== undefined && { name: name.trim() }),
-        ...(description !== undefined && { description: description.trim() || null }),
-        ...(contactEmail !== undefined && { contactEmail: contactEmail.trim() || null }),
+        ...(description !== undefined && {
+          description: description.trim() || null,
+        }),
+        ...(contactEmail !== undefined && {
+          contactEmail: contactEmail.trim() || null,
+        }),
         ...(isActive !== undefined && { isActive }),
       },
     });
@@ -207,7 +212,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const orgId = parseInt(req.params.id);
-    
+
     if (isNaN(orgId)) {
       return res.status(400).json({ error: "Invalid organization ID" });
     }
@@ -229,10 +234,10 @@ router.delete("/:id", async (req: Request, res: Response) => {
     }
 
     if (existingOrg._count.event > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Cannot delete organization with existing events",
         eventCount: existingOrg._count.event,
-        suggestion: "Delete all events first or set organization to inactive"
+        suggestion: "Delete all events first or set organization to inactive",
       });
     } else {
       await prisma.organization.delete({
@@ -240,9 +245,9 @@ router.delete("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    res.json({ 
+    res.json({
       message: "Organization deleted successfully",
-      deletedId: orgId 
+      deletedId: orgId,
     });
   } catch (error) {
     console.error("Error deleting organization:", error);

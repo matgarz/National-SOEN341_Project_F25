@@ -75,10 +75,13 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export function Analytics({ userRole }: AnalyticsProps) {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
   useEffect(() => {
     fetchAnalytics();
@@ -86,15 +89,18 @@ export function Analytics({ userRole }: AnalyticsProps) {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/analytics/comprehensive`, {
-        headers: {
-          ...getAuthHeader(),
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/analytics/comprehensive`,
+        {
+          headers: {
+            ...getAuthHeader(),
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!response.ok) throw new Error("Failed to fetch analytics");
-      
+
       const data = await response.json();
       setAnalyticsData(data);
     } catch (error) {
@@ -145,10 +151,12 @@ export function Analytics({ userRole }: AnalyticsProps) {
   }
 
   // Prepare category data with colors
-  const categoryDataWithColors = analyticsData.eventsByCategory.map((cat: { name: string; value: number }): CategoryData => ({
-    ...cat,
-    color: CATEGORY_COLORS[cat.name] || "#6B7280",
-  }));
+  const categoryDataWithColors = analyticsData.eventsByCategory.map(
+    (cat: { name: string; value: number }): CategoryData => ({
+      ...cat,
+      color: CATEGORY_COLORS[cat.name] || "#6B7280",
+    }),
+  );
 
   return (
     <div className="space-y-6">
@@ -181,7 +189,9 @@ export function Analytics({ userRole }: AnalyticsProps) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.totalEvents}</div>
+            <div className="text-2xl font-bold">
+              {analyticsData.totalEvents}
+            </div>
             <p className="text-xs text-muted-foreground">
               Across all categories
             </p>
@@ -199,9 +209,7 @@ export function Analytics({ userRole }: AnalyticsProps) {
             <div className="text-2xl font-bold">
               {analyticsData.totalTickets.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Tickets claimed
-            </p>
+            <p className="text-xs text-muted-foreground">Tickets claimed</p>
           </CardContent>
         </Card>
 
@@ -214,9 +222,7 @@ export function Analytics({ userRole }: AnalyticsProps) {
             <div className="text-2xl font-bold">
               ${analyticsData.totalRevenue.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              From paid events
-            </p>
+            <p className="text-xs text-muted-foreground">From paid events</p>
           </CardContent>
         </Card>
 
@@ -228,10 +234,10 @@ export function Analytics({ userRole }: AnalyticsProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analyticsData.avgAttendance}%</div>
-            <p className="text-xs text-muted-foreground">
-              Of total capacity
-            </p>
+            <div className="text-2xl font-bold">
+              {analyticsData.avgAttendance}%
+            </div>
+            <p className="text-xs text-muted-foreground">Of total capacity</p>
           </CardContent>
         </Card>
       </div>
@@ -291,7 +297,10 @@ export function Analytics({ userRole }: AnalyticsProps) {
                     labelLine={false}
                     label={(props) => {
                       const { name, value } = props as any;
-                      const total = categoryDataWithColors.reduce((sum: number, cat: CategoryData) => sum + cat.value, 0);
+                      const total = categoryDataWithColors.reduce(
+                        (sum: number, cat: CategoryData) => sum + cat.value,
+                        0,
+                      );
                       const percent = ((value / total) * 100).toFixed(0);
                       return `${name} ${percent}%`;
                     }}
@@ -299,9 +308,11 @@ export function Analytics({ userRole }: AnalyticsProps) {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {categoryDataWithColors.map((entry: CategoryData, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                    {categoryDataWithColors.map(
+                      (entry: CategoryData, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ),
+                    )}
                   </Pie>
                   <Tooltip />
                 </PieChart>
@@ -324,7 +335,8 @@ export function Analytics({ userRole }: AnalyticsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {analyticsData.monthlyTrends && analyticsData.monthlyTrends.length > 0 ? (
+          {analyticsData.monthlyTrends &&
+          analyticsData.monthlyTrends.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={analyticsData.monthlyTrends}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -369,46 +381,49 @@ export function Analytics({ userRole }: AnalyticsProps) {
         <CardContent>
           {analyticsData.topEvents.length > 0 ? (
             <div className="space-y-4">
-              {analyticsData.topEvents.map((event: EventPerformance, index: number) => {
-                const attendanceRate = event.capacity > 0 
-                  ? (event.attendees / event.capacity) * 100 
-                  : 0;
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="space-y-1">
-                      <h4 className="font-medium">{event.name}</h4>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span>{event.organization}</span>
-                        <span>
-                          {event.attendees}/{event.capacity} attendees
-                        </span>
-                        <Badge
-                          variant={
-                            attendanceRate > 80
-                              ? "default"
-                              : attendanceRate > 60
-                                ? "secondary"
-                                : "outline"
-                          }
-                        >
-                          {attendanceRate.toFixed(1)}% capacity
-                        </Badge>
+              {analyticsData.topEvents.map(
+                (event: EventPerformance, index: number) => {
+                  const attendanceRate =
+                    event.capacity > 0
+                      ? (event.attendees / event.capacity) * 100
+                      : 0;
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="space-y-1">
+                        <h4 className="font-medium">{event.name}</h4>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span>{event.organization}</span>
+                          <span>
+                            {event.attendees}/{event.capacity} attendees
+                          </span>
+                          <Badge
+                            variant={
+                              attendanceRate > 80
+                                ? "default"
+                                : attendanceRate > 60
+                                  ? "secondary"
+                                  : "outline"
+                            }
+                          >
+                            {attendanceRate.toFixed(1)}% capacity
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">
+                          {event.revenue > 0 ? `$${event.revenue}` : "Free"}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Revenue
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-medium">
-                        {event.revenue > 0 ? `$${event.revenue}` : "Free"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Revenue
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">

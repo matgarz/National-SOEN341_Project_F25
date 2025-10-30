@@ -31,45 +31,51 @@ export default function CalendarApp() {
   });
 
   useEffect(() => {
-  const loadAdminEvents = async () => {
-    if (user?.role !== 'ADMIN') return;
-    
-    try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_BASE_URL}/api/admin/events?status=APPROVED`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const events = await response.json();
-        
-        events.forEach((ev: any) => {
-          const start = Temporal.Instant.from(ev.date).toZonedDateTimeISO('UTC');
-          const end = start.add({ hours: 2 });
-          
-          const calendarEvent = {
-            id: ev.id.toString(),
-            title: ev.title,
-            start,
-            end,
-          };
-          
-          if (calendar?.events?.add) {
-            calendar.events.add(calendarEvent);
-          }
-        });
+    const loadAdminEvents = async () => {
+      if (user?.role !== "ADMIN") return;
+
+      try {
+        const API_BASE_URL =
+          import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+        const response = await fetch(
+          `${API_BASE_URL}/api/admin/events?status=APPROVED`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const events = await response.json();
+
+          events.forEach((ev: any) => {
+            const start = Temporal.Instant.from(ev.date).toZonedDateTimeISO(
+              "UTC",
+            );
+            const end = start.add({ hours: 2 });
+
+            const calendarEvent = {
+              id: ev.id.toString(),
+              title: ev.title,
+              start,
+              end,
+            };
+
+            if (calendar?.events?.add) {
+              calendar.events.add(calendarEvent);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error loading admin events:", error);
       }
-    } catch (error) {
-      console.error('Error loading admin events:', error);
+    };
+
+    if (calendar && user) {
+      loadAdminEvents();
     }
-  };
-  
-  if (calendar && user) {
-    loadAdminEvents();
-  }
-}, [calendar, user]);
+  }, [calendar, user]);
 
   return (
     <div id="calendario">
