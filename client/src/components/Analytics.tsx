@@ -29,7 +29,7 @@ interface AnalyticsProps {
   events?: Event[];
 }
 
-export function Analytics({ userRole, events = [] }: AnalyticsProps) {
+export function Analytics({ userRole/*, events = [] */}: AnalyticsProps) {
   // Sample analytics data - in a real app, this would come from the backend
   const eventPerformanceData = [
     { name: "Tech Workshop", attendees: 85, capacity: 100, revenue: 0 },

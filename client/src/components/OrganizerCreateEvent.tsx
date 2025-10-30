@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
-import type { User } from "../auth/AuthContext";
+//import type { User } from "../auth/AuthContext";
 
 interface EventForm {
   title: string;

@@ -27,7 +27,7 @@ export default function Register() {
 
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
-  const isAdmin = form.role === "ADMIN";
+  //const isAdmin = form.role === "ADMIN";
 
   const isValid = useMemo(() => {
     if (!form.firstName || !form.lastName) return false;

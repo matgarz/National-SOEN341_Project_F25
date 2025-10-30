@@ -1,5 +1,5 @@
 // client/src/components/EventList.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Event } from "../types/event";
 
 export default function EventList() {
