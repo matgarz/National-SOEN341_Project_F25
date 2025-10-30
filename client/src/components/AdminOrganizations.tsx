@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Building2, Mail, Calendar, Users, Edit, Trash2, Eye } from "lucide-react";
-import { useAuth } from "../auth/AuthContext";
+import { getAuthHeader } from "../auth/tokenAuth";
 
 interface Organization {
   id: number;
@@ -17,9 +17,12 @@ interface Organization {
 interface Event {
   id: number;
   title: string;
-  eventDate: string;
+  date: string;
   status: string;
   category: string;
+  _count?: {
+    ticket: number;
+  };
 }
 
 interface OrganizationDetails extends Organization {
@@ -28,7 +31,6 @@ interface OrganizationDetails extends Organization {
 }
 
 export default function AdminOrganizations() {
-  const { user } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,16 +50,23 @@ export default function AdminOrganizations() {
     isActive: true,
   });
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  const getAuthHeaders = () => {
+    return {
+      ...getAuthHeader(),
+      "Content-Type": "application/json",
+    };
+  };
+
   useEffect(() => {
     fetchOrganizations();
   }, []);
 
   const fetchOrganizations = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/admin/organizations", {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
+      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+        headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -73,19 +82,15 @@ export default function AdminOrganizations() {
   const fetchOrganizationDetails = async (orgId: number) => {
     try {
       // Fetch organization details
-      const orgResponse = await fetch(`http://localhost:3000/api/admin/organizations/${orgId}`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
+      const orgResponse = await fetch(`${API_BASE_URL}/api/admin/organizations/${orgId}`, {
+        headers: getAuthHeaders(),
       });
       
       // Fetch events for this organization
       const eventsResponse = await fetch(
-        `http://localhost:3000/api/admin/organizations/${orgId}/events`,
+        `${API_BASE_URL}/api/admin/organizations/${orgId}/events`,
         {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
 
@@ -120,13 +125,10 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/admin/organizations/${selectedOrg.id}`,
+        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
-          },
+          headers: getAuthHeaders(),
           body: JSON.stringify(editForm),
         }
       );
@@ -147,12 +149,10 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/admin/organizations/${selectedOrg.id}`,
+        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
 
@@ -399,7 +399,7 @@ export default function AdminOrganizations() {
                         <div>
                           <h4 className="font-medium text-gray-900">{event.title}</h4>
                           <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
-                            <span>{new Date(event.eventDate).toLocaleDateString()}</span>
+                            <span>{new Date(event.date).toLocaleDateString()}</span>
                             <span>•</span>
                             <span className="capitalize">{event.category}</span>
                           </div>

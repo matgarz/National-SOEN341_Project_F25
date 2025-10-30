@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Analytics } from "./Analytics";
 import { Input } from "./ui/input";
+import AdminOrganizations from "./AdminOrganizations";
 
 interface AdminStats {
   totalUsers: number;
@@ -94,21 +95,10 @@ interface User {
   };
 }
 
-interface Organization {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  _count?: {
-    event: number;
-  };
-}
-
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Filters
@@ -127,7 +117,6 @@ export default function AdminDashboard() {
     fetchStats();
     fetchEvents();
     fetchUsers();
-    fetchOrganizations();
   }, []);
 
   useEffect(() => {
@@ -188,19 +177,6 @@ export default function AdminDashboard() {
       setUsers(data);
     } catch (error) {
       console.error("Error fetching users:", error);
-    }
-  };
-
-  const fetchOrganizations = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
-        headers: getAuthHeaders(),
-      });
-      if (!response.ok) throw new Error("Failed to fetch organizations");
-      const data = await response.json();
-      setOrganizations(data);
-    } catch (error) {
-      console.error("Error fetching organizations:", error);
     }
   };
 
@@ -341,10 +317,6 @@ export default function AdminDashboard() {
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredOrgs = organizations.filter((org) =>
-    org.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendingEventsCount = stats?.eventsByStatus?.PENDING || 0;
@@ -703,61 +675,7 @@ export default function AdminDashboard() {
 
         {/* ORGANIZATIONS TAB */}
         <TabsContent value="organizations" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organizations</CardTitle>
-              <CardDescription>View and manage campus organizations</CardDescription>
-              <div className="flex gap-4 mt-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <Input
-                    placeholder="Search organizations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredOrgs.map((org) => (
-                  <div
-                    key={org.id}
-                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="bg-blue-100 p-3 rounded-lg">
-                        <Building2 className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{org.name}</h3>
-                        <p className="text-xs text-gray-500">
-                          Since {new Date(org.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                      {org.description}
-                    </p>
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="text-sm text-gray-500">
-                        <span className="font-semibold text-gray-900">
-                          {org._count?.event || 0}
-                        </span>{" "}
-                        Events
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {filteredOrgs.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No organizations found
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <AdminOrganizations />
         </TabsContent>
 
         {/* ANALYTICS TAB */}
