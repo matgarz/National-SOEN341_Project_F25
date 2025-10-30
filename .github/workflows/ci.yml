@@ -25,12 +25,12 @@ jobs:
         if: matrix.directory == 'server'
         run: cd server && npm ci
 
-      - name: Reinstall dependencies (client)
+      - name: Install dependencies (client)
         if: matrix.directory == 'client'
         run: |
           cd client
-          npm ci
-          npm install @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu --save-optional
+          rm -rf node_modules package-lock.json
+          npm install
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
