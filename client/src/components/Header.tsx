@@ -99,18 +99,6 @@ export default function Header({
             {/* Logged-in user */}
             {userRole !== "guest" && user && (
               <div className="flex items-center gap-4">
-                {/* Role selector */}
-                <Select value={userRole} onValueChange={onRoleChange}>
-                  <SelectTrigger className="w-32 border-primary/20 hover:border-primary/40 transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-
-                  <SelectContent className="z-50 bg-white border-b-blue-600 shadow-md">
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="organizer">Organizer</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
 
                 {/* Role badge */}
                 <Badge className={`${getRoleColor(userRole)} shadow-sm`}>
