@@ -1,79 +1,26 @@
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
-import StudentDashboard from "./components/StudentDashboard";
-import OrganizerCreateEvent from "./components/OrganizerCreateEvent";
-import { useAuth } from "./context/AuthContext";
-import Register from "./components/Register";
-import Login from "./components/Login";
-import { Route, Routes } from "react-router-dom";
-import CalendarApp from "./components/Calendar";
-import { Navigate } from "react-router-dom";
+import { useAuth } from "./auth/AuthContext";
+//import AdminDashboard from './components/AdminDashboard';
+//import QRCode from "./components/QRCode";
 
 export default function App() {
-  const { user, logout } = useAuth(); // get logout from AuthContext
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const userRole = user
-    ? (user.role.toLowerCase() as "student" | "organizer" | "admin")
-    : "guest";
-
-  // logging user out
-  const handleLogout = () => {
-    logout();
-  };
-
-  // for debugging
-  console.log("Current user:", user);
+  const userRole = user?.role ? user.role.toLowerCase() : "guest";
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header always visible */}
+    <div className="min-h-screen bg-background flex flex-col">
       <Header
         user={user}
-        userRole={userRole}
-        onLogout={handleLogout}
-        searchQuery={searchQuery} //needed to be implemnented
-        onSearchChange={setSearchQuery} //needed to be implemnented
+        userRole={userRole as "guest" | "student" | "organizer" | "admin"}
+        onLogout={logout}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
-
-      {/* Main content */}
-      <main className="p-4 max-w-7xl mx-auto">
-        <Routes>
-          <Route
-            path="/login"
-            element={!user ? <Login /> : <Navigate to="/dashboard" replace />}
-          />
-          <Route
-            path="/register"
-            element={
-              !user ? <Register /> : <Navigate to="/dashboard" replace />
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              user?.role === "STUDENT" ? (
-                <StudentDashboard />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-          <Route
-            path="/create-event"
-            element={
-              user?.role === "ORGANIZER" ? (
-                <OrganizerCreateEvent />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-          <Route path="/calendar" element={<CalendarApp />} />
-          <Route
-            path="*"
-            element={<Navigate to={user ? "/dashboard" : "/login"} />}
-          />
-        </Routes>
+      <main className="p-4 max-w-7xl mx-auto flex-grow">
+        <Outlet />
       </main>
     </div>
   );

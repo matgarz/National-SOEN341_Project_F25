@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAuth } from "../auth/AuthContext";
+//import type { User } from "../auth/AuthContext";
 
 interface EventForm {
   title: string;
@@ -12,15 +14,10 @@ interface EventForm {
   imageUrl?: string;
 }
 
-// Replace this with your actual user context / auth state
-const currentUser = {
-  id: 14, // logged-in user ID
-  organizationId: 9, // logged-in user's organization ID
-};
-
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 export default function OrganizerCreateEvent() {
+  const { user } = useAuth();
   const [form, setForm] = useState<EventForm>({
     title: "",
     description: "",
@@ -32,6 +29,7 @@ export default function OrganizerCreateEvent() {
     category: "",
     imageUrl: "",
   });
+ 
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -63,8 +61,8 @@ export default function OrganizerCreateEvent() {
         date: new Date(form.date).toISOString(), // Ensure ISO8601 string
         ticketPrice: form.ticketType === "PAID" ? form.ticketPrice : undefined,
         imageUrl: form.imageUrl?.trim() || undefined,
-        creatorId: currentUser.id,
-        organizationId: currentUser.organizationId,
+        creatorId: user?.id,
+        organizationId: user?.organizationId,
       };
 
       const res = await fetch(`${API}/api/events`, {

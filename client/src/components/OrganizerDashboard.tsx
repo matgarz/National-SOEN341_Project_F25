@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-// import { Filter } from "lucide-react";
-//import { Button } from "./ui/Button";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
+import { Button } from "./ui/Button";
 import { EventCard, type Event as EventCardEvent } from "./EventCard";
 import { FilterSidebar, type FilterState } from "./FilterSidebar";
 
-// Initial filter state
+// Initial filter state (reused from StudentDashboard)
 const initialFilters: FilterState = {
   categories: [],
   ticketTypes: [],
@@ -31,14 +31,13 @@ type ApiEvent = {
   location: string;
   capacity: number;
   ticketType: TicketType;
-  ticketPrice?: string | number | null; // Prisma Decimal often strings
+  ticketPrice?: string | number | null;
   category?: string | null;
   imageUrl?: string | null;
   status: EventStatus;
   organization?: { id: number; name: string | null };
-  Organizer?: { id: number; name: string | null };
   creator?: { id: number; name: string | null; email: string };
-  _count?: { tickets: number }; // if you included this in the backend
+  _count?: { ticket: number }; // Prisma _count
 };
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
@@ -58,7 +57,7 @@ const toCard = (e: ApiEvent): EventCardEvent => {
     ticketType: e.ticketType === "FREE" ? "free" : "paid",
     price: e.ticketType === "PAID" ? Number(e.ticketPrice ?? 0) : undefined,
     capacity: e.capacity ?? 0,
-    attendees: e._count?.tickets ?? 0,
+    attendees: e._count?.ticket ?? 0,
     image: e.imageUrl ?? "https://via.placeholder.com/640x360?text=Event",
     tags: e.category ? [e.category] : [],
     isBookmarked: false,
@@ -66,67 +65,17 @@ const toCard = (e: ApiEvent): EventCardEvent => {
   };
 };
 
-export default function StudentDashboard() {
+export default function OrganizerDashboard() {
+  const [bookmarkedEvents /*, setBookmarkedEvents*/] = useState<
+    EventCardEvent[]
+  >([]);
+  const navigate = useNavigate();
   const [events, setEvents] = useState<EventCardEvent[]>([]);
-  const [bookmarkedEvents, setBookmarkedEvents] = useState<EventCardEvent[]>(
-    [],
-  );
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState(initialFilters);
-
-  // Filtered events (client-side filtering)
-  /*const filteredEvents = useMemo(() => {
-    return events.filter((ev) => {
-      // Categories
-      if (
-        filters.categories.length > 0 &&
-        (!ev.category || !filters.categories.includes(ev.category))
-      ) {
-        return false;
-      }
-      // Ticket Types
-      if (
-        filters.ticketTypes.length > 0 &&
-        !filters.ticketTypes.includes(ev.ticketType)
-      ) {
-        return false;
-      }
-      // Date range (example for "today", "this-week", etc.)
-      const eventDate = new Date(ev.date);
-      const now = new Date();
-      if (filters.dateRange === "today") {
-        const isToday = eventDate.toDateString() === now.toDateString();
-        if (!isToday) return false;
-      }
-      // Location
-      if (
-        filters.location &&
-        !ev.location.toLowerCase().includes(filters.location.toLowerCase())
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [events, filters]);*/
-
-  // to be used and commented now for CI test integration
-  /* const sortedEvents = useMemo(() => {
-    const arr = [...filteredEvents];
-    if (filters.sortBy === "date-asc") {
-      arr.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      );
-    } else if (filters.sortBy === "date-desc") {
-      arr.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      );
-    }
-    // Add more sort logic as needed
-    return arr;
-  }, [filteredEvents, filters.sortBy]);*/
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -141,7 +90,6 @@ export default function StudentDashboard() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiEvent[] = await res.json();
         setEvents(data.map(toCard));
-        setBookmarkedEvents([]); // replace when you add a real "saved events" endpoint
       } catch (e: any) {
         if (e.name !== "AbortError") setError(e.message ?? String(e));
       } finally {
@@ -151,7 +99,7 @@ export default function StudentDashboard() {
     return () => ctrl.abort();
   }, [searchQuery]);
 
-  // client-side filter (your server already supports ?keyword=)
+  // client-side filter (optional, mirrors StudentDashboard)
   const filtered = useMemo(() => {
     if (!searchQuery) return events;
     const q = searchQuery.toLowerCase();
@@ -167,9 +115,16 @@ export default function StudentDashboard() {
   const now = Date.now();
   const upcoming = filtered.filter((e) => new Date(e.date).getTime() > now);
   const past = filtered.filter((e) => new Date(e.date).getTime() <= now);
+  //const pending = filtered.filter((e) => e.status === "PENDING"); TODO fix this line
 
   return (
     <div className=" space-y-6">
+      <Button
+        onClick={() => navigate("/create-event")}
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+      >
+        + Create Event
+      </Button>
       <div className="flex items-center gap-2">
         <Input
           placeholder="Search events…"

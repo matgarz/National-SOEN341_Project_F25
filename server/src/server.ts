@@ -1,12 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import type { Request, Response } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import eventRoutes from "./routes/events.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
-
-dotenv.config();
+import organizationRoutes from "./routes/organizations.routes.js";
 
 const app = express();
 const PORT = 3001;
@@ -25,13 +26,14 @@ app.use(
 app.use(express.json());
 
 app.get("/", (_req: Request, res: Response) => {
-  res.json({ message: "Hello from Express + TypeScript!" });
+  res.json({ message: "server is listening" });
 });
 
 // Mount both routes
 app.use("/api/events", eventRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/organizations", organizationRoutes);
 
 console.log("Booting server...");
 

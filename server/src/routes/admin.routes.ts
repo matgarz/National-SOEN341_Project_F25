@@ -1,21 +1,19 @@
 import { Router } from "express";
-import { PrismaClient, UserRole, EventStatus } from "@prisma/client";
-import {
-  authenticate,
-  requireAdmin,
-  AuthRequest,
-} from "../middleware/authMiddleware.js";
+import { Request, Response } from "express";
+import { PrismaClient, user_role, event_status } from "@prisma/client";
+import { authenticateToken } from "../middleware/auth/jwtAuth.js";
+import { authAdmin } from "../middleware/auth/roleAuth.js";
 const router = Router();
 const prisma = new PrismaClient();
-router.use(authenticate, requireAdmin);
+router.use(authenticateToken, authAdmin);
 // GET /api/admin/users - Get all users with optional filtering
-router.get("/users", async (req: AuthRequest, res) => {
+router.get("/users", async (req: Request, res: Response) => {
   try {
     const { role, search } = req.query;
 
     const users = await prisma.user.findMany({
       where: {
-        ...(role && { role: role as UserRole }),
+        ...(role && { role: role as user_role }),
         ...(search && {
           OR: [
             { name: { contains: search as string } },
@@ -49,7 +47,7 @@ router.get("/users", async (req: AuthRequest, res) => {
 });
 
 // GET /api/admin/users/:id - Get single user with full details
-router.get("/users/:id", async (req: AuthRequest, res) => {
+router.get("/users/:id", async (req: Request, res) => {
   try {
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
@@ -155,14 +153,14 @@ router.delete("/organizations/:id", async (req, res) => {
 });
 
 // PATCH /api/admin/users/:id/role - Update user role
-router.patch("/users/:id/role", async (req: AuthRequest, res) => {
+router.patch("/users/:id/role", async (req: Request, res) => {
   try {
     const userId = parseInt(req.params.id);
     const { role } = req.body;
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    if (!Object.values(UserRole).includes(role)) {
+    if (!Object.values(user_role).includes(role)) {
       return res.status(400).json({
         error: "Invalid role. Must be one of: STUDENT, ORGANIZER, ADMIN",
       });
@@ -196,7 +194,7 @@ router.patch("/users/:id/role", async (req: AuthRequest, res) => {
   }
 });
 // DELETE /api/admin/users/:id - Delete user
-router.delete("/users/:id", async (req: AuthRequest, res) => {
+router.delete("/users/:id", async (req: Request, res) => {
   try {
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
@@ -230,13 +228,13 @@ router.delete("/users/:id", async (req: AuthRequest, res) => {
 });
 
 // GET /api/admin/events - Get all events (including PENDING/REJECTED)
-router.get("/events", async (req: AuthRequest, res) => {
+router.get("/events", async (req: Request, res) => {
   try {
     const { status, organizationId, category } = req.query;
 
     const events = await prisma.event.findMany({
       where: {
-        ...(status && { status: status as EventStatus }),
+        ...(status && { status: status as event_status }),
         ...(organizationId && {
           organizationId: parseInt(organizationId as string),
         }),
@@ -246,14 +244,14 @@ router.get("/events", async (req: AuthRequest, res) => {
         organization: {
           select: { id: true, name: true, isActive: true },
         },
-        creator: {
+        user: {
           select: { id: true, name: true, email: true, role: true },
         },
         _count: {
           select: {
             ticket: true,
-            reviews: true,
-            savedBy: true,
+            review: true,
+            savedevent: true,
           },
         },
       },
@@ -271,14 +269,14 @@ router.get("/events", async (req: AuthRequest, res) => {
 });
 
 // PATCH /api/admin/events/:id/status - Update event status
-router.patch("/events/:id/status", async (req: AuthRequest, res) => {
+router.patch("/events/:id/status", async (req: Request, res) => {
   try {
     const eventId = parseInt(req.params.id);
     const { status } = req.body;
     if (isNaN(eventId)) {
       return res.status(400).json({ error: "Invalid event ID" });
     }
-    const validStatuses = Object.values(EventStatus);
+    const validStatuses = Object.values(event_status);
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         error: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
@@ -289,7 +287,7 @@ router.patch("/events/:id/status", async (req: AuthRequest, res) => {
       data: { status, updatedAt: new Date() },
       include: {
         organization: true,
-        creator: {
+        user: {
           select: { id: true, name: true, email: true },
         },
       },
@@ -308,7 +306,7 @@ router.patch("/events/:id/status", async (req: AuthRequest, res) => {
 });
 
 // DELETE /api/admin/events/:id - Delete event
-router.delete("/events/:id", async (req: AuthRequest, res) => {
+router.delete("/events/:id", async (req: Request, res) => {
   try {
     const eventId = parseInt(req.params.id);
     if (isNaN(eventId)) {
@@ -337,6 +335,86 @@ router.delete("/events/:id", async (req: AuthRequest, res) => {
   }
 });
 
+// GET /api/admin/analytics/comprehensive - Get comprehensive analytics
+router.get("/analytics/comprehensive", async (req: Request, res) => {
+  try {
+    const [
+      totalEvents,
+      totalTickets,
+      totalRevenue,
+      eventsByCategory,
+      topEvents,
+      monthlyStats,
+    ] = await Promise.all([
+      prisma.event.count(),
+      prisma.ticket.count(),
+      prisma.event.aggregate({
+        _sum: { ticketPrice: true },
+      }),
+      prisma.event.groupBy({
+        by: ["category"],
+        _count: { category: true },
+      }),
+      prisma.event.findMany({
+        take: 5,
+        include: {
+          _count: { select: { ticket: true } },
+          organization: { select: { name: true } },
+        },
+        orderBy: { ticket: { _count: "desc" } },
+        where: { status: "APPROVED" },
+      }),
+      prisma.$queryRaw`
+        SELECT 
+          DATE_FORMAT(date, '%b') as month,
+          COUNT(*) as eventCount,
+          COALESCE(SUM((SELECT COUNT(*) FROM Ticket WHERE Ticket.eventId = Event.id)), 0) as attendees
+        FROM Event
+        WHERE date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY DATE_FORMAT(date, '%Y-%m'), DATE_FORMAT(date, '%b')
+        ORDER BY DATE_FORMAT(date, '%Y-%m') ASC
+      `,
+    ]);
+    const totalCapacity = await prisma.event.aggregate({
+      _sum: { capacity: true },
+    });
+
+    const avgAttendance =
+      totalCapacity._sum.capacity && totalCapacity._sum.capacity > 0
+        ? (totalTickets / totalCapacity._sum.capacity) * 100
+        : 0;
+
+    res.json({
+      totalEvents,
+      totalTickets,
+      totalRevenue: Number(totalRevenue._sum.ticketPrice) || 0,
+      avgAttendance: avgAttendance.toFixed(1),
+      eventsByCategory: eventsByCategory.map((e) => ({
+        name: e.category,
+        value: e._count.category,
+      })),
+      topEvents: topEvents.map((e) => ({
+        name: e.title,
+        attendees: e._count.ticket,
+        capacity: e.capacity,
+        revenue: Number(e.ticketPrice) || 0,
+        organization: e.organization.name,
+      })),
+      monthlyTrends: (monthlyStats as any[]).map((stat: any) => ({
+        month: stat.month,
+        eventCount: Number(stat.eventCount),
+        attendees: Number(stat.attendees),
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching comprehensive analytics:", error);
+    res.status(500).json({
+      error: "Failed to fetch analytics",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
 // GET /api/admin/analytics/participation
 router.get("/analytics/participation", async (req, res) => {
   const ticketStats = await prisma.ticket.groupBy({
@@ -355,7 +433,7 @@ router.get("/analytics/participation", async (req, res) => {
 });
 
 // GET /api/admin/stats - Get platform statistics
-router.get("/stats", async (req: AuthRequest, res) => {
+router.get("/stats", async (req: Request, res) => {
   try {
     const [
       totalUsers,
@@ -397,7 +475,7 @@ router.get("/stats", async (req: AuthRequest, res) => {
           status: true,
           date: true,
           createdAt: true,
-          creator: {
+          user: {
             select: { name: true },
           },
         },
@@ -432,4 +510,5 @@ router.get("/stats", async (req: AuthRequest, res) => {
     });
   }
 });
+
 export default router;

@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   // Clear out everything
   await prisma.review.deleteMany();
-  await prisma.savedEvent.deleteMany();
+  await prisma.savedevent.deleteMany();
   await prisma.ticket.deleteMany();
   await prisma.event.deleteMany();
   await prisma.organization.deleteMany();
@@ -18,6 +18,7 @@ async function main() {
       data: {
         name: "CSSA",
         description: "CS events",
+        contactEmail: "CSSA@mail.com",
         isActive: true,
         updatedAt: new Date(),
       },
@@ -26,6 +27,7 @@ async function main() {
       data: {
         name: "CSU",
         description: "Student Union",
+        contactEmail: "CSU@mail.com",
         isActive: true,
         updatedAt: new Date(),
       },
@@ -35,6 +37,7 @@ async function main() {
         name: "Athletics",
         description: "Sports Dept",
         isActive: true,
+        contactEmail: "Athletics@mail.com",
         updatedAt: new Date(),
       },
     }),
@@ -42,6 +45,7 @@ async function main() {
       data: {
         name: "EngSoc",
         description: "Eng Society",
+        contactEmail: "EngSoc@mail.com",
         isActive: true,
         updatedAt: new Date(),
       },
@@ -68,6 +72,7 @@ async function main() {
       name: "John Smith",
       role: "ORGANIZER",
       updatedAt: new Date(),
+      organizationId: orgs[1].id,
     },
   });
 
@@ -79,6 +84,7 @@ async function main() {
       studentId: "ORG002",
       role: "ORGANIZER",
       updatedAt: new Date(),
+      organizationId: orgs[2].id,
     },
   });
 
@@ -148,10 +154,11 @@ async function main() {
     }),
     prisma.event.create({
       data: {
-        title: "Welcome Week",
-        description: "Orientation",
-        date: new Date(now.getTime() + 86400000),
-        location: "Building B",
+        title: "AI Executive Lab",
+        description:
+          "Reimagine billable hours - learn how to turn expertise into scalable, AI-powered products and services.",
+        date: new Date("2025-10-23T14:00:00Z"),
+        location: "Online",
         capacity: 200,
         ticketType: "FREE",
         status: "APPROVED",
@@ -162,10 +169,11 @@ async function main() {
     }),
     prisma.event.create({
       data: {
-        title: "Basketball Finals",
-        description: "Finals event",
-        date: new Date(now.getTime() + 2592000000),
-        location: "Gym",
+        title: "McGill Ventures",
+        description:
+          "After a sold-out event last year, we're excited to bring back our dynamic startup showcase & networking event!",
+        date: new Date("2025-11-07T13:00:00Z"),
+        location: "Espace CDPQ Montreal",
         capacity: 150,
         ticketType: "PAID",
         ticketPrice: 15.99,
@@ -246,17 +254,14 @@ async function main() {
 
   // SAVED EVENTS
   await Promise.all([
-    prisma.savedEvent.create({
+    prisma.savedevent.create({
       data: { userId: students[0].id, eventId: events[0].id },
     }),
-    prisma.savedEvent.create({
+    prisma.savedevent.create({
       data: { userId: students[1].id, eventId: events[1].id },
     }),
   ]);
 
-  console.log("Created 2 saved events");
-
-  console.log("\nDatabase seed completed successfully!");
   console.log("\nTest Accounts:");
   console.log("Admin: admin@concordia.ca / password123");
   console.log("Organizer: organizer1@concordia.ca / password123");

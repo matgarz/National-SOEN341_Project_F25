@@ -1,72 +1,180 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { setTokens } from "../auth/tokenAuth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+const isEmail = (v: string) => v.includes("@");
+const isStudentId = (v: string) => /^\d{6,}$/.test(v);
 
 export default function Login() {
-  const navigate = useNavigate();
-
-  const { login } = useAuth();
-  const [name, setName] = useState("");
+  const [identifier, setIdentifier] = useState(""); //email or studentId
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setError(null);
+
+    const body: Record<string, string> = { password };
+
+    if (isEmail(identifier)) body.emailOrStudentId = identifier.trim();
+    else if (isStudentId(identifier)) body.emailOrStudentId = identifier.trim();
+    else {
+      setError("Enter a valid email or student ID.");
+      return;
+    }
 
     try {
-      const res = await fetch(`${API}/api/auth/login`, {
+      setLoading(true);
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, password }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Login failed");
+        const error = await res.json();
+        alert(error.error || `Login failed (${res.status})`);
+        setLoading(false);
+        return;
       }
 
-      const user = await res.json();
-      login(user);
-      // go to the URL based on role
-      if (user.role === "student") navigate("/dashboard");
-      else if (user.role === "organizer")
-        navigate("/"); // to /events
-      else if (user.role === "admin") navigate("/"); // to /admin-dashboard
+      const data = await res.json();
+      console.log("Login success:", data);
+
+      alert("Login successful!");
+
+      setTokens({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
+      login(data.userPublic);
+
+      const user = data.userPublic;
+      if (user.role === "STUDENT")
+        navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER")
+        navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN")
+        navigate("/admin-dashboard", { replace: true });
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      {error && <div className="text-red-600 mb-2">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Username"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded p-2"
-          required
-        />
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 16,
+      }}
+    >
+      <form
+        onSubmit={onSubmit}
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          border: "1px solid #ddd",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
+          Log in
+        </h1>
+
+        {error && (
+          <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 12 }}>
+            {error}
+          </div>
+        )}
+
+        <label style={{ display: "block", marginBottom: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            Email or Student ID
+          </span>
+          <input
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
+            placeholder="you@school.ca or 40XXXXXX"
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #ccc",
+            }}
+            autoComplete="username"
+          />
+        </label>
+
+        <label style={{ display: "block", marginBottom: 16 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            Password
+          </span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              placeholder="••••••••"
+              style={{
+                flex: 1,
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              style={{
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+                background: "#f8f8f8",
+                cursor: "pointer",
+              }}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </label>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            borderRadius: 12,
+            border: "1px solid #111",
+            background: "#111",
+            color: "#fff",
+            fontWeight: 600,
+            cursor: "pointer",
+            opacity: loading ? 0.7 : 1,
+          }}
         >
-          Login
+          {loading ? "Signing in…" : "Sign in"}
         </button>
+
+        <div style={{ fontSize: 13, marginTop: 12, color: "#555" }}>
+          Don’t have an account? <a href="/register">Register</a>
+        </div>
       </form>
     </div>
   );

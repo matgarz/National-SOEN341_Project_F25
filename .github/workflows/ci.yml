@@ -12,21 +12,31 @@ jobs:
 
     strategy:
       matrix:
-        directory: [client, server]  # runs for both client and server directories
+        directory: [client, server] # runs for both client and server directories
     steps:
       - uses: actions/checkout@v3
 
-      - name: use Node.js
-        uses: actions/checkout@v3
-        with: 
-          node-version: '20'
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
 
       - name: Install dependencies
-        run: cd ${{ matrix.directory }} && npm ci
+        if: matrix.directory == 'client'
+        run: |
+          cd client
+          rm -rf node_modules package-lock.json
+          npm install
+
+      - name: Install dependencies
+        if: matrix.directory == 'server'
+        run: |
+          cd server
+          npm ci
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
-        
+
       - name: Run Prettier Check
         run: cd ${{ matrix.directory }} && npx prettier --check .
 
@@ -35,5 +45,4 @@ jobs:
 
       - name: Build Project
         if: matrix.directory == 'client'
-        run: cd ${{ matrix.directory }} && npm run build
-
+        run: cd client && npm run build

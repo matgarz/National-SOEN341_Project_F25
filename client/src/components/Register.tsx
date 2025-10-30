@@ -1,41 +1,74 @@
-import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { setTokens } from "../auth/tokenAuth";
+import { useAuth } from "../auth/AuthContext";
+
+type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 
 export default function Register() {
   const [form, setForm] = useState({
-    name: "",
-    password: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    role: "student", // default
+    password: "",
+    role: "STUDENT" as Role,
+
+    //student only
     studentId: "",
+
+    //organizer only
     organizationId: "",
   });
 
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
 
-  const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+  const isStudent = form.role === "STUDENT";
+  const isOrganizer = form.role === "ORGANIZER";
+  //const isAdmin = form.role === "ADMIN";
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  const isValid = useMemo(() => {
+    if (!form.firstName || !form.lastName) return false;
+    if (!/^[^@]+@[^@]+\.[^@]+$/.test(form.email)) return false;
+    if (form.password.length < 6) return false;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    if (form.role === "STUDENT") {
+      if (!/^\d{6,}$/.test(form.studentId)) return false;
+    }
+    if (form.role === "ORGANIZER") {
+      // TODO add constraints for organizer ie organization Id;
+    }
+    if (form.role === "ADMIN") {
+      // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
+    }
+    return true;
+  }, [form]);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    if (!isValid) {
+      setError("Please complete all required fields.");
+      return;
+    }
+
+    const payload: any = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      password: form.password,
+      role: form.role,
+    };
+    if (isStudent) payload.studentId = form.studentId.trim();
+    if (isOrganizer) {
+      payload.organizationID = null;
+    }
 
     try {
-      // Prepare payload to send
-      const payload: any = { ...form };
-      if (form.role === "student") payload.organizationId = undefined;
-      if (form.role === "organizer") payload.studentId = undefined;
-
-      const res = await fetch(`${API}/api/auth/register`, {
+      setLoading(true);
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -43,91 +76,214 @@ export default function Register() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || data.message || `HTTP ${res.status}`);
+        setError(`Error: ${data.error || "Something went wrong"}`);
       }
 
-      const data = await res.json();
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailOrStudentId:
+            form.role === "STUDENT" ? form.studentId || form.email : form.email,
+          password: form.password,
+        }),
+      });
 
-      // Auto-login after register
-      login(data);
-    } catch (err: any) {
-      setError(err.message || "Registration failed");
+      const data = await loginRes.json();
+      if (!loginRes.ok) throw new Error(data.error || "Auto-login failed");
+
+      // Step 3: Store tokens + user
+      setTokens({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
+      login(data.userPublic);
+
+      const user = data.userPublic;
+      if (user.role === "STUDENT")
+        navigate("/student-dashboard", { replace: true });
+      else if (user.role === "ORGANIZER")
+        navigate("/organizer-dashboard", { replace: true });
+      else if (user.role === "ADMIN")
+        navigate("/admin-dashboard", { replace: true });
+    } catch (err) {
+      console.error(err);
+      setError("Network error");
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  const set =
+    (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded shadow mt-6">
-      <h2 className="text-xl font-bold mb-4">Register</h2>
-      {error && <div className="text-red-600 mb-4">{error}</div>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="name"
-          placeholder="Username"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-          required
-        />
-        <select
-          title="role"
-          name="role"
-          value={form.role}
-          onChange={handleChange}
-          className="w-full border rounded p-2"
-        >
-          <option value="student">Student</option>
-          <option value="organizer">Organizer</option>
-        </select>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 16,
+      }}
+    >
+      <form
+        onSubmit={onSubmit}
+        style={{
+          width: "100%",
+          maxWidth: 560,
+          border: "1px solid #ddd",
+          borderRadius: 16,
+          padding: 24,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
+          Create your account
+        </h1>
 
-        {form.role === "student" && (
-          <input
-            name="studentId"
-            placeholder="Student ID"
-            value={form.studentId}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-            required
-          />
+        {error && (
+          <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 12 }}>
+            {error}
+          </div>
         )}
 
-        {form.role === "organizer" && (
+        <div
+          style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}
+        >
+          <label>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+              First name
+            </span>
+            <input
+              required
+              value={form.firstName}
+              onChange={set("firstName")}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            />
+          </label>
+          <label>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+              Last name
+            </span>
+            <input
+              required
+              value={form.lastName}
+              onChange={set("lastName")}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            />
+          </label>
+        </div>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            Email
+          </span>
           <input
-            name="organizationId"
-            placeholder="Organization ID"
-            value={form.organizationId}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
+            type="email"
             required
+            value={form.email}
+            onChange={set("email")}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #ccc",
+            }}
           />
+        </label>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            Password (min 6 chars)
+          </span>
+          <input
+            type="password"
+            required
+            value={form.password}
+            onChange={set("password")}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #ccc",
+            }}
+          />
+        </label>
+
+        <label style={{ display: "block", marginTop: 12 }}>
+          <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            Role
+          </span>
+          <select
+            value={form.role}
+            onChange={set("role")}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid #ccc",
+            }}
+          >
+            <option value="STUDENT">STUDENT</option>
+            <option value="ORGANIZER">ORGANIZER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </label>
+
+        {isStudent && (
+          <label style={{ display: "block", marginTop: 12 }}>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+              Student ID
+            </span>
+            <input
+              required
+              value={form.studentId}
+              onChange={set("studentId")}
+              placeholder="40XXXXXX"
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #ccc",
+              }}
+            />
+          </label>
         )}
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          disabled={loading || !isValid}
+          style={{
+            width: "100%",
+            marginTop: 16,
+            padding: "10px 12px",
+            borderRadius: 12,
+            border: "1px solid #111",
+            background: "#111",
+            color: "#fff",
+            fontWeight: 600,
+            cursor: "pointer",
+            opacity: loading ? 0.7 : 1,
+          }}
         >
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Creating account…" : "Create account"}
         </button>
+
+        <div style={{ fontSize: 13, marginTop: 12, color: "#555" }}>
+          Already have an account? <a href="/login">Sign in</a>
+        </div>
       </form>
     </div>
   );
