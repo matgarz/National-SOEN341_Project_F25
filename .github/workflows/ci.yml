@@ -31,6 +31,7 @@ jobs:
           cd client
           rm -rf node_modules package-lock.json
           npm install
+          npm install --force @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
