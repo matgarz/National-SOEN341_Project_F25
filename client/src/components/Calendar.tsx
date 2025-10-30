@@ -19,7 +19,7 @@ import "@schedule-x/theme-default/dist/index.css";
 export default function CalendarApp() {
   const eventsService = useState(() => createEventsServicePlugin())[0];
   const { user } = useAuth();
-  const [events, setEvents] = useState([]);
+  //const [events, setEvents] = useState([]);
   const calendar = useCalendarApp({
     views: [
       createViewDay(),
