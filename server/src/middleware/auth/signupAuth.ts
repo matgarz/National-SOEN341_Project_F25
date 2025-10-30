@@ -32,10 +32,13 @@ type StudentSignUp = {
  * when user is an organizer
  */
 type OrganizerSignUp = {
-  phone: string;
-  website: string;
-  department: string;
+  organization_Id: string;
 };
+
+type AdminSignUp = {
+  adminKey: string;
+}
+
 
 type UserMinimal = {
   name: string;
@@ -43,14 +46,6 @@ type UserMinimal = {
   password: string;
   role: UserRole;
   studentId: string | null;
-};
-
-type OrganizerMinimal = {
-  name: string;
-  email: string | null;
-  phone: string | null;
-  website: string | null;
-  department: string | null;
 };
 
 async function validateUserCreation(
@@ -92,7 +87,6 @@ async function validateStudentCreation(
     return res.status(400).json({ error: validStudentId });
   }
   next();
-  //maybe using strings like this is bad maybe the functions should return a {message:string, isValid:boolean}
 }
 
 async function validateOrganizerCreation(
@@ -104,23 +98,12 @@ async function validateOrganizerCreation(
     next();
     return;
   }
-
   const organizerToCreate: OrganizerSignUp = { ...req.body };
 
-  const validFields: string = validateNewOrganizerFields(organizerToCreate);
-  const validPhone: string = await validateNewOrganizerPhone(
-    organizerToCreate.phone,
-  );
+  //TODO validate organizationId;
 
-  //TODO maybe reduce the number of db operations by merging validate email and validate id
-  if (validFields) {
-    return res.status(400).json({ error: validFields });
-  }
-  if (validPhone) {
-    return res.status(400).json({ error: validPhone });
-  }
   next();
-  //maybe using strings like this is bad maybe the functions should return a {message:string, isValid:boolean}
+
 }
 
 async function addNewUser(req: Request, res: Response, next: NextFunction) {
@@ -183,30 +166,6 @@ async function validateNewStudentId(studentId: string): Promise<string> {
   return "";
 }
 
-function validateNewOrganizerFields(
-  organizerToCreate: OrganizerSignUp,
-): string {
-  if (
-    typeof organizerToCreate.department !== "string" ||
-    typeof organizerToCreate.website !== "string" ||
-    typeof organizerToCreate.phone !== "string"
-  )
-    return "Invalid organizer signup request";
-
-  //TODO validate Website, potentiallly move this to front end idk yet
-
-  return "";
-}
-
-async function validateNewOrganizerPhone(phoneNumb: string): Promise<string> {
-  const IdInUse = await prisma.organizer.findFirst({
-    where: { phone: phoneNumb },
-  });
-  if (IdInUse) {
-    return "phone number already in use";
-  }
-  return "";
-}
 
 async function createUser(
   userToCreate: UserSignUp,
@@ -217,14 +176,12 @@ async function createUser(
 
   let name = "";
   let studentId = null;
+  let OrganizationId = null;
   if (userToCreate.role === UserRole.STUDENT) {
     studentId = studentToCreate.studentId;
   }
   if (userToCreate.role === UserRole.ORGANIZER) {
-    const newOrganizer = await addOrganizerToDB(
-      userToCreate,
-      organizerToCreate,
-    );
+    OrganizationId = organizerToCreate.organization_Id;
   }
 
   const newUser: UserMinimal = {
@@ -236,21 +193,6 @@ async function createUser(
   };
 
   return newUser;
-}
-
-async function createOrganizer(
-  userToCreate: UserSignUp,
-  organizerToCreate: OrganizerSignUp,
-): Promise<OrganizerMinimal> {
-  const newOrganizer: OrganizerMinimal = {
-    name: userToCreate.firstName + " " + userToCreate.lastName,
-    email: userToCreate.email,
-    phone: organizerToCreate.phone,
-    website: organizerToCreate.website,
-    department: organizerToCreate.department,
-  };
-
-  return newOrganizer;
 }
 
 async function generateSecurePassword(password: string): Promise<string> {
@@ -281,37 +223,11 @@ async function addUserToDB(
       updatedAt: now,
     },
   });
-
-  console.log("usercreated");
-  console.log(newUser);
-}
-
-async function addOrganizerToDB(
-  userToCreate: UserSignUp,
-  organizerToCreate: OrganizerSignUp,
-): Promise<OrganizerMinimal> {
-  const newOrganizer: OrganizerMinimal = await createOrganizer(
-    userToCreate,
-    organizerToCreate,
-  );
-  const now = new Date();
-  return await prisma.organizer.create({
-    data: {
-      name: newOrganizer.name,
-      email: newOrganizer.email,
-      phone: newOrganizer.phone,
-      website: newOrganizer.website,
-      department: newOrganizer.department,
-      createdAt: now,
-      updatedAt: now,
-      isActive: true,
-    },
-  });
 }
 
 export {
   addNewUser,
   validateUserCreation,
   validateStudentCreation,
-  validateOrganizerCreation,
+  validateOrganizerCreation
 };

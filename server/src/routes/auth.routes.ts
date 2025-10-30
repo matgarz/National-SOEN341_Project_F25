@@ -9,6 +9,7 @@ const router = Router();
 router.post(
   "/signup",
   Signup.validateUserCreation,
+  Signup.validateStudentCreation,
   Signup.validateOrganizerCreation,
   Signup.addNewUser,
   (req: Request, res: Response) => {

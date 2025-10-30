@@ -24,7 +24,6 @@ router.get("/", async (req: Request, res: Response) => {
       include: {
         organization: { select: { id: true, name: true } },
         creator: { select: { id: true, name: true, email: true } },
-        // Organizer: { select: { id: true, name: true } }, organizer removed
         _count: { select: { ticket: true } },
       },
       orderBy: { date: "asc" },
@@ -160,7 +159,6 @@ router.post(
         category,
         imageUrl,
         organizationId,
-        organizerId,
         status,
         creatorId,
       } = req.body;
@@ -182,17 +180,6 @@ router.post(
       if (!creator) {
         return res.status(404).json({ error: "Creator not found" });
       }
-      if (organizerId) {
-        const organizer = await prisma.organizer.findUnique({
-          where: { id: parseInt(organizerId) },
-        });
-        if (!organizer) {
-          return res.status(404).json({ error: "Organizer not found" });
-        }
-        if (!organizer.isActive) {
-          return res.status(400).json({ error: "Organizer is not active" });
-        }
-      }
 
       // Create the new event
       const newEvent = await prisma.event.create({
@@ -208,7 +195,6 @@ router.post(
           imageUrl: imageUrl?.trim() || null,
           status: status || "APPROVED",
           organizationId: parseInt(organizationId),
-          organizerId: organizerId ? parseInt(organizerId) : null,
           creatorId: parseInt(creatorId),
           updatedAt: new Date(),
         },
@@ -217,9 +203,6 @@ router.post(
             select: { id: true, name: true, description: true },
           },
           creator: {
-            select: { id: true, name: true, email: true },
-          },
-          organizer: {
             select: { id: true, name: true, email: true },
           },
           _count: {

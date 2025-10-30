@@ -17,9 +17,7 @@ export default function Register() {
     studentId: "",
 
     //organizer only
-    phone: "",
-    website: "",
-    department: "",
+    organizationId: ""
   });
 
   const { login } = useAuth();
@@ -40,15 +38,10 @@ export default function Register() {
       if (!/^\d{6,}$/.test(form.studentId)) return false;
     }
     if (form.role === "ORGANIZER") {
-      if (!/^\d{3}-?\d{3}-?\d{4}$/.test(form.phone)) return false; //10 digit
-      if (
-        !(
-          form.website.startsWith("http://") ||
-          form.website.startsWith("https://")
-        )
-      )
-        return false;
-      if (!form.department) return false;
+      // TODO add constraints for organizer ie organization Id;
+    }
+    if (form.role === "ADMIN"){
+      // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
     }
     return true;
   }, [form]);
@@ -70,9 +63,7 @@ export default function Register() {
     };
     if (isStudent) payload.studentId = form.studentId.trim();
     if (isOrganizer) {
-      payload.phone = form.phone.trim();
-      payload.website = form.website.trim();
-      payload.department = form.department.trim();
+      payload.organizationID
     }
 
     try {
@@ -269,64 +260,6 @@ export default function Register() {
               }}
             />
           </label>
-        )}
-
-        {isOrganizer && (
-          <div
-            style={{ display: "grid", gap: 12, gridTemplateColumns: "1fr 1fr" }}
-          >
-            <label>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
-                Phone (10 digits)
-              </span>
-              <input
-                required
-                value={form.phone}
-                onChange={set("phone")}
-                placeholder="514-555-1212"
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #ccc",
-                }}
-              />
-            </label>
-            <label>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
-                Website (http/https)
-              </span>
-              <input
-                required
-                value={form.website}
-                onChange={set("website")}
-                placeholder="https://example.com"
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #ccc",
-                }}
-              />
-            </label>
-            <label style={{ gridColumn: "1 / -1" }}>
-              <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
-                Department
-              </span>
-              <input
-                required
-                value={form.department}
-                onChange={set("department")}
-                placeholder="Marketing"
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid #ccc",
-                }}
-              />
-            </label>
-          </div>
         )}
 
         <button

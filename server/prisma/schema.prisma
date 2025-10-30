@@ -24,8 +24,6 @@ model Event {
 
   organizationId Int
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "Event_organizationId_fkey")
-  organizerId    Int?
-  organizer      Organizer?   @relation(fields: [organizerId], references: [id], onDelete: Cascade, map: "Event_organizerId_fkey")
 
   creatorId Int
   creator   User         @relation(fields: [creatorId], references: [id], onDelete: Cascade, map: "Event_creatorId_fkey")
@@ -38,19 +36,17 @@ model Event {
   @@index([date], map: "Event_date_idx")
   @@index([organizationId], map: "Event_organizationId_idx")
   @@index([status], map: "Event_status_idx")
-  @@index([organizerId], map: "Event_organizerId_idx")
 }
 
 model Organization {
-  id           Int         @id @default(autoincrement())
-  name         String      @unique(map: "Organization_name_key")
-  description  String?     @db.Text
+  id           Int      @id @default(autoincrement())
+  name         String   @unique(map: "Organization_name_key")
+  description  String?  @db.Text
   contactEmail String?
-  isActive     Boolean     @default(true)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   event        Event[]
-  organizers   Organizer[]
 
   @@index([isActive], map: "Organization_isActive_idx")
 }
@@ -121,27 +117,6 @@ model User {
 
   @@index([email], map: "User_email_idx")
   @@index([role], map: "User_role_idx")
-}
-
-//ORGANIZER ENTITY
-model Organizer {
-  id             Int           @id @default(autoincrement())
-  name           String
-  email          String?
-  phone          String?
-  website        String?
-  logoUrl        String?
-  department     String?
-  isActive       Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  // Relations
-  organizationId Int?
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  events         Event[]
-
-  @@index([isActive])
-  @@index([organizationId])
 }
 
 enum PaymentStatus {
