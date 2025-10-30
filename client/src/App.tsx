@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import { useAuth } from "./auth/AuthContext";
+//import AdminDashboard from './components/AdminDashboard';
 //import QRCode from "./components/QRCode";
 
 export default function App() {

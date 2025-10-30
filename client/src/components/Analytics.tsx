@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -22,49 +23,93 @@ import {
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/Button";
 import { Download, Users, Calendar, Ticket, TrendingUp } from "lucide-react";
-import { type Event } from "./EventCard";
+import { getAuthHeader } from "../auth/tokenAuth";
+
+interface EventPerformance {
+  name: string;
+  attendees: number;
+  capacity: number;
+  revenue: number;
+  organization: string;
+}
+
+interface CategoryData {
+  name: string;
+  value: number;
+  color: string;
+}
 
 interface AnalyticsProps {
   userRole: "organizer" | "admin";
-  events?: Event[];
 }
 
-export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
-  // Sample analytics data - in a real app, this would come from the backend
-  const eventPerformanceData = [
-    { name: "Tech Workshop", attendees: 85, capacity: 100, revenue: 0 },
-    { name: "Spring Concert", attendees: 450, capacity: 500, revenue: 2250 },
-    { name: "Career Fair", attendees: 320, capacity: 400, revenue: 0 },
-    { name: "Film Screening", attendees: 95, capacity: 120, revenue: 475 },
-    { name: "Sports Meet", attendees: 180, capacity: 200, revenue: 900 },
-  ];
+interface AnalyticsData {
+  totalEvents: number;
+  totalTickets: number;
+  totalRevenue: number;
+  avgAttendance: string;
+  eventsByCategory: Array<{ name: string; value: number }>;
+  topEvents: Array<{
+    name: string;
+    attendees: number;
+    capacity: number;
+    revenue: number;
+    organization: string;
+  }>;
+  monthlyTrends: Array<{
+    month: string;
+    eventCount: number;
+    attendees: number;
+  }>;
+}
 
-  const categoryData = [
-    { name: "Academic", value: 35, color: "#3B82F6" },
-    { name: "Social", value: 25, color: "#10B981" },
-    { name: "Sports", value: 20, color: "#F59E0B" },
-    { name: "Cultural", value: 15, color: "#8B5CF6" },
-    { name: "Career", value: 5, color: "#6B7280" },
-  ];
+const CATEGORY_COLORS: Record<string, string> = {
+  Academic: "#3B82F6",
+  Social: "#10B981",
+  Sports: "#F59E0B",
+  Cultural: "#8B5CF6",
+  Career: "#6B7280",
+  Workshop: "#EC4899",
+  Networking: "#14B8A6",
+  Entertainment: "#F97316",
+};
 
-  const monthlyTrends = [
-    { month: "Jan", events: 12, attendees: 890 },
-    { month: "Feb", events: 15, attendees: 1200 },
-    { month: "Mar", events: 18, attendees: 1450 },
-    { month: "Apr", events: 22, attendees: 1680 },
-    { month: "May", events: 25, attendees: 1920 },
-  ];
+export function Analytics({ userRole }: AnalyticsProps) {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const totalEvents = userRole === "admin" ? 92 : 12;
-  const totalAttendees = userRole === "admin" ? 8140 : 1250;
-  const totalRevenue = userRole === "admin" ? 15420 : 3625;
-  const avgAttendance = userRole === "admin" ? 88.5 : 85.2;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/analytics/comprehensive`, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch analytics");
+      
+      const data = await response.json();
+      setAnalyticsData(data);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleExportData = () => {
-    // Mock export functionality
-    const csvData = eventPerformanceData
+    if (!analyticsData) return;
+
+    const csvData = analyticsData.topEvents
       .map(
-        (event) =>
+        (event: EventPerformance) =>
           `${event.name},${event.attendees},${event.capacity},${event.revenue}`,
       )
       .join("\n");
@@ -80,6 +125,30 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg">Loading analytics...</div>
+      </div>
+    );
+  }
+
+  if (!analyticsData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-lg text-muted-foreground">
+          Unable to load analytics data
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare category data with colors
+  const categoryDataWithColors = analyticsData.eventsByCategory.map((cat: { name: string; value: number }): CategoryData => ({
+    ...cat,
+    color: CATEGORY_COLORS[cat.name] || "#6B7280",
+  }));
 
   return (
     <div className="space-y-6">
@@ -112,9 +181,9 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalEvents}</div>
+            <div className="text-2xl font-bold">{analyticsData.totalEvents}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+12%</span> from last month
+              Across all categories
             </p>
           </CardContent>
         </Card>
@@ -128,10 +197,10 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalAttendees.toLocaleString()}
+              {analyticsData.totalTickets.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+18%</span> from last month
+              Tickets claimed
             </p>
           </CardContent>
         </Card>
@@ -143,10 +212,10 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalRevenue.toLocaleString()}
+              ${analyticsData.totalRevenue.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+8%</span> from last month
+              From paid events
             </p>
           </CardContent>
         </Card>
@@ -159,9 +228,9 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgAttendance}%</div>
+            <div className="text-2xl font-bold">{analyticsData.avgAttendance}%</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+2.1%</span> from last month
+              Of total capacity
             </p>
           </CardContent>
         </Card>
@@ -172,28 +241,34 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
         {/* Event Performance */}
         <Card>
           <CardHeader>
-            <CardTitle>Event Performance</CardTitle>
+            <CardTitle>Top Events by Attendance</CardTitle>
             <CardDescription>
-              Attendance vs capacity for recent events
+              Most popular events by ticket count
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={eventPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="attendees" fill="#3B82F6" name="Attendees" />
-                <Bar dataKey="capacity" fill="#E5E7EB" name="Capacity" />
-              </BarChart>
-            </ResponsiveContainer>
+            {analyticsData.topEvents.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={analyticsData.topEvents}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="attendees" fill="#3B82F6" name="Attendees" />
+                  <Bar dataKey="capacity" fill="#E5E7EB" name="Capacity" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                No event data available
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -206,28 +281,36 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(props) => {
-                    const { name, percent } = props as any;
-                    return `${name} ${(percent * 100).toFixed(0)}%`;
-                  }}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {categoryDataWithColors.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={categoryDataWithColors}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(props) => {
+                      const { name, value } = props as any;
+                      const total = categoryDataWithColors.reduce((sum: number, cat: CategoryData) => sum + cat.value, 0);
+                      const percent = ((value / total) * 100).toFixed(0);
+                      return `${name} ${percent}%`;
+                    }}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {categoryDataWithColors.map((entry: CategoryData, index: number) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                No category data available
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -237,48 +320,59 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
         <CardHeader>
           <CardTitle>Monthly Trends</CardTitle>
           <CardDescription>
-            Events and attendance trends over the past 5 months
+            Events and attendance trends over recent months
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyTrends}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Bar
-                yAxisId="left"
-                dataKey="events"
-                fill="#3B82F6"
-                name="Events"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="attendees"
-                stroke="#10B981"
-                name="Attendees"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {analyticsData.monthlyTrends && analyticsData.monthlyTrends.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analyticsData.monthlyTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="eventCount"
+                  stroke="#3B82F6"
+                  name="Events"
+                  strokeWidth={2}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="attendees"
+                  stroke="#10B981"
+                  name="Attendees"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+              No trend data available
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Recent Events Performance */}
-      {userRole === "organizer" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Events</CardTitle>
-            <CardDescription>
-              Detailed performance metrics for your latest events
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      {/* Top Events Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Performing Events</CardTitle>
+          <CardDescription>
+            Detailed metrics for most popular events
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {analyticsData.topEvents.length > 0 ? (
             <div className="space-y-4">
-              {eventPerformanceData.slice(0, 3).map((event, index) => {
-                const attendanceRate = (event.attendees / event.capacity) * 100;
+              {analyticsData.topEvents.map((event: EventPerformance, index: number) => {
+                const attendanceRate = event.capacity > 0 
+                  ? (event.attendees / event.capacity) * 100 
+                  : 0;
                 return (
                   <div
                     key={index}
@@ -287,6 +381,7 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
                     <div className="space-y-1">
                       <h4 className="font-medium">{event.name}</h4>
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span>{event.organization}</span>
                         <span>
                           {event.attendees}/{event.capacity} attendees
                         </span>
@@ -315,9 +410,13 @@ export function Analytics({ userRole /*, events = [] */ }: AnalyticsProps) {
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No event performance data available
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

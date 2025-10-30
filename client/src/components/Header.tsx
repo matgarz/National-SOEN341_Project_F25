@@ -1,4 +1,4 @@
-import { Calendar, Search, User } from "lucide-react";
+import { Calendar, Search, User, Shield } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
@@ -157,6 +157,18 @@ export default function Header({
 
           {/* Right: Notification/User icons */}
           <nav className="flex items-center space-x-2">
+            {userRole === "admin" && (
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Link
+                  to="/admin-dashboard"
+                  className="flex gap-2 items-center px-3 py-2 rounded hover:bg-purple-100 transition-colors text-base text-purple-700 font-medium"
+                  style={{ textDecoration: "none" }}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Link>
+              </motion.div>
+            )}
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Link
                 to="/calendar"

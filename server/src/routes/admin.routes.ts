@@ -335,6 +335,85 @@ router.delete("/events/:id", async (req: Request, res) => {
   }
 });
 
+// GET /api/admin/analytics/comprehensive - Get comprehensive analytics
+router.get("/analytics/comprehensive", async (req: Request, res) => {
+  try {
+    const [
+      totalEvents,
+      totalTickets,
+      totalRevenue,
+      eventsByCategory,
+      topEvents,
+      monthlyStats,
+    ] = await Promise.all([
+      prisma.event.count(),
+      prisma.ticket.count(),
+      prisma.event.aggregate({
+        _sum: { ticketPrice: true },
+      }),
+      prisma.event.groupBy({
+        by: ["category"],
+        _count: { category: true },
+      }),
+      prisma.event.findMany({
+        take: 5,
+        include: {
+          _count: { select: { ticket: true } },
+          organization: { select: { name: true } },
+        },
+        orderBy: { ticket: { _count: "desc" } },
+        where: { status: "APPROVED" },
+      }),
+      prisma.$queryRaw`
+        SELECT 
+          DATE_FORMAT(date, '%b') as month,
+          COUNT(*) as eventCount,
+          COALESCE(SUM((SELECT COUNT(*) FROM Ticket WHERE Ticket.eventId = Event.id)), 0) as attendees
+        FROM Event
+        WHERE date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY DATE_FORMAT(date, '%Y-%m'), DATE_FORMAT(date, '%b')
+        ORDER BY DATE_FORMAT(date, '%Y-%m') ASC
+      `,
+    ]);
+    const totalCapacity = await prisma.event.aggregate({
+      _sum: { capacity: true },
+    });
+    
+    const avgAttendance = totalCapacity._sum.capacity && totalCapacity._sum.capacity > 0
+      ? (totalTickets / totalCapacity._sum.capacity) * 100 
+      : 0;
+
+    res.json({
+  totalEvents,
+  totalTickets,
+  totalRevenue: Number(totalRevenue._sum.ticketPrice) || 0,
+  avgAttendance: avgAttendance.toFixed(1),
+  eventsByCategory: eventsByCategory.map(e => ({
+    name: e.category,
+    value: e._count.category,
+  })),
+  topEvents: topEvents.map(e => ({
+    name: e.title,
+    attendees: e._count.ticket,
+    capacity: e.capacity,
+    revenue: Number(e.ticketPrice) || 0,
+    organization: e.organization.name,
+  })),
+  monthlyTrends: (monthlyStats as any[]).map((stat: any) => ({
+    month: stat.month,
+    eventCount: Number(stat.eventCount),
+    attendees: Number(stat.attendees),  
+  })),
+});
+  } catch (error) {
+    console.error("Error fetching comprehensive analytics:", error);
+    res.status(500).json({
+      error: "Failed to fetch analytics",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
 // GET /api/admin/analytics/participation
 router.get("/analytics/participation", async (req, res) => {
   const ticketStats = await prisma.ticket.groupBy({
@@ -430,4 +509,7 @@ router.get("/stats", async (req: Request, res) => {
     });
   }
 });
+
+
+
 export default router;
