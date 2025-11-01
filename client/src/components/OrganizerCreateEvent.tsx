@@ -218,8 +218,6 @@ export default function OrganizerCreateEvent() {
             <option value="Career">Career</option>
             <option value="Workshop">Workshop</option>
           </select>
-
-
         </div>
 
         {/* Image URL */}
