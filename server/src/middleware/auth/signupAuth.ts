@@ -169,10 +169,8 @@ async function validateNewStudentId(studentId: string): Promise<string> {
 async function addUserToDB(userToCreate: UserSignUp) {
   const hashedPassword = await bcrypt.hash(userToCreate.password, 10);
 
-  // Combine firstName and lastName into single name field
   const fullName = `${userToCreate.firstName} ${userToCreate.lastName}`;
 
-  // Build user data object based on role
   const userData: any = {
     name: fullName,
     email: userToCreate.email,
@@ -180,19 +178,18 @@ async function addUserToDB(userToCreate: UserSignUp) {
     role: userToCreate.role,
   };
 
-  // Add role-specific fields
   if (userToCreate.role === user_role.STUDENT) {
     userData.studentId = userToCreate.studentId;
-    userData.accountStatus = accountstatus.APPROVED; // Auto-approve students
+    userData.accountStatus = accountstatus.APPROVED;
   }
 
   if (userToCreate.role === user_role.ORGANIZER) {
-    userData.organizationId = userToCreate.organizationID; // Note: DB field is organizationId
+    userData.organizationId = userToCreate.organizationID;
     userData.accountStatus = accountstatus.PENDING; // Requires admin approval
   }
 
   if (userToCreate.role === user_role.ADMIN) {
-    userData.accountStatus = accountstatus.APPROVED; // Auto-approve admins
+    userData.accountStatus = accountstatus.APPROVED;
   }
 
   const newUser = await prisma.user.create({
