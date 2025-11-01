@@ -112,7 +112,7 @@ function FilterContent({
       </div>
 
       {/* Sort By */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label>Sort By</Label>
         <Select
           value={filters.sortBy}
