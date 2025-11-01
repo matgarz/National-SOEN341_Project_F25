@@ -203,14 +203,23 @@ export default function OrganizerCreateEvent() {
         {/* Category */}
         <div>
           <label className="block font-medium">Category</label>
-          <input
-            type="text"
+          <select
             name="category"
             value={form.category}
             onChange={handleChange}
             className="w-full border rounded p-2 mt-1"
             required
-          />
+                  >
+            <option value="">Select a category</option>
+            <option value="Academic">Academic</option>
+            <option value="Social">Social</option>
+            <option value="Sports">Sports</option>
+            <option value="Cultural">Cultural</option>
+            <option value="Career">Career</option>
+            <option value="Workshop">Workshop</option>
+          </select>
+
+
         </div>
 
         {/* Image URL */}
