@@ -3,16 +3,13 @@ import { getAuthHeader } from "../auth/tokenAuth";
 import {
   Check,
   X,
-  //Eye,
   Users,
   Calendar,
   AlertTriangle,
   TrendingUp,
   Trash2,
   Edit2,
-  //Building2,
   Search,
-  //Filter,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import {
@@ -52,16 +49,6 @@ interface AdminStats {
     REJECTED: number;
     CANCELLED: number;
     COMPLETED: number;
-  };
-}
-
-interface Organization {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  _count?: {
-    event: number;
   };
 }
 
@@ -122,11 +109,6 @@ export default function AdminDashboard() {
 
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [editForm, setEditForm] = useState({
-  role: "",
-  organizationId: null as number | null,
-});
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
@@ -136,7 +118,6 @@ export default function AdminDashboard() {
     fetchStats();
     fetchEvents();
     fetchUsers();
-    fetchOrganizations();
   }, []);
 
   useEffect(() => {
@@ -148,7 +129,6 @@ export default function AdminDashboard() {
   }, [userRoleFilter]);
 
   const getAuthHeaders = () => {
-    //const token = localStorage.getItem("token");
     return {
       ...getAuthHeader(),
       "Content-Type": "application/json",
@@ -169,19 +149,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  const fetchOrganizations = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error("Failed to fetch organizations");
-    const data = await response.json();
-    setOrganizations(data);
-  } catch (error) {
-    console.error("Error fetching organizations:", error);
-  }
-};
 
   const fetchEvents = async () => {
     try {
@@ -279,31 +246,28 @@ export default function AdminDashboard() {
   };
 
   // User actions
-  const handleRoleChange = async (userId: number, role: string, organizationId?: number | null) => {
-  if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
-    return;
-  }
+   const handleRoleChange = async (userId: number, role: string) => {
+    if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
+      return;
+    }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
-      method: "PATCH",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ 
-        role,
-        organizationId: role === "ORGANIZER" ? organizationId : null
-      }),
-    });
-    
-    if (!response.ok) throw new Error("Failed to update role");
-    alert("User role updated successfully");
-    setEditingUser(null);
-    fetchUsers();
-    fetchStats();
-  } catch (error) {
-    console.error("Error updating user role:", error);
-    alert("Failed to update user role");
-  }
-};
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ role }),
+      });
+      
+      if (!response.ok) throw new Error("Failed to update role");
+      alert("User role updated successfully");
+      setEditingUser(null);
+      fetchUsers();
+      fetchStats();
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      alert("Failed to update user role");
+    }
+  };
 
   const handleDeleteUser = async (userId: number, userName: string) => {
     if (
@@ -332,6 +296,7 @@ export default function AdminDashboard() {
       alert("Failed to delete user");
     }
   };
+
 
   // Utility functions
   const getStatusColor = (status: string) => {
@@ -366,10 +331,10 @@ export default function AdminDashboard() {
 
   // Filter functions
   const filteredEvents = events.filter((event) =>
-  event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  event.organization?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  event.category?.toLowerCase().includes(searchTerm.toLowerCase())
-);
+    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.organization?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const filteredUsers = users.filter(
     (user) =>
@@ -424,11 +389,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{pendingEventsCount}</div>
             <p className="text-xs text-muted-foreground">
-              {flaggedEventsCount > 0 && (
-                <span className="text-red-600">
-                  {flaggedEventsCount} flagged
-                </span>
-              )}
+              Awaiting approval
             </p>
           </CardContent>
         </Card>
@@ -448,9 +409,7 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tickets Issued
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Tickets Issued</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -460,24 +419,44 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Alerts */}
-      {pendingEventsCount > 0 && (
+      {/* Alert for pending items */}
+      {(pendingEventsCount > 0 || flaggedEventsCount > 0) && (
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            {pendingEventsCount} event{pendingEventsCount > 1 ? "s" : ""}{" "}
+            {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
             awaiting approval. Please review the moderation queue.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="events" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="events">Event Moderation</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="analytics">Platform Analytics</TabsTrigger>
+       <Tabs defaultValue="events" className="space-y-6">
+        <TabsList className="grid grid-cols-4 gap-2 bg-gradient-to-r from-blue-50 to-purple-50 p-2 rounded-xl shadow-sm border border-gray-200">
+          <TabsTrigger 
+            value="events" 
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            📋 Event Moderation
+          </TabsTrigger>
+          <TabsTrigger 
+            value="users"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            👥 User Management
+          </TabsTrigger>
+          <TabsTrigger 
+            value="organizations"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            🏢 Organizations
+          </TabsTrigger>
+          <TabsTrigger 
+            value="analytics"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            📊 Platform Analytics
+          </TabsTrigger>
         </TabsList>
 
         {/* EVENT MODERATION TAB */}
@@ -530,91 +509,64 @@ export default function AdminDashboard() {
                     <TableRow key={event.id}>
                       <TableCell>
                         <div>
-                          <span className="font-medium">{event.title}</span>
+                          <div className="font-medium">{event.title}</div>
                           <div className="text-xs text-gray-500">
                             {event.category}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{event.organization?.name || 'N/A'}</TableCell>
-                      <TableCell>{event.user?.name}</TableCell>
+                      <TableCell>
+                        {event.organization?.name || "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{event.user.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {event.user.email}
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {new Date(event.date).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusColor(event.status)}
-                        >
+                        <Badge className={getStatusColor(event.status)}>
                           {event.status}
                         </Badge>
                       </TableCell>
                       <TableCell>{event._count?.ticket || 0}</TableCell>
                       <TableCell>
-                        {event.status === "PENDING" ? (
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "APPROVED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "REJECTED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleDeleteEvent(event.id, event.title)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        ) : event.status === "APPROVED" ? (
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "CANCELLED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleDeleteEvent(event.id, event.title)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        ) : (
+                        <div className="flex gap-2">
+                          {event.status === "PENDING" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  handleEventAction(
+                                    event.id,
+                                    "APPROVED",
+                                    event.title,
+                                  )
+                                }
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  handleEventAction(
+                                    event.id,
+                                    "REJECTED",
+                                    event.title,
+                                  )
+                                }
+                              >
+                                <X className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"
@@ -624,7 +576,7 @@ export default function AdminDashboard() {
                           >
                             <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
-                        )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -674,8 +626,8 @@ export default function AdminDashboard() {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Student ID</TableHead>
-                    <TableHead>Role</TableHead>
                     <TableHead>Activity</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -692,7 +644,6 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>{user.studentId}</TableCell>
-                      
                       <TableCell>
                         <div className="text-xs">
                           {user._count?.event && (
@@ -704,72 +655,53 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-  {editingUser === user.id ? (
-    <div className="flex flex-col gap-2">
-      {/* Role selector */}
-      <select
-        value={newRole}
-        onChange={(e) => setNewRole(e.target.value)}
-        className="text-sm border rounded px-2 py-1"
-      >
-        <option value="">Select Role</option>
-        <option value="STUDENT">Student</option>
-        <option value="ORGANIZER">Organizer</option>
-        <option value="ADMIN">Admin</option>
-      </select>
-      
-      {/* Organization selector - only show for organizers */}
-      {newRole === "ORGANIZER" && (
-        <select
-          value={user.organizationId || ""}
-          onChange={(e) => {
-            const orgId = e.target.value ? parseInt(e.target.value) : null;
-            user.organizationId = orgId;
-          }}
-          className="text-sm border rounded px-2 py-1"
-        >
-          <option value="">No Organization</option>
-          {organizations.map(org => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </select>
-      )}
-      
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          onClick={() => handleRoleChange(user.id, newRole, user.organizationId)}
-          disabled={!newRole}
-        >
-          Save
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => {
-            setEditingUser(null);
-            setNewRole("");
-          }}
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
-  ) : (
-    <div className="flex flex-col gap-1">
-      <Badge className={getRoleColor(user.role)}>
-        {user.role}
-      </Badge>
-      {user.organization && (
-        <span className="text-xs text-gray-600">
-          {user.organization.name}
-        </span>
-      )}
-    </div>
-  )}
-</TableCell>
+                        {editingUser === user.id ? (
+                          <div className="flex flex-col gap-2">
+                            {/* Role selector - Organization dropdown REMOVED */}
+                            <select
+                              value={newRole}
+                              onChange={(e) => setNewRole(e.target.value)}
+                              className="text-sm border rounded px-2 py-1"
+                            >
+                              <option value="">Select Role</option>
+                              <option value="STUDENT">Student</option>
+                              <option value="ORGANIZER">Organizer</option>
+                              <option value="ADMIN">Admin</option>
+                            </select>
+                            
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleRoleChange(user.id, newRole)}
+                                disabled={!newRole}
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingUser(null);
+                                  setNewRole("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            <Badge className={getRoleColor(user.role)}>
+                              {user.role}
+                            </Badge>
+                            {user.organization && (
+                              <span className="text-xs text-gray-600">
+                                {user.organization.name}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {new Date(user.createdAt).toLocaleDateString()}
                       </TableCell>
