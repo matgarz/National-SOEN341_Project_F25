@@ -10,6 +10,7 @@ import {
   Trash2,
   Edit2,
   Search,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import {
@@ -84,6 +85,7 @@ interface User {
   email: string;
   studentId: string;
   role: "STUDENT" | "ORGANIZER" | "ADMIN";
+  accountStatus?: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
   organizationId: number | null;  
   organization?: {                 
     id: number;
@@ -110,6 +112,8 @@ export default function AdminDashboard() {
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
 
+  const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
+
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
@@ -118,6 +122,7 @@ export default function AdminDashboard() {
     fetchStats();
     fetchEvents();
     fetchUsers();
+    fetchPendingOrganizers();
   }, []);
 
   useEffect(() => {
@@ -147,6 +152,22 @@ export default function AdminDashboard() {
       console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch Pending Orgs
+  const fetchPendingOrganizers = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/pending-organizers`,
+        { headers: getAuthHeaders() }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setPendingOrganizers(data);
+      }
+    } catch (error) {
+    console.error("Error fetching pending organizers:", error);
     }
   };
 
@@ -214,6 +235,61 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error updating event:", error);
       alert("Failed to update event status");
+    }
+  };
+
+
+const handleApproveOrganizer = async (userId: number, userName: string) => {
+    if (!confirm(`Approve organizer account for ${userName}?`)) return;
+    
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/approve`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+        }
+      );
+      
+      if (response.ok) {
+        alert("Organizer approved successfully!");
+        fetchPendingOrganizers();
+        fetchUsers();
+        fetchStats();
+      } else {
+        const error = await response.json();
+        alert(`Failed to approve organizer: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error approving organizer:", error);
+      alert("Failed to approve organizer");
+    }
+  };
+
+     const handleRejectOrganizer = async (userId: number, userName: string) => {
+    if (!confirm(`Reject organizer account for ${userName}? This cannot be undone.`)) return;
+    
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/reject`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+        }
+      );
+      
+      if (response.ok) {
+        alert("Organizer rejected successfully");
+        fetchPendingOrganizers();
+        fetchUsers();
+        fetchStats();
+      } else {
+        const error = await response.json();
+        alert(`Failed to reject organizer: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Error rejecting organizer:", error);
+      alert("Failed to reject organizer");
     }
   };
 
@@ -420,14 +496,88 @@ export default function AdminDashboard() {
       </div>
 
       {/* Alert for pending items */}
-      {(pendingEventsCount > 0 || flaggedEventsCount > 0) && (
+      {(pendingEventsCount > 0 || pendingOrganizers.length > 0) && (
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
-            awaiting approval. Please review the moderation queue.
+            {pendingEventsCount > 0 && (
+              <span>
+                {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
+                awaiting approval.
+              </span>
+            )}
+            {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
+            {pendingOrganizers.length > 0 && (
+              <span>
+                {pendingOrganizers.length} organizer account{pendingOrganizers.length !== 1 ? "s" : ""}{" "}
+                awaiting approval.
+              </span>
+            )}
           </AlertDescription>
         </Alert>
+      )}
+
+       {/* Pending Organizer Approvals Section */}
+      {pendingOrganizers.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-blue-900">Pending Organizer Approvals</CardTitle>
+            </div>
+            <CardDescription className="text-blue-700">
+              Review and approve organizer account requests
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {pendingOrganizers.map((organizer) => (
+                <div
+                  key={organizer.id}
+                  className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        {organizer.name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {organizer.email}
+                      </div>
+                      {organizer.organization && (
+                        <div className="text-sm text-gray-600 mt-1">
+                          Organization: <span className="font-medium">{organizer.organization.name}</span>
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        Requested: {new Date(organizer.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleApproveOrganizer(organizer.id, organizer.name)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleRejectOrganizer(organizer.id, organizer.name)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Main Content Tabs */}
