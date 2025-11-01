@@ -193,7 +193,7 @@ router.post(
           ticketPrice: ticketPrice ? parseFloat(ticketPrice) : null,
           category: category?.trim() || null,
           imageUrl: imageUrl?.trim() || null,
-          status: status || "APPROVED",
+          status: status,
           organizationId: parseInt(organizationId),
           creatorId: parseInt(creatorId),
           updatedAt: new Date(),
