@@ -142,7 +142,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/events/organizer/:organizerId/analytics - Get Analytics for events
+// GET /api/events/organizer/:organizerId/analytics - Get Analytics for all organizer events
 router.get(
   "/organizer/:organizerId/analytics",
   async (req: Request, res: Response) => {
@@ -187,6 +187,61 @@ router.get(
     }
   },
 );
+
+// GET /api/events/:id/details - Get analytics of a particular event with attendee list
+router.get("/:id/details", async (req: Request, res: Response) => {
+    try {
+        const eventId = parseInt(req.params.id);
+        if (isNaN(eventId)) return res.status(400).json({ error: "Invalid event ID" });
+
+        const event = await prisma.event.findUnique({
+            where: { id: eventId },
+            include: {
+                organization: true,
+                user: { select: { id: true, name: true, email: true } },
+                ticket: {
+                    select: {
+                        id: true,
+                        checkedIn: true,
+                        user: { select: { id: true, name: true, email: true } },
+                    },
+                }, 
+            },
+        });
+
+        if (!event) return res.status(404).json({ error: "Event not found" });
+
+        // Compute attendance stats
+        const ticketsIssued = event.ticket.length;
+        const attended = event.ticket.filter(t => t.checkedIn).length;
+        const attendanceRate = ticketsIssued > 0 ? ((attended / ticketsIssued) * 100).toFixed(1) : "0";
+
+        res.json({
+            event: {
+                id: event.id,
+                title: event.title,
+                date: event.date,
+                capacity: event.capacity,
+                ticketsIssued,
+                attended,
+                attendanceRate,
+            },
+            attendees: event.ticket.map(t => ({
+                id: t.id,
+                name: t.user.name,
+                email: t.user.email,
+                checkedIn: t.checkedIn,
+            })),
+        });
+    } catch (err) {
+        console.error("Error fetching event details:", err);
+        res.status(500).json({
+            error: "Failed to fetch event details",
+            details: err instanceof Error ? err.message : err,
+        });
+    }
+});
+
 
 //POST /api/events (Create new Event)
 router.post(

@@ -13,6 +13,7 @@ import Calendar from "../components/Calendar";
 import { useAuth } from "../auth/AuthContext";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
+import OrganizerEventAnalytics from "../components/OrganizerEventAnalytics";
 
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 
@@ -92,6 +93,15 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+        {
+            path: "organizer/event/:id/analytics",
+            element: (
+                <ProtectedRoute allowedRoles={["ORGANIZER"]}>
+                    <OrganizerEventAnalytics />
+                </ProtectedRoute>
+            ),
+        },
 
       {
         path: "calendar",

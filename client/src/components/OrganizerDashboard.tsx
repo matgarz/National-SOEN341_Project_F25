@@ -138,7 +138,15 @@ export default function OrganizerDashboard() {
                     {/* List of analytics cards */}
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {filteredAnalytics.map((a) => (
-                            <EventAnalyticsCard key={a.eventId} {...a} />
+                        <EventAnalyticsCard
+                            key={a.eventId}                     
+                            id={String(a.eventId)}              
+                            title={a.title}
+                            ticketsIssued={a.ticketsIssued}
+                            attended={a.attended}
+                            attendanceRate={a.attendanceRate}
+                            remainingCapacity={a.remainingCapacity}
+                        />
                         ))}
                         {filteredAnalytics.length === 0 && !loading && (
                             <div className="text-sm opacity-70">No events found.</div>
