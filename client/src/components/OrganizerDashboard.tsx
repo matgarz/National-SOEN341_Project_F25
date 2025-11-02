@@ -20,7 +20,7 @@ type AnalyticsData = {
 
 export default function OrganizerDashboard() {
   const navigate = useNavigate();
-  const [events, setEvents] = useState<EventCardEvent[]>([]);
+  const [events] = useState<EventCardEvent[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
