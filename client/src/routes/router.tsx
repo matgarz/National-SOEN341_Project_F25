@@ -102,6 +102,15 @@ export const router = createBrowserRouter([
         ),
       },
 
+      {
+        path: "admin/events-calendar",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <Calendar showAllEvents={true} />
+          </ProtectedRoute>
+        ),
+      },
+
       { path: "no-access", element: <NoAccess /> },
       { path: "*", element: <NotFound /> },
     ],

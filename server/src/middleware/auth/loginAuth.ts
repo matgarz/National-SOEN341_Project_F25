@@ -31,22 +31,24 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
   if (!user) {
     return res.status(400).json({ error: "Email or Student Id was not found" });
   }
-  if (user.accountStatus === 'PENDING') {
+  if (user.accountStatus === "PENDING") {
     return res.status(403).json({
-      error: 'Account pending approval',
-      message: 'Your organizer account is awaiting admin approval. You will be notified once approved.',
+      error: "Account pending approval",
+      message:
+        "Your organizer account is awaiting admin approval. You will be notified once approved.",
     });
   }
-  if (user.accountStatus === 'REJECTED') {
+  if (user.accountStatus === "REJECTED") {
     return res.status(403).json({
-      error: 'Account rejected',
-      message: 'Your organizer account request was not approved. Please contact support for more information.',
+      error: "Account rejected",
+      message:
+        "Your organizer account request was not approved. Please contact support for more information.",
     });
   }
-  if (user.accountStatus === 'SUSPENDED') {
+  if (user.accountStatus === "SUSPENDED") {
     return res.status(403).json({
-      error: 'Account suspended',
-      message: 'Your account has been suspended. Please contact support.',
+      error: "Account suspended",
+      message: "Your account has been suspended. Please contact support.",
     });
   }
   if (!(await bcrypt.compare(userToLogin.password, user.password))) {

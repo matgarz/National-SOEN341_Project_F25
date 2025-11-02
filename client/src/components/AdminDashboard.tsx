@@ -86,8 +86,8 @@ interface User {
   studentId: string;
   role: "STUDENT" | "ORGANIZER" | "ADMIN";
   accountStatus?: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
-  organizationId: number | null;  
-  organization?: {                 
+  organizationId: number | null;
+  organization?: {
     id: number;
     name: string;
   };
@@ -160,14 +160,14 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/admin/users/pending-organizers`,
-        { headers: getAuthHeaders() }
+        { headers: getAuthHeaders() },
       );
       if (response.ok) {
         const data = await response.json();
         setPendingOrganizers(data);
       }
     } catch (error) {
-    console.error("Error fetching pending organizers:", error);
+      console.error("Error fetching pending organizers:", error);
     }
   };
 
@@ -238,19 +238,18 @@ export default function AdminDashboard() {
     }
   };
 
-
-const handleApproveOrganizer = async (userId: number, userName: string) => {
+  const handleApproveOrganizer = async (userId: number, userName: string) => {
     if (!confirm(`Approve organizer account for ${userName}?`)) return;
-    
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/admin/users/${userId}/approve`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
-        }
+        },
       );
-      
+
       if (response.ok) {
         alert("Organizer approved successfully!");
         fetchPendingOrganizers();
@@ -258,7 +257,9 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
         fetchStats();
       } else {
         const error = await response.json();
-        alert(`Failed to approve organizer: ${error.message || 'Unknown error'}`);
+        alert(
+          `Failed to approve organizer: ${error.message || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Error approving organizer:", error);
@@ -266,18 +267,23 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
     }
   };
 
-     const handleRejectOrganizer = async (userId: number, userName: string) => {
-    if (!confirm(`Reject organizer account for ${userName}? This cannot be undone.`)) return;
-    
+  const handleRejectOrganizer = async (userId: number, userName: string) => {
+    if (
+      !confirm(
+        `Reject organizer account for ${userName}? This cannot be undone.`,
+      )
+    )
+      return;
+
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/admin/users/${userId}/reject`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
-        }
+        },
       );
-      
+
       if (response.ok) {
         alert("Organizer rejected successfully");
         fetchPendingOrganizers();
@@ -285,7 +291,9 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
         fetchStats();
       } else {
         const error = await response.json();
-        alert(`Failed to reject organizer: ${error.message || 'Unknown error'}`);
+        alert(
+          `Failed to reject organizer: ${error.message || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Error rejecting organizer:", error);
@@ -322,18 +330,23 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
   };
 
   // User actions
-   const handleRoleChange = async (userId: number, role: string) => {
-    if (!confirm(`Are you sure you want to change this user's role to ${role}?`)) {
+  const handleRoleChange = async (userId: number, role: string) => {
+    if (
+      !confirm(`Are you sure you want to change this user's role to ${role}?`)
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
-        method: "PATCH",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ role }),
-      });
-      
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/role`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ role }),
+        },
+      );
+
       if (!response.ok) throw new Error("Failed to update role");
       alert("User role updated successfully");
       setEditingUser(null);
@@ -373,7 +386,6 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
     }
   };
 
-
   // Utility functions
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -406,10 +418,13 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
   };
 
   // Filter functions
-  const filteredEvents = events.filter((event) =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.organization?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.organization?.name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      event.category?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const filteredUsers = users.filter(
@@ -464,9 +479,7 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingEventsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Awaiting approval
-            </p>
+            <p className="text-xs text-muted-foreground">Awaiting approval</p>
           </CardContent>
         </Card>
 
@@ -485,7 +498,9 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tickets Issued</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tickets Issued
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -509,21 +524,23 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
             {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
             {pendingOrganizers.length > 0 && (
               <span>
-                {pendingOrganizers.length} organizer account{pendingOrganizers.length !== 1 ? "s" : ""}{" "}
-                awaiting approval.
+                {pendingOrganizers.length} organizer account
+                {pendingOrganizers.length !== 1 ? "s" : ""} awaiting approval.
               </span>
             )}
           </AlertDescription>
         </Alert>
       )}
 
-       {/* Pending Organizer Approvals Section */}
+      {/* Pending Organizer Approvals Section */}
       {pendingOrganizers.length > 0 && (
         <Card className="border-blue-200 bg-blue-50">
           <CardHeader>
             <div className="flex items-center gap-2">
               <UserCheck className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-blue-900">Pending Organizer Approvals</CardTitle>
+              <CardTitle className="text-blue-900">
+                Pending Organizer Approvals
+              </CardTitle>
             </div>
             <CardDescription className="text-blue-700">
               Review and approve organizer account requests
@@ -546,17 +563,23 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
                       </div>
                       {organizer.organization && (
                         <div className="text-sm text-gray-600 mt-1">
-                          Organization: <span className="font-medium">{organizer.organization.name}</span>
+                          Organization:{" "}
+                          <span className="font-medium">
+                            {organizer.organization.name}
+                          </span>
                         </div>
                       )}
                       <div className="text-xs text-gray-500 mt-1">
-                        Requested: {new Date(organizer.createdAt).toLocaleDateString()}
+                        Requested:{" "}
+                        {new Date(organizer.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        onClick={() => handleApproveOrganizer(organizer.id, organizer.name)}
+                        onClick={() =>
+                          handleApproveOrganizer(organizer.id, organizer.name)
+                        }
                         className="bg-green-600 hover:bg-green-700"
                       >
                         <Check className="h-4 w-4 mr-1" />
@@ -565,7 +588,9 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleRejectOrganizer(organizer.id, organizer.name)}
+                        onClick={() =>
+                          handleRejectOrganizer(organizer.id, organizer.name)
+                        }
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <X className="h-4 w-4 mr-1" />
@@ -581,27 +606,27 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
       )}
 
       {/* Main Content Tabs */}
-       <Tabs defaultValue="events" className="space-y-6">
+      <Tabs defaultValue="events" className="space-y-6">
         <TabsList className="grid grid-cols-4 gap-2 bg-gradient-to-r from-blue-50 to-purple-50 p-2 rounded-xl shadow-sm border border-gray-200">
-          <TabsTrigger 
-            value="events" 
+          <TabsTrigger
+            value="events"
             className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
           >
             📋 Event Moderation
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="users"
             className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
           >
             👥 User Management
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="organizations"
             className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
           >
             🏢 Organizations
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="analytics"
             className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
           >
@@ -665,9 +690,7 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {event.organization?.name || "N/A"}
-                      </TableCell>
+                      <TableCell>{event.organization?.name || "N/A"}</TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">{event.user.name}</div>
@@ -818,11 +841,13 @@ const handleApproveOrganizer = async (userId: number, userName: string) => {
                               <option value="ORGANIZER">Organizer</option>
                               <option value="ADMIN">Admin</option>
                             </select>
-                            
+
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
-                                onClick={() => handleRoleChange(user.id, newRole)}
+                                onClick={() =>
+                                  handleRoleChange(user.id, newRole)
+                                }
                                 disabled={!newRole}
                               >
                                 Save

@@ -47,12 +47,12 @@ router.get("/users", async (req: Request, res: Response) => {
 });
 
 // GET /api/admin/users/pending-organizers
-router.get('/users/pending-organizers', async (req: Request, res: Response) => {
+router.get("/users/pending-organizers", async (req: Request, res: Response) => {
   try {
     const pendingOrganizers = await prisma.user.findMany({
       where: {
-        role: 'ORGANIZER',
-        accountStatus: 'PENDING',
+        role: "ORGANIZER",
+        accountStatus: "PENDING",
       },
       include: {
         organization: {
@@ -68,15 +68,15 @@ router.get('/users/pending-organizers', async (req: Request, res: Response) => {
         },
       },
       orderBy: {
-        createdAt: 'asc',
+        createdAt: "asc",
       },
     });
 
     res.json(pendingOrganizers);
   } catch (error) {
-    console.error('Error fetching pending organizers:', error);
+    console.error("Error fetching pending organizers:", error);
     res.status(500).json({
-      error: 'Failed to fetch pending organizers',
+      error: "Failed to fetch pending organizers",
       details: error instanceof Error ? error.message : error,
     });
   }
@@ -143,34 +143,34 @@ router.get("/users/:id", async (req: Request, res) => {
 });
 
 // PATCH /api/admin/users/:id/approve
-router.patch('/users/:id/approve', async (req: Request, res: Response) => {
+router.patch("/users/:id/approve", async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
 
     if (isNaN(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      return res.status(400).json({ error: "Invalid user ID" });
     }
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.role !== 'ORGANIZER') {
-      return res.status(400).json({ error: 'User is not an organizer' });
+    if (user.role !== "ORGANIZER") {
+      return res.status(400).json({ error: "User is not an organizer" });
     }
-    if (user.accountStatus !== 'PENDING') {
+    if (user.accountStatus !== "PENDING") {
       return res.status(400).json({
-        error: 'User account is not pending approval',
+        error: "User account is not pending approval",
         currentStatus: user.accountStatus,
       });
     }
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        accountStatus: 'APPROVED',
+        accountStatus: "APPROVED",
         updatedAt: new Date(),
       },
       select: {
@@ -189,25 +189,24 @@ router.patch('/users/:id/approve', async (req: Request, res: Response) => {
       },
     });
     res.json({
-      message: 'Organizer account approved successfully',
+      message: "Organizer account approved successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Error approving organizer:', error);
+    console.error("Error approving organizer:", error);
     res.status(500).json({
-      error: 'Failed to approve organizer',
+      error: "Failed to approve organizer",
       details: error instanceof Error ? error.message : error,
     });
   }
 });
 
-
 // PATCH /api/admin/users/:id/reject
-router.patch('/users/:id/reject', async (req: Request, res: Response) => {
+router.patch("/users/:id/reject", async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      return res.status(400).json({ error: "Invalid user ID" });
     }
 
     const user = await prisma.user.findUnique({
@@ -215,23 +214,23 @@ router.patch('/users/:id/reject', async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.role !== 'ORGANIZER') {
-      return res.status(400).json({ error: 'User is not an organizer' });
+    if (user.role !== "ORGANIZER") {
+      return res.status(400).json({ error: "User is not an organizer" });
     }
 
-    if (user.accountStatus !== 'PENDING') {
+    if (user.accountStatus !== "PENDING") {
       return res.status(400).json({
-        error: 'User account is not pending approval',
+        error: "User account is not pending approval",
         currentStatus: user.accountStatus,
       });
     }
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
-        accountStatus: 'REJECTED',
+        accountStatus: "REJECTED",
         updatedAt: new Date(),
       },
       select: {
@@ -244,13 +243,13 @@ router.patch('/users/:id/reject', async (req: Request, res: Response) => {
     });
 
     res.json({
-      message: 'Organizer account rejected',
+      message: "Organizer account rejected",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Error rejecting organizer:', error);
+    console.error("Error rejecting organizer:", error);
     res.status(500).json({
-      error: 'Failed to reject organizer',
+      error: "Failed to reject organizer",
       details: error instanceof Error ? error.message : error,
     });
   }

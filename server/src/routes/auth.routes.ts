@@ -16,9 +16,14 @@ router.post(
   (req: Request, res: Response) => {
     const createdUser = res.locals.createdUser;
 
-    if (createdUser && createdUser.role === 'ORGANIZER' && createdUser.accountStatus === 'PENDING') {
+    if (
+      createdUser &&
+      createdUser.role === "ORGANIZER" &&
+      createdUser.accountStatus === "PENDING"
+    ) {
       return res.status(201).json({
-        message: 'Account created successfully. Your organizer account is pending admin approval.',
+        message:
+          "Account created successfully. Your organizer account is pending admin approval.",
         requiresApproval: true,
         user: {
           id: createdUser.id,
@@ -29,7 +34,7 @@ router.post(
         },
       });
     }
-    if (createdUser && createdUser.accountStatus === 'APPROVED') {
+    if (createdUser && createdUser.accountStatus === "APPROVED") {
       const tokens = TokenAuth.createTokens({
         id: createdUser.id,
         email: createdUser.email,

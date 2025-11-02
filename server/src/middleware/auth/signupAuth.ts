@@ -49,9 +49,11 @@ async function validateStudentCreation(
     return;
   }
 
-  const studentToCreate: UserSignUp  = { ...req.body };
+  const studentToCreate: UserSignUp = { ...req.body };
   if (!studentToCreate.studentId || studentToCreate.studentId.trim() === "") {
-    return res.status(400).json({ error: "Student ID is required for student accounts" });
+    return res
+      .status(400)
+      .json({ error: "Student ID is required for student accounts" });
   }
   const validStudentId = await validateNewStudentId(studentToCreate.studentId);
 
@@ -70,7 +72,7 @@ async function validateOrganizerCreation(
     next();
     return;
   }
-  const organizerToCreate: UserSignUp  = { ...req.body };
+  const organizerToCreate: UserSignUp = { ...req.body };
 
   if (!organizerToCreate.organizationID) {
     return res.status(400).json({
@@ -164,7 +166,6 @@ async function validateNewStudentId(studentId: string): Promise<string> {
   }
   return "";
 }
-
 
 async function addUserToDB(userToCreate: UserSignUp) {
   const hashedPassword = await bcrypt.hash(userToCreate.password, 10);

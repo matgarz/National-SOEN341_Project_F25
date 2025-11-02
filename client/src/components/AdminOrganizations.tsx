@@ -54,7 +54,6 @@ export default function AdminOrganizations() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -137,14 +136,11 @@ export default function AdminOrganizations() {
     }
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/admin/organizations`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(createForm),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(createForm),
+      });
 
       if (response.ok) {
         await fetchOrganizations();
@@ -158,7 +154,9 @@ export default function AdminOrganizations() {
         alert("Organization created successfully!");
       } else {
         const errorData = await response.json();
-        alert(`Failed to create organization: ${errorData.error || "Unknown error"}`);
+        alert(
+          `Failed to create organization: ${errorData.error || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Error creating organization:", error);
@@ -407,7 +405,10 @@ export default function AdminOrganizations() {
                 <textarea
                   value={createForm.description}
                   onChange={(e) =>
-                    setCreateForm({ ...createForm, description: e.target.value })
+                    setCreateForm({
+                      ...createForm,
+                      description: e.target.value,
+                    })
                   }
                   placeholder="Enter organization description"
                   rows={4}
@@ -423,7 +424,10 @@ export default function AdminOrganizations() {
                   type="email"
                   value={createForm.contactEmail}
                   onChange={(e) =>
-                    setCreateForm({ ...createForm, contactEmail: e.target.value })
+                    setCreateForm({
+                      ...createForm,
+                      contactEmail: e.target.value,
+                    })
                   }
                   placeholder="contact@organization.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
