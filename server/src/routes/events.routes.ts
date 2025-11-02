@@ -143,47 +143,50 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // GET /api/events/organizer/:organizerId/analytics - Get Analytics for events
-router.get("/organizer/:organizerId/analytics", async (req: Request, res: Response) => {
+router.get(
+  "/organizer/:organizerId/analytics",
+  async (req: Request, res: Response) => {
     try {
-        const organizerId = parseInt(req.params.organizerId);
-        if (isNaN(organizerId)) {
-            return res.status(400).json({ error: "Invalid organizer ID" });
-        }
+      const organizerId = parseInt(req.params.organizerId);
+      if (isNaN(organizerId)) {
+        return res.status(400).json({ error: "Invalid organizer ID" });
+      }
 
-        const events = await prisma.event.findMany({
-            where: { creatorId: organizerId },
-            include: {
-                _count: { select: { ticket: true } },
-                ticket: { select: { checkedIn: true } },
-            },
-        });
+      const events = await prisma.event.findMany({
+        where: { creatorId: organizerId },
+        include: {
+          _count: { select: { ticket: true } },
+          ticket: { select: { checkedIn: true } },
+        },
+      });
 
-        const analytics = events.map((ev) => {
-            const ticketsIssued = ev._count.ticket;
-            const attended = ev.ticket.filter((t) => t.checkedIn).length;
-            const attendanceRate = ticketsIssued > 0 ? (attended / ticketsIssued) * 100 : 0;
-            const remainingCapacity = ev.capacity - ticketsIssued;
+      const analytics = events.map((ev) => {
+        const ticketsIssued = ev._count.ticket;
+        const attended = ev.ticket.filter((t) => t.checkedIn).length;
+        const attendanceRate =
+          ticketsIssued > 0 ? (attended / ticketsIssued) * 100 : 0;
+        const remainingCapacity = ev.capacity - ticketsIssued;
 
-            return {
-                eventId: ev.id,
-                title: ev.title,
-                ticketsIssued,
-                attended,
-                attendanceRate: attendanceRate.toFixed(1),
-                remainingCapacity: remainingCapacity >= 0 ? remainingCapacity : 0,
-            };
-        });
+        return {
+          eventId: ev.id,
+          title: ev.title,
+          ticketsIssued,
+          attended,
+          attendanceRate: attendanceRate.toFixed(1),
+          remainingCapacity: remainingCapacity >= 0 ? remainingCapacity : 0,
+        };
+      });
 
-        res.json(analytics);
+      res.json(analytics);
     } catch (error) {
-        console.error("Error fetching organizer analytics:", error);
-        res.status(500).json({
-            error: "Failed to fetch organizer analytics",
-            details: error instanceof Error ? error.message : error,
-        });
+      console.error("Error fetching organizer analytics:", error);
+      res.status(500).json({
+        error: "Failed to fetch organizer analytics",
+        details: error instanceof Error ? error.message : error,
+      });
     }
-});
-
+  },
+);
 
 //POST /api/events (Create new Event)
 router.post(
