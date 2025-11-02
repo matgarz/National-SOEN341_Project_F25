@@ -102,9 +102,9 @@ export default function OrganizerDashboard() {
       </div>
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
-        <TabsList className="grid grid-cols-2 w-1/2 mb-4">
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
+        <TabsList className="grid grid-cols-2 w-full mb-4 space-x-7"> 
+          <TabsTrigger className="bg-gray-200  hover:cursor-pointer" value="upcoming">Upcoming</TabsTrigger>
+          <TabsTrigger className="bg-gray-200  hover:cursor-pointer" value="past">Past</TabsTrigger>
         </TabsList>
 
         <Input
