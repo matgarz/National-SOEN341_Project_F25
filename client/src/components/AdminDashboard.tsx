@@ -124,6 +124,11 @@ export default function AdminDashboard() {
   const [newRole, setNewRole] = useState<string>("");
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
+<<<<<<< HEAD
+=======
+  
+
+>>>>>>> 6520f05a353f28606b1a2469711ead076f96540c
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
