@@ -817,6 +817,7 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>{user.studentId}</TableCell>
+
                       <TableCell>
                         <div className="text-xs">
                           {user._count?.event && (
@@ -830,7 +831,7 @@ export default function AdminDashboard() {
                       <TableCell>
                         {editingUser === user.id ? (
                           <div className="flex flex-col gap-2">
-                            {/* Role selector - Organization dropdown REMOVED */}
+                            {/* Role selector */}
                             <select
                               value={newRole}
                               onChange={(e) => setNewRole(e.target.value)}

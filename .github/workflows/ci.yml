@@ -22,17 +22,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        if: matrix.directory == 'client'
-        run: |
-          cd client
-          rm -rf node_modules package-lock.json
-          npm install
-
-      - name: Install dependencies
-        if: matrix.directory == 'server'
-        run: |
-          cd server
-          npm ci
+        run: cd ${{ matrix.directory }} && npm ci
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
@@ -43,6 +33,6 @@ jobs:
       - name: Run Tests
         run: cd ${{ matrix.directory }} && npm test
 
-      - name: Build Project
-        if: matrix.directory == 'client'
-        run: cd client && npm run build
+      #- name: Build Project
+      #  if: matrix.directory == 'client'
+      #  run: cd client && npm run build
