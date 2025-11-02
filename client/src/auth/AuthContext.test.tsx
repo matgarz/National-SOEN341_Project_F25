@@ -33,7 +33,7 @@ describe("useAuth / AuthProvider", () => {
       return null;
     };
     expect(() => render(<Outside />)).toThrow(
-      "useAuth must be used within AuthProvider"
+      "useAuth must be used within AuthProvider",
     );
   });
 
@@ -42,7 +42,7 @@ describe("useAuth / AuthProvider", () => {
     render(
       <AuthProvider>
         <AuthConsumer />
-      </AuthProvider>
+      </AuthProvider>,
     );
     expect(screen.getByTestId("username")).toHaveTextContent("User");
   });
@@ -55,7 +55,7 @@ describe("useAuth / AuthProvider", () => {
     render(
       <AuthProvider>
         <AuthConsumer />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     expect(screen.getByTestId("username")).toHaveTextContent("none");
@@ -65,7 +65,7 @@ describe("useAuth / AuthProvider", () => {
     expect(screen.getByTestId("username")).toHaveTextContent("User");
     expect(setSpy).toHaveBeenCalledWith("user", JSON.stringify(mockUser));
     expect(JSON.parse(localStorage.getItem("user") as string)).toEqual(
-      mockUser
+      mockUser,
     );
   });
 
@@ -79,7 +79,7 @@ describe("useAuth / AuthProvider", () => {
     render(
       <AuthProvider>
         <AuthConsumer />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     expect(screen.getByTestId("username")).toHaveTextContent("User");

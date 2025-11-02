@@ -38,10 +38,10 @@ beforeEach(() => {
 test("renders Access Denied copy", () => {
   render(<NoAccess />);
   expect(
-    screen.getByRole("heading", { name: /access denied/i })
+    screen.getByRole("heading", { name: /access denied/i }),
   ).toBeInTheDocument();
   expect(
-    screen.getByText(/you don't have permission to view this page/i)
+    screen.getByText(/you don't have permission to view this page/i),
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
 });

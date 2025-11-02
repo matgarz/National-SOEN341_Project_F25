@@ -89,7 +89,7 @@ describe("tokenAuth", () => {
       expect(result).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         "/api/auth/refresh",
-        expect.any(Object)
+        expect.any(Object),
       );
       expect(setSpy).toHaveBeenCalledWith("accessToken", "new123");
       expect(localStorage.getItem("accessToken")).toBe("new123");
