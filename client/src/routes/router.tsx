@@ -94,14 +94,14 @@ export const router = createBrowserRouter([
         ),
       },
 
-        {
-            path: "organizer/event/:id/analytics",
-            element: (
-                <ProtectedRoute allowedRoles={["ORGANIZER"]}>
-                    <OrganizerEventAnalytics />
-                </ProtectedRoute>
-            ),
-        },
+      {
+        path: "organizer/event/:id/analytics",
+        element: (
+          <ProtectedRoute allowedRoles={["ORGANIZER"]}>
+            <OrganizerEventAnalytics />
+          </ProtectedRoute>
+        ),
+      },
 
       {
         path: "calendar",
