@@ -228,4 +228,121 @@ router.post(
   },
 );
 
+// GET /api/events/saved - Get all saved events for the authenticated user
+router.get("/saved/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const savedEvents = await prisma.savedevent.findMany({
+      where: { userId },
+      include: {
+        event: {
+          include: {
+            organization: { select: { id: true, name: true } },
+            user: { select: { id: true, name: true, email: true } },
+            _count: { select: { ticket: true } },
+          },
+        },
+      },
+    });
+
+    const events = savedEvents.map((saved) => saved.event);
+    res.json(events);
+  } catch (error) {
+    console.error("Error fetching saved events:", error);
+    res.status(500).json({
+      error: "Failed to fetch saved events",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// POST /api/events/:id/save - Save an event for the authenticated user
+router.post("/:id/save", async (req: Request, res: Response) => {
+  try {
+    const eventId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    if (isNaN(eventId) || !userId) {
+      return res.status(400).json({ error: "Invalid event ID or user ID" });
+    }
+
+    // Check if event exists
+    const event = await prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // Check if already saved
+    const existing = await prisma.savedevent.findUnique({
+      where: {
+        userId_eventId: {
+          userId: parseInt(userId),
+          eventId,
+        },
+      },
+    });
+
+    if (existing) {
+      return res.status(200).json({ message: "Event already saved" });
+    }
+
+    // Create saved event
+    const savedEvent = await prisma.savedevent.create({
+      data: {
+        userId: parseInt(userId),
+        eventId,
+      },
+    });
+
+    res.status(201).json({
+      message: "Event saved successfully",
+      savedEvent,
+    });
+  } catch (error) {
+    console.error("Error saving event:", error);
+    res.status(500).json({
+      error: "Failed to save event",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// DELETE /api/events/:id/save - Remove a saved event
+router.delete("/:id/save", async (req: Request, res: Response) => {
+  try {
+    const eventId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    if (isNaN(eventId) || !userId) {
+      return res.status(400).json({ error: "Invalid event ID or user ID" });
+    }
+
+    // Delete saved event
+    await prisma.savedevent.delete({
+      where: {
+        userId_eventId: {
+          userId: parseInt(userId),
+          eventId,
+        },
+      },
+    });
+
+    res.json({ message: "Event unsaved successfully" });
+  } catch (error) {
+    console.error("Error unsaving event:", error);
+    if (error instanceof Error && error.message.includes("Record to delete does not exist")) {
+      return res.status(404).json({ error: "Saved event not found" });
+    }
+    res.status(500).json({
+      error: "Failed to unsave event",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
 export default router;
