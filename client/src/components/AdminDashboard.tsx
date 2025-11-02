@@ -35,6 +35,16 @@ import { Analytics } from "./Analytics";
 import { Input } from "./ui/input";
 import AdminOrganizations from "./AdminOrganizations";
 
+interface Organization {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  _count?: {
+    event: number;
+  };
+}
+
 interface AdminStats {
   totalUsers: number;
   totalEvents: number;
@@ -113,6 +123,7 @@ export default function AdminDashboard() {
   const [newRole, setNewRole] = useState<string>("");
 
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";

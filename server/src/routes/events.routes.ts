@@ -143,6 +143,109 @@ router.get("/:id", async (req: Request, res: Response) => {
     });
   }
 });
+
+// GET /api/events/organizer/:organizerId/analytics - Get Analytics for all organizer events
+router.get(
+  "/organizer/:organizerId/analytics",
+  async (req: Request, res: Response) => {
+    try {
+      const organizerId = parseInt(req.params.organizerId);
+      if (isNaN(organizerId)) {
+        return res.status(400).json({ error: "Invalid organizer ID" });
+      }
+
+      const events = await prisma.event.findMany({
+        where: { creatorId: organizerId },
+        include: {
+          _count: { select: { ticket: true } },
+          ticket: { select: { checkedIn: true } },
+        },
+      });
+
+      const analytics = events.map((ev) => {
+        const ticketsIssued = ev._count.ticket;
+        const attended = ev.ticket.filter((t) => t.checkedIn).length;
+        const attendanceRate =
+          ticketsIssued > 0 ? (attended / ticketsIssued) * 100 : 0;
+        const remainingCapacity = ev.capacity - ticketsIssued;
+
+        return {
+          eventId: ev.id,
+          title: ev.title,
+          ticketsIssued,
+          attended,
+          attendanceRate: attendanceRate.toFixed(1),
+          remainingCapacity: remainingCapacity >= 0 ? remainingCapacity : 0,
+        };
+      });
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching organizer analytics:", error);
+      res.status(500).json({
+        error: "Failed to fetch organizer analytics",
+        details: error instanceof Error ? error.message : error,
+      });
+    }
+  },
+);
+
+// GET /api/events/:id/details - Get analytics of a particular event with attendee list
+router.get("/:id/details", async (req: Request, res: Response) => {
+  try {
+    const eventId = parseInt(req.params.id);
+    if (isNaN(eventId))
+      return res.status(400).json({ error: "Invalid event ID" });
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        organization: true,
+        user: { select: { id: true, name: true, email: true } },
+        ticket: {
+          select: {
+            id: true,
+            checkedIn: true,
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
+      },
+    });
+
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    // Compute attendance stats
+    const ticketsIssued = event.ticket.length;
+    const attended = event.ticket.filter((t) => t.checkedIn).length;
+    const attendanceRate =
+      ticketsIssued > 0 ? ((attended / ticketsIssued) * 100).toFixed(1) : "0";
+
+    res.json({
+      event: {
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        capacity: event.capacity,
+        ticketsIssued,
+        attended,
+        attendanceRate,
+      },
+      attendees: event.ticket.map((t) => ({
+        id: t.id,
+        name: t.user.name,
+        email: t.user.email,
+        checkedIn: t.checkedIn,
+      })),
+    });
+  } catch (err) {
+    console.error("Error fetching event details:", err);
+    res.status(500).json({
+      error: "Failed to fetch event details",
+      details: err instanceof Error ? err.message : err,
+    });
+  }
+});
+
 //POST /api/events (Create new Event)
 router.post(
   "/",
@@ -495,6 +598,60 @@ router.get("/tickets/:userId", async (req: Request, res: Response) => {
       details: error instanceof Error ? error.message : error,
     });
   }
-});
+// POST /api/events/validate-ticket
+router.post("/validate-ticket", async (req: Request, res: Response) => {
+  try {
+    const { qrCode } = req.body;
+
+    if (!qrCode || typeof qrCode !== "string") {
+      return res.status(400).json({ error: "QR code is required" });
+    }
+
+    // Find ticket with that QR code
+    const ticket = await prisma.ticket.findUnique({
+      where: { qrCode },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        event: { select: { id: true, title: true, date: true } },
+      },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: "Invalid QR code" });
+    }
+
+    // Check if already checked in
+    if (ticket.checkedIn) {
+      return res.status(400).json({
+        error: "Ticket already validated",
+        checkedInAt: ticket.checkedInAt,
+        user: ticket.user,
+        event: ticket.event,
+      });
+    }
+
+    // Update ticket as checked-in
+    const updatedTicket = await prisma.ticket.update({
+      where: { id: ticket.id },
+      data: { checkedIn: true, checkedInAt: new Date() },
+    });
+
+    res.json({
+      message: "Ticket successfully validated",
+      ticket: {
+        id: updatedTicket.id,
+        user: ticket.user,
+        event: ticket.event,
+        checkedInAt: updatedTicket.checkedInAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error validating ticket:", error);
+    res.status(500).json({
+      error: "Failed to validate ticket",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});},);
 
 export default router;

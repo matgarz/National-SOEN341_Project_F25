@@ -14,6 +14,7 @@ import MyEvents from "../components/MyEvents";
 import { useAuth } from "../auth/AuthContext";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
+import OrganizerEventAnalytics from "../components/OrganizerEventAnalytics";
 
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 
@@ -90,6 +91,15 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["ORGANIZER", "ADMIN"]}>
             <OrganizerCreateEvent />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "organizer/event/:id/analytics",
+        element: (
+          <ProtectedRoute allowedRoles={["ORGANIZER"]}>
+            <OrganizerEventAnalytics />
           </ProtectedRoute>
         ),
       },
