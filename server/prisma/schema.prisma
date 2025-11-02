@@ -107,9 +107,10 @@ model user {
   name           String
   studentId      String?       @unique(map: "User_studentId_key")
   role           user_role     @default(STUDENT)
+  accountStatus  accountstatus @default(APPROVED)
   organizationId Int?
   createdAt      DateTime      @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime      @updatedAt
   event          event[]
   review         review[]
   savedevent     savedevent[]
@@ -118,6 +119,14 @@ model user {
 
   @@index([email], map: "User_email_idx")
   @@index([role], map: "User_role_idx")
+  @@index([accountStatus])
+}
+
+enum accountstatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
 }
 
 enum ticket_paymentStatus {

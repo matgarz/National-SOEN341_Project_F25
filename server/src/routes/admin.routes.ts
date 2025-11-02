@@ -46,6 +46,42 @@ router.get("/users", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/admin/users/pending-organizers
+router.get("/users/pending-organizers", async (req: Request, res: Response) => {
+  try {
+    const pendingOrganizers = await prisma.user.findMany({
+      where: {
+        role: "ORGANIZER",
+        accountStatus: "PENDING",
+      },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            event: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    res.json(pendingOrganizers);
+  } catch (error) {
+    console.error("Error fetching pending organizers:", error);
+    res.status(500).json({
+      error: "Failed to fetch pending organizers",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
 // GET /api/admin/users/:id - Get single user with full details
 router.get("/users/:id", async (req: Request, res) => {
   try {
@@ -101,6 +137,119 @@ router.get("/users/:id", async (req: Request, res) => {
     console.error("Error fetching user:", error);
     res.status(500).json({
       error: "Failed to fetch user",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// PATCH /api/admin/users/:id/approve
+router.patch("/users/:id/approve", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.role !== "ORGANIZER") {
+      return res.status(400).json({ error: "User is not an organizer" });
+    }
+    if (user.accountStatus !== "PENDING") {
+      return res.status(400).json({
+        error: "User account is not pending approval",
+        currentStatus: user.accountStatus,
+      });
+    }
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        accountStatus: "APPROVED",
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        accountStatus: true,
+        organizationId: true,
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    res.json({
+      message: "Organizer account approved successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error approving organizer:", error);
+    res.status(500).json({
+      error: "Failed to approve organizer",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// PATCH /api/admin/users/:id/reject
+router.patch("/users/:id/reject", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.role !== "ORGANIZER") {
+      return res.status(400).json({ error: "User is not an organizer" });
+    }
+
+    if (user.accountStatus !== "PENDING") {
+      return res.status(400).json({
+        error: "User account is not pending approval",
+        currentStatus: user.accountStatus,
+      });
+    }
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        accountStatus: "REJECTED",
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        accountStatus: true,
+      },
+    });
+
+    res.json({
+      message: "Organizer account rejected",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error rejecting organizer:", error);
+    res.status(500).json({
+      error: "Failed to reject organizer",
       details: error instanceof Error ? error.message : error,
     });
   }
