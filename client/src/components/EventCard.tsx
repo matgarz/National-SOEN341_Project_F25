@@ -222,7 +222,6 @@ export function EventCard({
                     {event.ticketType === "free"
                       ? "Claim Ticket"
                       : "Buy Ticket"}
-                      
                   </Button>
                 </motion.div>
               ) : event.hasTicket ? (

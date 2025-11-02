@@ -1,4 +1,12 @@
-import { X, Calendar, Clock, MapPin, Users, Tag, DollarSign } from "lucide-react";
+import {
+  X,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Tag,
+  DollarSign,
+} from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "./ui/Button";
 import { Badge } from "./ui/badge";
@@ -45,17 +53,19 @@ interface EventDetailsModalProps {
 }
 
 // Simple geocoding function (you can enhance this with a real geocoding API)
-const getCoordinatesFromLocation = async (location: string): Promise<[number, number]> => {
+const getCoordinatesFromLocation = async (
+  location: string,
+): Promise<[number, number]> => {
   // Default to Montreal coordinates
   const defaultCoords: [number, number] = [45.5017, -73.5673];
-  
+
   // Simple location matching for common venues (you can expand this)
   const locationMap: Record<string, [number, number]> = {
-    "H-110": [45.4972, -73.5790], // Concordia Hall Building
-    "Building A": [45.4950, -73.5790],
-    "Espace CDPQ Montreal": [45.5088, -73.5540],
+    "H-110": [45.4972, -73.579], // Concordia Hall Building
+    "Building A": [45.495, -73.579],
+    "Espace CDPQ Montreal": [45.5088, -73.554],
     "EV Building": [45.4953, -73.5784],
-    "MB Building": [45.4970, -73.5791],
+    "MB Building": [45.497, -73.5791],
   };
 
   // Check if we have a predefined location
@@ -68,14 +78,16 @@ const getCoordinatesFromLocation = async (location: string): Promise<[number, nu
   return defaultCoords;
 };
 
-export function EventDetailsModal({ 
-  event, 
-  isOpen, 
-  onClose, 
+export function EventDetailsModal({
+  event,
+  isOpen,
+  onClose,
   onClaimTicket,
-  userRole = "student" 
+  userRole = "student",
 }: EventDetailsModalProps) {
-  const [mapCoords, setMapCoords] = useState<[number, number]>([45.5017, -73.5673]);
+  const [mapCoords, setMapCoords] = useState<[number, number]>([
+    45.5017, -73.5673,
+  ]);
 
   useEffect(() => {
     if (isOpen && event.location) {
@@ -110,7 +122,10 @@ export function EventDetailsModal({
     const remaining = event.capacity - event.attendees;
     if (remaining === 0) return { text: "Sold Out", color: "text-red-600" };
     if (remaining < 10)
-      return { text: `Only ${remaining} spots left!`, color: "text-orange-600" };
+      return {
+        text: `Only ${remaining} spots left!`,
+        color: "text-orange-600",
+      };
     return { text: `${remaining} spots available`, color: "text-green-600" };
   };
 
@@ -140,15 +155,17 @@ export function EventDetailsModal({
             >
               {/* Header with Image */}
               <div className="relative h-64 bg-gradient-to-br from-blue-500 to-purple-600">
-                {event.image && event.image !== "https://via.placeholder.com/640x360?text=Event" && (
-                  <img 
-                    src={event.image} 
-                    alt={event.title}
-                    className="w-full h-full object-cover"
-                  />
-                )}
+                {event.image &&
+                  event.image !==
+                    "https://via.placeholder.com/640x360?text=Event" && (
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                
+
                 {/* Close button */}
                 <button
                   onClick={onClose}
@@ -164,12 +181,18 @@ export function EventDetailsModal({
                       {event.category}
                     </Badge>
                     {event.ticketType === "free" ? (
-                      <Badge className="bg-green-100 text-green-800">Free Event</Badge>
+                      <Badge className="bg-green-100 text-green-800">
+                        Free Event
+                      </Badge>
                     ) : (
-                      <Badge className="bg-blue-100 text-blue-800">${event.price}</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">
+                        ${event.price}
+                      </Badge>
                     )}
                   </div>
-                  <h2 className="text-3xl font-bold text-white">{event.title}</h2>
+                  <h2 className="text-3xl font-bold text-white">
+                    {event.title}
+                  </h2>
                 </div>
               </div>
 
@@ -177,8 +200,12 @@ export function EventDetailsModal({
               <div className="p-6 space-y-6">
                 {/* Description */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-900">About This Event</h3>
-                  <p className="text-gray-700 leading-relaxed">{event.description}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                    About This Event
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    {event.description}
+                  </p>
                 </div>
 
                 {/* Event Details Grid */}
@@ -204,15 +231,21 @@ export function EventDetailsModal({
                     <Users className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-semibold text-gray-900">Attendance</p>
-                      <p className="text-gray-700">{event.attendees} attending</p>
-                      <p className={`text-sm ${availability.color}`}>{availability.text}</p>
+                      <p className="text-gray-700">
+                        {event.attendees} attending
+                      </p>
+                      <p className={`text-sm ${availability.color}`}>
+                        {availability.text}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start space-x-3">
                     <Tag className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-semibold text-gray-900">Organized By</p>
+                      <p className="font-semibold text-gray-900">
+                        Organized By
+                      </p>
                       <p className="text-gray-700">{event.organizer}</p>
                     </div>
                   </div>
@@ -221,7 +254,9 @@ export function EventDetailsModal({
                     <div className="flex items-start space-x-3">
                       <DollarSign className="h-5 w-5 text-primary mt-0.5" />
                       <div>
-                        <p className="font-semibold text-gray-900">Ticket Price</p>
+                        <p className="font-semibold text-gray-900">
+                          Ticket Price
+                        </p>
                         <p className="text-gray-700">${event.price}</p>
                       </div>
                     </div>
@@ -230,7 +265,9 @@ export function EventDetailsModal({
 
                 {/* Map */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-gray-900">Event Location</h3>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-900">
+                    Event Location
+                  </h3>
                   <div className="h-64 rounded-lg overflow-hidden border-2 border-gray-200">
                     <MapContainer
                       center={mapCoords}
@@ -256,7 +293,9 @@ export function EventDetailsModal({
                 {/* Tags */}
                 {event.tags && event.tags.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-2 text-gray-900">Tags</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                      Tags
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {event.tags.map((tag, idx) => (
                         <Badge key={idx} variant="outline" className="text-sm">
@@ -285,7 +324,9 @@ export function EventDetailsModal({
                           onClose();
                         }}
                       >
-                        {event.ticketType === "free" ? "Claim Free Ticket" : `Buy Ticket - $${event.price}`}
+                        {event.ticketType === "free"
+                          ? "Claim Free Ticket"
+                          : `Buy Ticket - $${event.price}`}
                       </Button>
                     )}
                   </div>

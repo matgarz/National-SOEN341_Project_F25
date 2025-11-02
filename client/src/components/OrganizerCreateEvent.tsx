@@ -29,7 +29,6 @@ export default function OrganizerCreateEvent() {
     category: "",
     imageUrl: "",
   });
- 
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);

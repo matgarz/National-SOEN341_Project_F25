@@ -234,7 +234,7 @@ router.post(
 router.get("/saved/:userId", async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
@@ -337,7 +337,10 @@ router.delete("/:id/save", async (req: Request, res: Response) => {
     res.json({ message: "Event unsaved successfully" });
   } catch (error) {
     console.error("Error unsaving event:", error);
-    if (error instanceof Error && error.message.includes("Record to delete does not exist")) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Record to delete does not exist")
+    ) {
       return res.status(404).json({ error: "Saved event not found" });
     }
     res.status(500).json({
@@ -358,19 +361,21 @@ router.post("/:id/ticket", async (req: Request, res: Response) => {
     }
 
     // Check if event exists and is approved
-    const event = await prisma.event.findUnique({ 
+    const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
-        _count: { select: { ticket: true } }
-      }
+        _count: { select: { ticket: true } },
+      },
     });
-    
+
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
 
     if (event.status !== "APPROVED") {
-      return res.status(400).json({ error: "Event is not approved for ticket sales" });
+      return res
+        .status(400)
+        .json({ error: "Event is not approved for ticket sales" });
     }
 
     // Check if event has available capacity
@@ -389,9 +394,9 @@ router.post("/:id/ticket", async (req: Request, res: Response) => {
     });
 
     if (existingTicket) {
-      return res.status(200).json({ 
-        message: "You already have a ticket for this event", 
-        ticket: existingTicket 
+      return res.status(200).json({
+        message: "You already have a ticket for this event",
+        ticket: existingTicket,
       });
     }
 
@@ -457,7 +462,7 @@ router.post("/:id/ticket", async (req: Request, res: Response) => {
 router.get("/tickets/:userId", async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
-    
+
     if (isNaN(userId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }

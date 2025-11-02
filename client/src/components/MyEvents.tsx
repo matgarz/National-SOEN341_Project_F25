@@ -4,7 +4,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import QRCode from "./QRCode";
-import { Calendar as CalendarIcon, MapPin, Clock, Ticket as TicketIcon, Download } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  MapPin,
+  Clock,
+  Ticket as TicketIcon,
+  Download,
+} from "lucide-react";
 import { useCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
 import {
   createViewDay,
@@ -54,7 +60,7 @@ export default function MyEvents() {
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [loading, setLoading] = useState(true);
   const eventsService = useState(() => createEventsServicePlugin())[0];
-  
+
   const calendar = useCalendarApp({
     views: [
       createViewDay(),
@@ -75,13 +81,15 @@ export default function MyEvents() {
         if (res.ok) {
           const data: TicketData[] = await res.json();
           // Filter out any tickets with undefined/null event data
-          const validTickets = data.filter(ticket => {
-            return ticket && 
-                   ticket.event && 
-                   ticket.event.id && 
-                   ticket.event.title && 
-                   ticket.event.date &&
-                   ticket.qrCode;
+          const validTickets = data.filter((ticket) => {
+            return (
+              ticket &&
+              ticket.event &&
+              ticket.event.id &&
+              ticket.event.title &&
+              ticket.event.date &&
+              ticket.qrCode
+            );
           });
           setTickets(validTickets);
 
@@ -89,7 +97,9 @@ export default function MyEvents() {
           if (calendar) {
             validTickets.forEach((ticket) => {
               try {
-                const start = Temporal.Instant.from(ticket.event.date).toZonedDateTimeISO("UTC");
+                const start = Temporal.Instant.from(
+                  ticket.event.date,
+                ).toZonedDateTimeISO("UTC");
                 const end = start.add({ hours: 2 }); // Assume 2-hour events
 
                 const calendarEvent = {
@@ -151,10 +161,10 @@ export default function MyEvents() {
   // Separate upcoming and past tickets
   const now = new Date();
   const upcomingTickets = tickets.filter(
-    (t) => t && t.event && t.event.date && new Date(t.event.date) > now
+    (t) => t && t.event && t.event.date && new Date(t.event.date) > now,
   );
   const pastTickets = tickets.filter(
-    (t) => t && t.event && t.event.date && new Date(t.event.date) <= now
+    (t) => t && t.event && t.event.date && new Date(t.event.date) <= now,
   );
 
   return (
@@ -220,85 +230,93 @@ export default function MyEvents() {
                     Upcoming Events
                   </h2>
                   <div className="grid gap-6 md:grid-cols-2">
-                    {upcomingTickets.map((ticket) => ticket && ticket.event ? (
-                      <motion.div
-                        key={ticket.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white pb-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="text-xl font-bold mb-1">
-                                  {ticket.event.title}
-                                </h3>
-                                <p className="text-sm opacity-90">
-                                  by {ticket.event.organization?.name || "Unknown"}
-                                </p>
-                              </div>
-                              {getStatusBadge(ticket)}
-                            </div>
-                          </CardHeader>
-                          <CardContent className="p-6 space-y-4">
-                            <div className="grid gap-3">
-                              <div className="flex items-start gap-3">
-                                <CalendarIcon className="h-5 w-5 text-gray-600 mt-0.5" />
+                    {upcomingTickets.map((ticket) =>
+                      ticket && ticket.event ? (
+                        <motion.div
+                          key={ticket.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white pb-4">
+                              <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="font-medium">
-                                    {formatDate(ticket.event.date)}
+                                  <h3 className="text-xl font-bold mb-1">
+                                    {ticket.event.title}
+                                  </h3>
+                                  <p className="text-sm opacity-90">
+                                    by{" "}
+                                    {ticket.event.organization?.name ||
+                                      "Unknown"}
                                   </p>
-                                  <p className="text-sm text-gray-600">
-                                    {formatTime(ticket.event.date)}
+                                </div>
+                                {getStatusBadge(ticket)}
+                              </div>
+                            </CardHeader>
+                            <CardContent className="p-6 space-y-4">
+                              <div className="grid gap-3">
+                                <div className="flex items-start gap-3">
+                                  <CalendarIcon className="h-5 w-5 text-gray-600 mt-0.5" />
+                                  <div>
+                                    <p className="font-medium">
+                                      {formatDate(ticket.event.date)}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      {formatTime(ticket.event.date)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                  <MapPin className="h-5 w-5 text-gray-600 mt-0.5" />
+                                  <p className="font-medium">
+                                    {ticket.event.location}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-gray-600 mt-0.5" />
-                                <p className="font-medium">
-                                  {ticket.event.location}
+
+                              <div className="pt-4 border-t">
+                                <p className="text-sm text-gray-600 mb-3">
+                                  Your Ticket QR Code
+                                </p>
+                                <div className="flex justify-center">
+                                  <QRCode
+                                    link={JSON.stringify({
+                                      ticketId: ticket.qrCode,
+                                      eventId: ticket.event.id,
+                                      userId: ticket.user?.id || user?.id,
+                                      eventTitle: ticket.event.title,
+                                    })}
+                                    size={192}
+                                    title={`Ticket for ${ticket.event.title}`}
+                                  />
+                                </div>
+                                <p className="text-xs text-center text-gray-500 mt-3">
+                                  Show this QR code at the event entrance
                                 </p>
                               </div>
-                            </div>
 
-                            <div className="pt-4 border-t">
-                              <p className="text-sm text-gray-600 mb-3">
-                                Your Ticket QR Code
-                              </p>
-                              <div className="flex justify-center">
-                                <QRCode
-                                  link={JSON.stringify({
-                                    ticketId: ticket.qrCode,
-                                    eventId: ticket.event.id,
-                                    userId: ticket.user?.id || user?.id,
-                                    eventTitle: ticket.event.title,
-                                  })}
-                                  size={192}
-                                  title={`Ticket for ${ticket.event.title}`}
-                                />
-                              </div>
-                              <p className="text-xs text-center text-gray-500 mt-3">
-                                Show this QR code at the event entrance
-                              </p>
-                            </div>
-
-                            {ticket.event.ticketType === "PAID" && ticket.event.ticketPrice && (
-                              <div className="pt-3 border-t">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm text-gray-600">
-                                    Amount Paid:
-                                  </span>
-                                  <span className="font-bold text-lg">
-                                    ${Number(ticket.event.ticketPrice).toFixed(2)}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ) : null)}
+                              {ticket.event.ticketType === "PAID" &&
+                                ticket.event.ticketPrice && (
+                                  <div className="pt-3 border-t">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-sm text-gray-600">
+                                        Amount Paid:
+                                      </span>
+                                      <span className="font-bold text-lg">
+                                        $
+                                        {Number(
+                                          ticket.event.ticketPrice,
+                                        ).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ) : null,
+                    )}
                   </div>
                 </div>
               )}
@@ -308,32 +326,34 @@ export default function MyEvents() {
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Past Events</h2>
                   <div className="grid gap-4 md:grid-cols-2">
-                    {pastTickets.map((ticket) => ticket && ticket.event ? (
-                      <Card
-                        key={ticket.id}
-                        className="opacity-75 hover:opacity-100 transition-opacity"
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold">
-                                {ticket.event.title}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {formatDate(ticket.event.date)}
-                              </p>
+                    {pastTickets.map((ticket) =>
+                      ticket && ticket.event ? (
+                        <Card
+                          key={ticket.id}
+                          className="opacity-75 hover:opacity-100 transition-opacity"
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-bold">
+                                  {ticket.event.title}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                  {formatDate(ticket.event.date)}
+                                </p>
+                              </div>
+                              {getStatusBadge(ticket)}
                             </div>
-                            {getStatusBadge(ticket)}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="h-4 w-4" />
-                            <span>{ticket.event.location}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ) : null)}
+                          </CardHeader>
+                          <CardContent className="pb-4">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <MapPin className="h-4 w-4" />
+                              <span>{ticket.event.location}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ) : null,
+                    )}
                   </div>
                 </div>
               )}
