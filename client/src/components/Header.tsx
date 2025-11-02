@@ -147,7 +147,11 @@ export default function Header({
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Link
                 to={
-                  userRole === "admin" ? "/admin/events-calendar" : "/calendar"
+                  userRole === "admin" 
+                    ? "/admin/events-calendar" 
+                    : userRole === "student"
+                    ? "/my-events"
+                    : "/calendar"
                 }
                 className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
                 style={{ textDecoration: "none" }}

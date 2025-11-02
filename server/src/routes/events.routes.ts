@@ -4,6 +4,8 @@ import type { Request, Response } from "express";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import { createEventValidation } from "../middleware/validators/event.validator.js";
 import { handleValidationErrors } from "../middleware/validationHandler.js";
+import QRCode from "qrcode";
+import { randomUUID } from "crypto";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -340,6 +342,151 @@ router.delete("/:id/save", async (req: Request, res: Response) => {
     }
     res.status(500).json({
       error: "Failed to unsave event",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// POST /api/events/:id/ticket - Claim a ticket for an event
+router.post("/:id/ticket", async (req: Request, res: Response) => {
+  try {
+    const eventId = parseInt(req.params.id);
+    const { userId } = req.body;
+
+    if (isNaN(eventId) || !userId) {
+      return res.status(400).json({ error: "Invalid event ID or user ID" });
+    }
+
+    // Check if event exists and is approved
+    const event = await prisma.event.findUnique({ 
+      where: { id: eventId },
+      include: {
+        _count: { select: { ticket: true } }
+      }
+    });
+    
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    if (event.status !== "APPROVED") {
+      return res.status(400).json({ error: "Event is not approved for ticket sales" });
+    }
+
+    // Check if event has available capacity
+    if (event._count.ticket >= event.capacity) {
+      return res.status(400).json({ error: "Event is sold out" });
+    }
+
+    // Check if user already has a ticket for this event
+    const existingTicket = await prisma.ticket.findUnique({
+      where: {
+        userId_eventId: {
+          userId: parseInt(userId),
+          eventId,
+        },
+      },
+    });
+
+    if (existingTicket) {
+      return res.status(200).json({ 
+        message: "You already have a ticket for this event", 
+        ticket: existingTicket 
+      });
+    }
+
+    // Generate QR code data
+    const ticketId = randomUUID();
+    const qrData = JSON.stringify({
+      ticketId,
+      eventId,
+      userId: parseInt(userId),
+      eventTitle: event.title,
+      date: event.date.toISOString(),
+      location: event.location,
+    });
+
+    // Create the ticket
+    const ticket = await prisma.ticket.create({
+      data: {
+        qrCode: ticketId, // Store the unique ID as QR code identifier
+        userId: parseInt(userId),
+        eventId,
+        claimed: true,
+        checkedIn: false,
+        paymentStatus: event.ticketType === "FREE" ? "FREE" : "PENDING",
+        paymentAmount: event.ticketPrice,
+        updatedAt: new Date(),
+      },
+      include: {
+        event: {
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            location: true,
+            ticketType: true,
+            ticketPrice: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({
+      message: "Ticket claimed successfully",
+      ticket,
+      qrData, // Include QR data for frontend to generate QR code
+    });
+  } catch (error) {
+    console.error("Error claiming ticket:", error);
+    res.status(500).json({
+      error: "Failed to claim ticket",
+      details: error instanceof Error ? error.message : error,
+    });
+  }
+});
+
+// GET /api/events/tickets/:userId - Get all tickets for a user
+router.get("/tickets/:userId", async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.userId);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    const tickets = await prisma.ticket.findMany({
+      where: { userId },
+      include: {
+        event: {
+          include: {
+            organization: { select: { id: true, name: true } },
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(tickets);
+  } catch (error) {
+    console.error("Error fetching user tickets:", error);
+    res.status(500).json({
+      error: "Failed to fetch tickets",
       details: error instanceof Error ? error.message : error,
     });
   }

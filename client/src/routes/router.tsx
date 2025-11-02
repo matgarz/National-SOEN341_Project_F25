@@ -10,6 +10,7 @@ import Register from "../components/Register";
 import StudentDashboard from "../components/StudentDashboard";
 import OrganizerCreateEvent from "../components/OrganizerCreateEvent";
 import Calendar from "../components/Calendar";
+import MyEvents from "../components/MyEvents";
 import { useAuth } from "../auth/AuthContext";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
@@ -98,6 +99,15 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["STUDENT", "ORGANIZER", "ADMIN"]}>
             <Calendar />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "my-events",
+        element: (
+          <ProtectedRoute allowedRoles={["STUDENT"]}>
+            <MyEvents />
           </ProtectedRoute>
         ),
       },

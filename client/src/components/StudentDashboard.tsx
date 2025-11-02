@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Filter } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { EventCard, type Event as EventCardEvent } from "./EventCard";
 import { FilterSidebar, type FilterState } from "./FilterSidebar";
+import { EventDetailsModal, type EventDetails } from "./EventDetailsModal";
 import { useAuth } from "../auth/AuthContext";
+import { Check, AlertCircle } from "lucide-react";
 
 // Initial filter state
 const initialFilters: FilterState = {
@@ -47,7 +49,7 @@ type ApiEvent = {
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 /** Map API events → EventCard props */
-const toCard = (e: ApiEvent, bookmarkedIds: Set<string>): EventCardEvent => {
+const toCard = (e: ApiEvent, bookmarkedIds: Set<string>, ticketIds: Set<string>): EventCardEvent => {
   const d = new Date(e.date);
   return {
     id: String(e.id),
@@ -65,7 +67,7 @@ const toCard = (e: ApiEvent, bookmarkedIds: Set<string>): EventCardEvent => {
     image: e.imageUrl ?? "https://via.placeholder.com/640x360?text=Event",
     tags: e.category ? [e.category] : [],
     isBookmarked: bookmarkedIds.has(String(e.id)),
-    hasTicket: false,
+    hasTicket: ticketIds.has(String(e.id)),
   };
 };
 
@@ -73,30 +75,43 @@ export default function StudentDashboard() {
   const { user } = useAuth();
   const [events, setEvents] = useState<EventCardEvent[]>([]);
   const [bookmarkedEventIds, setBookmarkedEventIds] = useState<Set<string>>(new Set());
+  const [claimedTicketIds, setClaimedTicketIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState(initialFilters);
+  const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // Fetch bookmarked events on mount
+  // Fetch bookmarked events and tickets on mount
   useEffect(() => {
     if (!user?.id) return;
     
-    const fetchBookmarkedEvents = async () => {
+    const fetchUserData = async () => {
       try {
-        const res = await fetch(`${API}/api/events/saved/${user.id}`);
-        if (res.ok) {
-          const data: ApiEvent[] = await res.json();
+        // Fetch bookmarked events
+        const bookmarksRes = await fetch(`${API}/api/events/saved/${user.id}`);
+        if (bookmarksRes.ok) {
+          const data: ApiEvent[] = await bookmarksRes.json();
           const ids = new Set(data.map(e => String(e.id)));
           setBookmarkedEventIds(ids);
         }
+
+        // Fetch claimed tickets
+        const ticketsRes = await fetch(`${API}/api/events/tickets/${user.id}`);
+        if (ticketsRes.ok) {
+          const tickets = await ticketsRes.json();
+          const ticketEventIds = new Set(tickets.map((t: any) => String(t.eventId)));
+          setClaimedTicketIds(ticketEventIds);
+        }
       } catch (e) {
-        console.error("Failed to fetch bookmarked events:", e);
+        console.error("Failed to fetch user data:", e);
       }
     };
     
-    fetchBookmarkedEvents();
+    fetchUserData();
   }, [user]);
 
   // Fetch events from API
@@ -112,7 +127,7 @@ export default function StudentDashboard() {
         const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiEvent[] = await res.json();
-        setEvents(data.map(e => toCard(e, bookmarkedEventIds)));
+        setEvents(data.map(e => toCard(e, bookmarkedEventIds, claimedTicketIds)));
       } catch (e: unknown) {
         if (e instanceof Error && e.name !== "AbortError") {
           setError(e.message ?? String(e));
@@ -122,7 +137,7 @@ export default function StudentDashboard() {
       }
     })();
     return () => ctrl.abort();
-  }, [searchQuery, bookmarkedEventIds]);
+  }, [searchQuery, bookmarkedEventIds, claimedTicketIds]);
 
   // Handle bookmark toggle
   const handleBookmark = async (eventId: string) => {
@@ -169,6 +184,49 @@ export default function StudentDashboard() {
     } catch (e) {
       console.error("Failed to toggle bookmark:", e);
     }
+  };
+
+  // Handle view details
+  const handleViewDetails = (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event) {
+      setSelectedEvent(event);
+      setIsDetailsModalOpen(true);
+    }
+  };
+
+  // Handle claim ticket
+  const handleClaimTicket = async (eventId: string) => {
+    if (!user?.id) return;
+    
+    try {
+      const res = await fetch(`${API}/api/events/${eventId}/ticket`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setClaimedTicketIds(prev => new Set(prev).add(eventId));
+        setEvents(prev => prev.map(e => 
+          e.id === eventId ? { ...e, hasTicket: true } : e
+        ));
+        showNotification("Ticket claimed successfully! Check 'My Events' to view your ticket.", "success");
+      } else {
+        const error = await res.json();
+        showNotification(error.error || "Failed to claim ticket", "error");
+      }
+    } catch (e) {
+      console.error("Failed to claim ticket:", e);
+      showNotification("Failed to claim ticket. Please try again.", "error");
+    }
+  };
+
+  // Show notification
+  const showNotification = (message: string, type: "success" | "error") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
   };
 
   // Split events into upcoming and past, then apply filters
@@ -370,7 +428,34 @@ export default function StudentDashboard() {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-4 right-4 z-50"
+          >
+            <div
+              className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+                notification.type === "success"
+                  ? "bg-green-500 text-white"
+                  : "bg-red-500 text-white"
+              }`}
+            >
+              {notification.type === "success" ? (
+                <Check className="h-5 w-5" />
+              ) : (
+                <AlertCircle className="h-5 w-5" />
+              )}
+              <p className="font-medium">{notification.message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center gap-6">
         <Button 
           variant="default" 
@@ -419,8 +504,8 @@ export default function StudentDashboard() {
                       event={ev}
                       userRole="student"
                       onBookmark={handleBookmark}
-                      onClaimTicket={(id) => console.log("claim/buy", id)}
-                      onViewDetails={(id) => console.log("details", id)}
+                      onClaimTicket={handleClaimTicket}
+                      onViewDetails={handleViewDetails}
                     />
                   ))}
                 </div>
@@ -440,7 +525,7 @@ export default function StudentDashboard() {
                       event={ev}
                       userRole="student"
                       onBookmark={handleBookmark}
-                      onViewDetails={(id) => console.log("details", id)}
+                      onViewDetails={handleViewDetails}
                     />
                   ))}
                 </div>
@@ -475,6 +560,17 @@ export default function StudentDashboard() {
           </Tabs>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+          onClaimTicket={handleClaimTicket}
+          userRole="student"
+        />
+      )}
     </div>
   )
 }
