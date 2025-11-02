@@ -8,8 +8,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "node",
-    "types": [ "react", "react-dom" ],
-    "lib": [ "dom", "esnext" ]
+    "types": ["react", "react-dom"],
+    "lib": ["dom", "esnext"]
   }
 }
-

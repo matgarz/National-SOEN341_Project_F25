@@ -29,7 +29,6 @@ export default function OrganizerCreateEvent() {
     category: "",
     imageUrl: "",
   });
- 
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -209,7 +208,7 @@ export default function OrganizerCreateEvent() {
             onChange={handleChange}
             className="w-full border rounded p-2 mt-1"
             required
-                  >
+          >
             <option value="">Select a category</option>
             <option value="Academic">Academic</option>
             <option value="Social">Social</option>
