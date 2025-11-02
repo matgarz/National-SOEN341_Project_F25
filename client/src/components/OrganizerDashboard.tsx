@@ -59,18 +59,21 @@ export default function OrganizerDashboard() {
      }, [organizerId]);
 
     // Separate into upcoming/past events based on date
-    const now = new Date();
+    const now = Date.now();
+
     const filteredAnalytics = useMemo(() => {
         return analytics
             .filter((a) => {
-                const eventDate = new Date(a.date);
-                const isUpcoming = eventDate >= now;
+                const eventTime = new Date(a.date).getTime();
+                const isUpcoming = eventTime > now;
                 return filter === "upcoming" ? isUpcoming : !isUpcoming;
             })
             .filter((a) =>
                 a.title.toLowerCase().includes(searchQuery.toLowerCase())
             );
-    }, [analytics, filter, searchQuery]);
+    }, [analytics, filter, searchQuery, now]);
+
+
 
     // Compute summary stats
     const summary = useMemo(() => {

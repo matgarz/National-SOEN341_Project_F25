@@ -330,4 +330,61 @@ router.post(
   },
 );
 
+// POST /api/events/validate-ticket
+router.post("/validate-ticket", async (req: Request, res: Response) => {
+    try {
+        const { qrCode } = req.body;
+
+        if (!qrCode || typeof qrCode !== "string") {
+            return res.status(400).json({ error: "QR code is required" });
+        }
+
+        // Find ticket with that QR code
+        const ticket = await prisma.ticket.findUnique({
+            where: { qrCode },
+            include: {
+                user: { select: { id: true, name: true, email: true } },
+                event: { select: { id: true, title: true, date: true } },
+            },
+        });
+
+        if (!ticket) {
+            return res.status(404).json({ error: "Invalid QR code" });
+        }
+
+        // Check if already checked in
+        if (ticket.checkedIn) {
+            return res.status(400).json({
+                error: "Ticket already validated",
+                checkedInAt: ticket.checkedInAt,
+                user: ticket.user,
+                event: ticket.event,
+            });
+        }
+
+        // Update ticket as checked-in
+        const updatedTicket = await prisma.ticket.update({
+            where: { id: ticket.id },
+            data: { checkedIn: true, checkedInAt: new Date() },
+        });
+
+        res.json({
+            message: "Ticket successfully validated",
+            ticket: {
+                id: updatedTicket.id,
+                user: ticket.user,
+                event: ticket.event,
+                checkedInAt: updatedTicket.checkedInAt,
+            },
+        });
+    } catch (error) {
+        console.error("Error validating ticket:", error);
+        res.status(500).json({
+            error: "Failed to validate ticket",
+            details: error instanceof Error ? error.message : error,
+        });
+    }
+});
+
+
 export default router;

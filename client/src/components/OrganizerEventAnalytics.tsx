@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useAuth } from "../auth/AuthContext";
+import jsQR from "jsqr";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -30,6 +31,7 @@ export default function OrganizerEventAnalytics() {
     const [attendees, setAttendees] = useState<Attendee[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [lastFile, setLastFile] = useState<string | null>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -77,10 +79,65 @@ export default function OrganizerEventAnalytics() {
         URL.revokeObjectURL(url);
     };
 
-    const handleQRUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        alert(`Pretending to scan QR from file: ${file.name}`);
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const img = new Image();
+            img.onload = async () => {
+                // Draw image to a canvas
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return alert("Canvas not supported.");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Extract pixel data
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Decode QR code
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                if (!code) {
+                    alert("❌ No QR code detected in the image.");
+                    return;
+                }
+
+                const qrCode = code.data.trim();
+                console.log("Decoded QR code:", qrCode);
+
+                try {
+                    const res = await fetch(`${API}/api/events/validate-ticket`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ qrCode }),
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.error || `HTTP ${res.status}`);
+                    }
+
+                    const data = await res.json();
+                    alert(`✅ Ticket validated: ${data.ticket?.user?.name || "Unknown user"}`);
+
+                    // Optional: refresh attendees after successful check-in
+                    setAttendees((prev) =>
+                        prev.map((a) =>
+                            a.email === data.ticket.user.email ? { ...a, checkedIn: true } : a
+                        )
+                    );
+                } catch (err: any) {
+                    alert(`❌ Validation failed: ${err.message}`);
+                }
+            };
+
+            img.src = reader.result as string;
+        };
+
+        reader.readAsDataURL(file);
     };
 
     if (loading) return <div className="p-4">Loading event details...</div>;
@@ -160,15 +217,36 @@ export default function OrganizerEventAnalytics() {
                 </CardHeader>
                 <CardContent>
                     <p className="mb-2 text-sm opacity-80">
-                        Upload a QR code image to validate a ticket (placeholder for scanner
-                        integration).
+                        Upload a QR code image to validate a ticket.
                     </p>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleQRUpload}
-                        className="block"
-                    />
+
+                    <div className="flex items-center gap-3">
+                        <input
+                            id="qrFile"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                                handleQRUpload(e);
+                                const fileName = e.target.files?.[0]?.name;
+                                if (fileName) setLastFile(fileName);
+                            }}
+                            className="hidden"
+                        />
+
+                        <Button
+                            type="button"
+                            className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+                            onClick={() => document.getElementById("qrFile")?.click()}
+                        >
+                            Choose File
+                        </Button>
+
+                        {lastFile && (
+                            <span className="text-sm text-gray-600">
+                                Last file selected: <strong>{lastFile}</strong>
+                            </span>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>
