@@ -14,8 +14,6 @@ interface EventForm {
   imageUrl?: string;
 }
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
 export default function OrganizerCreateEvent() {
   const { user } = useAuth();
   const [form, setForm] = useState<EventForm>({
@@ -64,7 +62,7 @@ export default function OrganizerCreateEvent() {
         organizationId: user?.organizationId,
       };
 
-      const res = await fetch(`${API}/api/events`, {
+      const res = await fetch(`/api/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

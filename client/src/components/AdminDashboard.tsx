@@ -125,8 +125,6 @@ export default function AdminDashboard() {
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 
   // Fetch all data
   useEffect(() => {
@@ -153,7 +151,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+      const response = await fetch(`/api/admin/stats`, {
         headers: getAuthHeaders(),
       });
       if (!response.ok) throw new Error("Failed to fetch stats");
@@ -170,7 +168,7 @@ export default function AdminDashboard() {
   const fetchPendingOrganizers = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/pending-organizers`,
+        `/api/admin/users/pending-organizers`,
         { headers: getAuthHeaders() },
       );
       if (response.ok) {
@@ -184,7 +182,7 @@ export default function AdminDashboard() {
 
   const fetchEvents = async () => {
     try {
-      let url = `${API_BASE_URL}/api/admin/events`;
+      let url = `/api/admin/events`;
       if (eventStatusFilter !== "ALL") {
         url += `?status=${eventStatusFilter}`;
       }
@@ -199,7 +197,7 @@ export default function AdminDashboard() {
 
   const fetchUsers = async () => {
     try {
-      let url = `${API_BASE_URL}/api/admin/users`;
+      let url = `/api/admin/users`;
       if (userRoleFilter !== "ALL") {
         url += `?role=${userRoleFilter}`;
       }
@@ -231,7 +229,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/events/${eventId}/status`,
+        `/api/admin/events/${eventId}/status`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -254,7 +252,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/${userId}/approve`,
+        `/api/admin/users/${userId}/approve`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -288,7 +286,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/${userId}/reject`,
+        `/api/admin/users/${userId}/reject`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -323,7 +321,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/events/${eventId}`,
+        `/api/admin/events/${eventId}`,
         {
           method: "DELETE",
           headers: getAuthHeaders(),
@@ -350,7 +348,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/${userId}/role`,
+        `/api/admin/users/${userId}/role`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -380,7 +378,7 @@ export default function AdminDashboard() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/users/${userId}`,
+        `/api/admin/users/${userId}`,
         {
           method: "DELETE",
           headers: getAuthHeaders(),

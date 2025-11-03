@@ -47,7 +47,7 @@ function QRCode({ link, size, title }: QRCodeProps) {
           <ItemContent>
             <QRCodeSVG
               value={link}
-              title={title} //TODO cahnge the title
+              title={title}
               size={size - padding}
               bgColor={"#ffffff"}
               fgColor={"#000000"}

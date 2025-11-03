@@ -81,9 +81,6 @@ export function Analytics({ userRole }: AnalyticsProps) {
   );
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
-
   useEffect(() => {
     fetchAnalytics();
   }, []);
@@ -91,7 +88,7 @@ export function Analytics({ userRole }: AnalyticsProps) {
   const fetchAnalytics = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/analytics/comprehensive`,
+        `/api/admin/analytics/comprehensive`,
         {
           headers: {
             ...getAuthHeader(),

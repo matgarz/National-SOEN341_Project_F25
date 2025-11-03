@@ -29,7 +29,7 @@ export default function AdminUserManagement() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      let url = `${import.meta.env.VITE_API_BASE_URL}/api/admin/users`;
+      let url = `/api/admin/users`;
 
       if (roleFilter !== "ALL") {
         url += `?role=${roleFilter}`;
@@ -63,7 +63,7 @@ export default function AdminUserManagement() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}/role`,
+        `/api/admin/users/${userId}/role`,
         {
           method: "PATCH",
           headers: {
@@ -97,7 +97,7 @@ export default function AdminUserManagement() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}`,
+        `/api/admin/users/${userId}`,
         {
           method: "DELETE",
           headers: {

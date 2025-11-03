@@ -6,8 +6,6 @@ import { Button } from "./ui/Button";
 import { EventAnalyticsCard } from "./EventAnalyticsCard";
 import { useAuth } from "../auth/AuthContext";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
 type AnalyticsData = {
   eventId: number;
   title: string;
@@ -44,7 +42,7 @@ export default function OrganizerDashboard() {
     (async () => {
       try {
         setLoading(true);
-        const url = `${API}/api/events/organizer/${organizerId}/analytics`;
+        const url = `/api/events/organizer/${organizerId}/analytics`;
         const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: AnalyticsData[] = await res.json();
