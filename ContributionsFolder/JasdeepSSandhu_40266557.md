@@ -28,12 +28,12 @@ Almost always active on discord but an estimate of daily Discord involvement: 1 
 
 ## Sprint 3:
 
-- Built, worked on and fixed the issues with CI Testing workflows using Github Actions
-- Created a Project and connected it to this repository. Then I linked and assigned the issues and pull reuqests under different tabs (like ToDo, Ready, Done, etc.) within the Project. This helped significantly with Sprint Planning.
-- Worked on finished the Student UI Features.
-- Implemented filters fully to filter the events
-- Implemented the Details functionality to show the modal UI component which shows the details of the particular event & location of the event using an integrated Map (using react leaflet lib)
-- Integrated QR Code ticket generation feature (written by Ariberto) within the Student feature and create the UI for it.
-- Made the technical architecture as well as wrote down the technical documentation for the project. (Worked on the diagram with Matteo)
-- As a scrum master, I kept track of the tasks to be done with the help of issues. I also tracked all the pull request changes, reviewed and approved them for merge. Handled multiple pull requests together
-- Kept up with everyone on Discord with their tasks and made sure the sprint goals are met before the deadline with all the requirements as mentioned in the Sprint 3 document.
+- Built, worked on and fixed the issues with CI Testing workflows using Github Actions (~3 hours on Oct 30)
+- Created a Project and connected it to this repository. Then I linked and assigned the issues and pull reuqests under different tabs (like ToDo, Ready, Done, etc.) within the Project. This helped significantly with Sprint Planning. (~3 hours on Oct 26)
+- Worked on finished the Student UI Features. (~12 hours on Oct 31)
+- Implemented filters fully to filter the events (~3 hours on Oct 31)
+- Implemented the Details functionality to show the modal UI component which shows the details of the particular event & location of the event using an integrated Map (using react leaflet lib) (~4 hours on Nov 1)
+- Integrated QR Code ticket generation feature (written by Ariberto) within the Student feature and create the UI for it. (~4 to 5 hours on Nov 1)
+- Made the technical architecture as well as wrote down the technical documentation for the project. (Worked on the diagram with Matteo) (~2 hours on Nov 2)
+- As a scrum master, I kept track of the tasks to be done with the help of issues. I also tracked all the pull request changes, reviewed and approved them for merge. Handled multiple pull requests together (throughout sprint 3)
+- Kept up with everyone on Discord with their tasks and made sure the sprint goals are met before the deadline with all the requirements as mentioned in the Sprint 3 document. (throughout Sprint 3)
