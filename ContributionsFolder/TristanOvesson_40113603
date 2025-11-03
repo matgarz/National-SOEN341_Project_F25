@@ -1,3 +1,4 @@
+--- Sprint 1 ---
 Dates: Sept 13-Sept 23: 
 I participated in the first meeting which lasted about 20min. Then got very sick and was not able to do much school work for 10 days. 
 I kept up to date by checking the gitHub and Discord regularly to stay involved in the discussions. 
@@ -16,5 +17,25 @@ We have a laboratory tonight where we've planned to all meet before the lab star
 I created my own branch from the main branch and inside it created the ContributionsFolder where all our contributions should be.
 After writing this, I will make a pull request so that all my teammates complete this section as well. This took me about 1 hour.
 
-Overall time spent on project so far: 
+Overall time spent on project in Sprint 1: 
 20min + 15min*10days + 2hours + 1hour = 350min = 5 hours and 50 minutes.
+
+--- Sprint 2 ---
+In sprint 2, I created the organizer dashboard and started implementing the create event functionality. I did not fully complete any of the features but got close to both.
+I also heavily reviewed everyone's code and stayed on top of the project workflow, both frontend and backend to be able to full-stack develop the organizer functionalities.
+I received lots of help from my teammates to understand code they had written and gained a great amount of knowledge.
+Lastly, I checked gitHub daily and left comments/reviewed code and learnt how to use gitHub even better than previously.
+
+I spent about 15min a day on gitHub, on average. I spent about 10 hours developing my features. I spent 10 more hours reading code and researching the libraries and workflows we decided to use as a team.
+Overall time spent on project in Sprint 2:
+15 min/day * 17 days + 10 hours + 10 hours = 24.5 hours
+
+--- Sprint 3 ---
+In sprint 3, I completed all organizer requirements. I wrote new routes to access the database properly and fetch events/tickets/analytics. I changed the organizer dashboard to show analytic cards instead of looking like the student dashboard --> we are still discussing this, might change it back.
+I used AuthContext to retrieve logged-in user's information to be able to create events properly and for those events to be linked to creator. The analytic cards I spoke about earlier have a View Details button which takes us to a page with more detailed analytics.
+It is from the mentioned page that we can export attendee list in .csv and where we can upload QR-code images to validate tickets. I performed robust testing on all my implemented features in order to ensure I passed the Acceptance tests on all my related user stories.
+Lastly, I still checked gitHub daily and left comments on issues, closed issues, linked issues to PRs, reviewed PRs and assisted in Discord discussions among teammates.
+I spent a total of 20 hours developing and 4 hours reviewing gitHub and Discord. Lastly I created the issues which we discussed as a team for our Sprint 4, this took me about an hour total including the discussion with teammates.
+Overall time spent on project in Sprint 3:
+20 hours + 4 hours + 1 hour = 25 hours.
+

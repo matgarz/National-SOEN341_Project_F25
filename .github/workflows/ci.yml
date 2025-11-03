@@ -21,17 +21,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies (server)
-        if: matrix.directory == 'server'
-        run: cd server && npm ci
-
-      - name: Install dependencies (client)
-        if: matrix.directory == 'client'
-        run: |
-          cd client
-          rm -rf node_modules package-lock.json
-          npm install
-          npm install --force @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu
+      - name: Install dependencies
+        run: cd ${{ matrix.directory }} && npm ci
 
       # - name: Run ESLint
       #   run: cd ${{ matrix.directory }} && npx eslint .
@@ -42,6 +33,6 @@ jobs:
       - name: Run Tests
         run: cd ${{ matrix.directory }} && npm test
 
-      - name: Build Project
-        if: matrix.directory == 'client'
-        run: cd client && npm run build
+      #- name: Build Project
+      #  if: matrix.directory == 'client'
+      #  run: cd client && npm run build

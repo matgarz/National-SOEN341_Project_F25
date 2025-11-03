@@ -2,13 +2,13 @@ import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+//import {
+//Select,
+//SelectContent,
+//SelectItem,
+//SelectTrigger,
+//SelectValue,
+//} from "./ui/select";
 import { Badge } from "./ui/badge";
 import { Link } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export default function Header({
   currentView,
   userRole,
   onViewChange,
-  onRoleChange,
+  //onRoleChange,
   onLogout,
   searchQuery,
   onSearchChange,
@@ -99,19 +99,6 @@ export default function Header({
             {/* Logged-in user */}
             {userRole !== "guest" && user && (
               <div className="flex items-center gap-4">
-                {/* Role selector */}
-                <Select value={userRole} onValueChange={onRoleChange}>
-                  <SelectTrigger className="w-32 border-primary/20 hover:border-primary/40 transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-
-                  <SelectContent className="z-50 bg-white border-b-blue-600 shadow-md">
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="organizer">Organizer</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 {/* Role badge */}
                 <Badge className={`${getRoleColor(userRole)} shadow-sm`}>
                   {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
@@ -159,12 +146,18 @@ export default function Header({
           <nav className="flex items-center space-x-2">
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Link
-                to="/calendar"
+                to={
+                  userRole === "admin"
+                    ? "/admin/events-calendar"
+                    : userRole === "student"
+                      ? "/my-events"
+                      : "/calendar"
+                }
                 className="flex gap-2 items-center px-3 py-2 rounded hover:bg-primary/10 transition-colors text-base"
                 style={{ textDecoration: "none" }}
               >
                 <Calendar className="h-4 w-4" />
-                My Events
+                {userRole === "admin" ? "All Events" : "My Events"}
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
