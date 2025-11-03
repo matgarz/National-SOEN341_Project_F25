@@ -21,6 +21,38 @@ September 19 - September 25: ~120 minutes
 - Verify task breakdown for user stories are all assigned to team members.
 - Ensure meeting minutes are consistent and accurate.
 
-Total time spent during Sprint #1: 235 minutes (~3 hours 55 minutes)
+Total time spent during Sprint #1: ~235 minutes (3 hours 55 minutes)
+
+
+# Sprint 2
+
+September 28 - October 5: ~120 minutes
+-Implemented search function allowing users to quickly identify desired events by typing keyword in search bar.
+-Search bar compares the keyword entered with all events in the database for matching title, or description.
+-Debug and tested search function to verify correct search results for upcoming results.
+
+
+October 5 - October 12: ~210 minutes
+-Implemented dynamic calendar feature to allow users (Student, Organizer, Admin) to add, view, and manage events on their personal calendar.
+-Implemented real time rendering of the calendar, so when an event is added from the upcoming events in the calendar page, the calendar displays it immediately.
+-Adjusted calendar time format to fetch event time/duration to display events as coloured blocks representing the event.
+
+Total time spent during Sprint #2: ~330 minutes (5 hours 30 minutes)
+
+
+# Sprint 3
+
+October 12 - Nov 2: ~120 minutes
+-Managed Github repository (tracked open issues and closed completed tasks).
+-Reviewed pull requests
+-Contributed to task prioritization
+-Organized sprint backlog (during lab sessions).
+-Linked tasks to their respective user stories, and closed those that have been completed.
+
+Total time spent during Sprint #2: ~120 minutes (2 hours)
+
+
+
+
 
 
