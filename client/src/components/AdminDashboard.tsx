@@ -3,16 +3,14 @@ import { getAuthHeader } from "../auth/tokenAuth";
 import {
   Check,
   X,
-  //Eye,
   Users,
   Calendar,
   AlertTriangle,
   TrendingUp,
   Trash2,
   Edit2,
-  //Building2,
   Search,
-  //Filter,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import {
@@ -37,6 +35,16 @@ import { Analytics } from "./Analytics";
 import { Input } from "./ui/input";
 import AdminOrganizations from "./AdminOrganizations";
 
+interface Organization {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  _count?: {
+    event: number;
+  };
+}
+
 interface AdminStats {
   totalUsers: number;
   totalEvents: number;
@@ -52,16 +60,6 @@ interface AdminStats {
     REJECTED: number;
     CANCELLED: number;
     COMPLETED: number;
-  };
-}
-
-interface Organization {
-  id: number;
-  name: string;
-  description: string;
-  createdAt: string;
-  _count?: {
-    event: number;
   };
 }
 
@@ -97,6 +95,7 @@ interface User {
   email: string;
   studentId: string;
   role: "STUDENT" | "ORGANIZER" | "ADMIN";
+  accountStatus?: "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED";
   organizationId: number | null;
   organization?: {
     id: number;
@@ -122,8 +121,9 @@ export default function AdminDashboard() {
 
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
+
+  const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  
 
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
     fetchStats();
     fetchEvents();
     fetchUsers();
-    fetchOrganizations();
+    fetchPendingOrganizers();
   }, []);
 
   useEffect(() => {
@@ -145,7 +145,6 @@ export default function AdminDashboard() {
   }, [userRoleFilter]);
 
   const getAuthHeaders = () => {
-    //const token = localStorage.getItem("token");
     return {
       ...getAuthHeader(),
       "Content-Type": "application/json",
@@ -167,16 +166,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchOrganizations = async () => {
+  // Fetch Pending Orgs
+  const fetchPendingOrganizers = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
-        headers: getAuthHeaders(),
-      });
-      if (!response.ok) throw new Error("Failed to fetch organizations");
-      const data = await response.json();
-      setOrganizations(data);
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/pending-organizers`,
+        { headers: getAuthHeaders() },
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setPendingOrganizers(data);
+      }
     } catch (error) {
-      console.error("Error fetching organizations:", error);
+      console.error("Error fetching pending organizers:", error);
     }
   };
 
@@ -247,6 +249,69 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleApproveOrganizer = async (userId: number, userName: string) => {
+    if (!confirm(`Approve organizer account for ${userName}?`)) return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/approve`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+        },
+      );
+
+      if (response.ok) {
+        alert("Organizer approved successfully!");
+        fetchPendingOrganizers();
+        fetchUsers();
+        fetchStats();
+      } else {
+        const error = await response.json();
+        alert(
+          `Failed to approve organizer: ${error.message || "Unknown error"}`,
+        );
+      }
+    } catch (error) {
+      console.error("Error approving organizer:", error);
+      alert("Failed to approve organizer");
+    }
+  };
+
+  const handleRejectOrganizer = async (userId: number, userName: string) => {
+    if (
+      !confirm(
+        `Reject organizer account for ${userName}? This cannot be undone.`,
+      )
+    )
+      return;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/reject`,
+        {
+          method: "PATCH",
+          headers: getAuthHeaders(),
+        },
+      );
+
+      if (response.ok) {
+        alert("Organizer rejected successfully");
+        fetchPendingOrganizers();
+        fetchUsers();
+        fetchStats();
+      } else {
+        const error = await response.json();
+        alert(
+          `Failed to reject organizer: ${error.message || "Unknown error"}`,
+        );
+      }
+    } catch (error) {
+      console.error("Error rejecting organizer:", error);
+      alert("Failed to reject organizer");
+    }
+  };
+
   const handleDeleteEvent = async (eventId: number, eventTitle: string) => {
     if (
       !confirm(
@@ -276,11 +341,7 @@ export default function AdminDashboard() {
   };
 
   // User actions
-  const handleRoleChange = async (
-    userId: number,
-    role: string,
-    organizationId?: number | null,
-  ) => {
+  const handleRoleChange = async (userId: number, role: string) => {
     if (
       !confirm(`Are you sure you want to change this user's role to ${role}?`)
     ) {
@@ -293,10 +354,7 @@ export default function AdminDashboard() {
         {
           method: "PATCH",
           headers: getAuthHeaders(),
-          body: JSON.stringify({
-            role,
-            organizationId: role === "ORGANIZER" ? organizationId : null,
-          }),
+          body: JSON.stringify({ role }),
         },
       );
 
@@ -432,13 +490,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingEventsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {flaggedEventsCount > 0 && (
-                <span className="text-red-600">
-                  {flaggedEventsCount} flagged
-                </span>
-              )}
-            </p>
+            <p className="text-xs text-muted-foreground">Awaiting approval</p>
           </CardContent>
         </Card>
 
@@ -469,24 +521,128 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Alerts */}
-      {pendingEventsCount > 0 && (
+      {/* Alert for pending items */}
+      {(pendingEventsCount > 0 || pendingOrganizers.length > 0) && (
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            {pendingEventsCount} event{pendingEventsCount > 1 ? "s" : ""}{" "}
-            awaiting approval. Please review the moderation queue.
+            {pendingEventsCount > 0 && (
+              <span>
+                {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
+                awaiting approval.
+              </span>
+            )}
+            {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
+            {pendingOrganizers.length > 0 && (
+              <span>
+                {pendingOrganizers.length} organizer account
+                {pendingOrganizers.length !== 1 ? "s" : ""} awaiting approval.
+              </span>
+            )}
           </AlertDescription>
         </Alert>
       )}
 
+      {/* Pending Organizer Approvals Section */}
+      {pendingOrganizers.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-blue-900">
+                Pending Organizer Approvals
+              </CardTitle>
+            </div>
+            <CardDescription className="text-blue-700">
+              Review and approve organizer account requests
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {pendingOrganizers.map((organizer) => (
+                <div
+                  key={organizer.id}
+                  className="bg-white rounded-lg p-4 border border-blue-200 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        {organizer.name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {organizer.email}
+                      </div>
+                      {organizer.organization && (
+                        <div className="text-sm text-gray-600 mt-1">
+                          Organization:{" "}
+                          <span className="font-medium">
+                            {organizer.organization.name}
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        Requested:{" "}
+                        {new Date(organizer.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleApproveOrganizer(organizer.id, organizer.name)
+                        }
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          handleRejectOrganizer(organizer.id, organizer.name)
+                        }
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Main Content Tabs */}
       <Tabs defaultValue="events" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="events">Event Moderation</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="analytics">Platform Analytics</TabsTrigger>
+        <TabsList className="grid grid-cols-4 gap-2 bg-gradient-to-r from-blue-50 to-purple-50 p-2 rounded-xl shadow-sm border border-gray-200">
+          <TabsTrigger
+            value="events"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            📋 Event Moderation
+          </TabsTrigger>
+          <TabsTrigger
+            value="users"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            👥 User Management
+          </TabsTrigger>
+          <TabsTrigger
+            value="organizations"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            🏢 Organizations
+          </TabsTrigger>
+          <TabsTrigger
+            value="analytics"
+            className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:scale-105 transition-all duration-200 hover:bg-white/50 font-semibold text-sm"
+          >
+            📊 Platform Analytics
+          </TabsTrigger>
         </TabsList>
 
         {/* EVENT MODERATION TAB */}
@@ -539,91 +695,62 @@ export default function AdminDashboard() {
                     <TableRow key={event.id}>
                       <TableCell>
                         <div>
-                          <span className="font-medium">{event.title}</span>
+                          <div className="font-medium">{event.title}</div>
                           <div className="text-xs text-gray-500">
                             {event.category}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>{event.organization?.name || "N/A"}</TableCell>
-                      <TableCell>{event.user?.name}</TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{event.user.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {event.user.email}
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {new Date(event.date).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={getStatusColor(event.status)}
-                        >
+                        <Badge className={getStatusColor(event.status)}>
                           {event.status}
                         </Badge>
                       </TableCell>
                       <TableCell>{event._count?.ticket || 0}</TableCell>
                       <TableCell>
-                        {event.status === "PENDING" ? (
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "APPROVED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "REJECTED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleDeleteEvent(event.id, event.title)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        ) : event.status === "APPROVED" ? (
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEventAction(
-                                  event.id,
-                                  "CANCELLED",
-                                  event.title,
-                                )
-                              }
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() =>
-                                handleDeleteEvent(event.id, event.title)
-                              }
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        ) : (
+                        <div className="flex gap-2">
+                          {event.status === "PENDING" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  handleEventAction(
+                                    event.id,
+                                    "APPROVED",
+                                    event.title,
+                                  )
+                                }
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  handleEventAction(
+                                    event.id,
+                                    "REJECTED",
+                                    event.title,
+                                  )
+                                }
+                              >
+                                <X className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"
@@ -633,7 +760,7 @@ export default function AdminDashboard() {
                           >
                             <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
-                        )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -683,8 +810,8 @@ export default function AdminDashboard() {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Student ID</TableHead>
-                    <TableHead>Role</TableHead>
                     <TableHead>Activity</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -727,36 +854,11 @@ export default function AdminDashboard() {
                               <option value="ADMIN">Admin</option>
                             </select>
 
-                            {/* Organization selector - only show for organizers */}
-                            {newRole === "ORGANIZER" && (
-                              <select
-                                value={user.organizationId || ""}
-                                onChange={(e) => {
-                                  const orgId = e.target.value
-                                    ? parseInt(e.target.value)
-                                    : null;
-                                  user.organizationId = orgId;
-                                }}
-                                className="text-sm border rounded px-2 py-1"
-                              >
-                                <option value="">No Organization</option>
-                                {organizations.map((org) => (
-                                  <option key={org.id} value={org.id}>
-                                    {org.name}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
-
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 onClick={() =>
-                                  handleRoleChange(
-                                    user.id,
-                                    newRole,
-                                    user.organizationId,
-                                  )
+                                  handleRoleChange(user.id, newRole)
                                 }
                                 disabled={!newRole}
                               >

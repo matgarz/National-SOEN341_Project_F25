@@ -1,9 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenAuth";
 import { useAuth } from "../auth/AuthContext";
 
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
+
+interface Organization {
+  id: number;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -20,6 +27,8 @@ export default function Register() {
     organizationId: "",
   });
 
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -28,6 +37,30 @@ export default function Register() {
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
   //const isAdmin = form.role === "ADMIN";
+
+  useEffect(() => {
+    if (isOrganizer && organizations.length === 0) {
+      fetchOrganizations();
+    }
+  }, [isOrganizer]);
+
+  const fetchOrganizations = async () => {
+    setLoadingOrgs(true);
+    try {
+      const response = await fetch("/api/organizations/public");
+      if (response.ok) {
+        const data = await response.json();
+        setOrganizations(data);
+      } else {
+        setError("Failed to load organizations");
+      }
+    } catch (err) {
+      console.error("Error fetching organizations:", err);
+      setError("Failed to load organizations");
+    } finally {
+      setLoadingOrgs(false);
+    }
+  };
 
   const isValid = useMemo(() => {
     if (!form.firstName || !form.lastName) return false;
@@ -38,7 +71,7 @@ export default function Register() {
       if (!/^\d{6,}$/.test(form.studentId)) return false;
     }
     if (form.role === "ORGANIZER") {
-      // TODO add constraints for organizer ie organization Id;
+      if (!form.organizationId || form.organizationId === "") return false;
     }
     if (form.role === "ADMIN") {
       // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
@@ -63,7 +96,7 @@ export default function Register() {
     };
     if (isStudent) payload.studentId = form.studentId.trim();
     if (isOrganizer) {
-      payload.organizationID = null;
+      payload.organizationID = parseInt(form.organizationId);
     }
 
     try {
@@ -259,6 +292,58 @@ export default function Register() {
                 border: "1px solid #ccc",
               }}
             />
+          </label>
+        )}
+
+        {isOrganizer && (
+          <label style={{ display: "block", marginTop: 12 }}>
+            <span style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+              Organization <span style={{ color: "#dc2626" }}>*</span>
+            </span>
+            {loadingOrgs ? (
+              <div
+                style={{
+                  padding: "10px 12px",
+                  color: "#666",
+                  fontStyle: "italic",
+                }}
+              >
+                Loading organizations...
+              </div>
+            ) : (
+              <select
+                required
+                value={form.organizationId}
+                onChange={set("organizationId")}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  border: "1px solid #ccc",
+                }}
+              >
+                <option value="">Select your organization</option>
+                {organizations
+                  .filter((org) => org.isActive)
+                  .map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name}
+                    </option>
+                  ))}
+              </select>
+            )}
+            {organizations.length === 0 && !loadingOrgs && (
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "#dc2626",
+                  marginTop: 4,
+                }}
+              >
+                No active organizations available. Please contact an
+                administrator.
+              </div>
+            )}
           </label>
         )}
 

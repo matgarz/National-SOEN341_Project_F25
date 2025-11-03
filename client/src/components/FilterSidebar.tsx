@@ -112,7 +112,7 @@ function FilterContent({
       </div>
 
       {/* Sort By */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label>Sort By</Label>
         <Select
           value={filters.sortBy}
@@ -257,10 +257,11 @@ export function FilterSidebar({
 
   return (
     <motion.div
-      className="hidden lg:block w-80 bg-white/70 backdrop-blur-sm border-r border-gray-200/50 p-6 h-full overflow-y-auto shadow-sm"
+      className="w-80 bg-white/70 backdrop-blur-sm border-r border-gray-200/50 p-6 h-full overflow-y-auto shadow-sm rounded-lg"
       initial={{ x: -320, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      exit={{ x: -320, opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <FilterContent filters={filters} onFiltersChange={onFiltersChange} />
     </motion.div>

@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { Request, Response } from "express";
-import { PrismaClient, user_role } from "@prisma/client";
+import { PrismaClient, user_role, accountstatus } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -10,42 +10,15 @@ const prisma = new PrismaClient();
  * expected in Request Body
  * on Sign up
  */
-type UserSignUp = {
+interface UserSignUp {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   role: user_role;
-};
-
-/**
- * Student specific fields
- * expected in request Body
- * when user is student
- */
-type StudentSignUp = {
-  studentId: string;
-};
-
-/**
- * additional fields expected on user sign up
- * when user is an organizer
- */
-type OrganizerSignUp = {
-  organization_Id: string;
-};
-
-type AdminSignUp = {
-  adminKey: string;
-};
-
-type UserMinimal = {
-  name: string;
-  email: string;
-  password: string;
-  role: user_role;
-  studentId: string | null;
-};
+  studentId?: string;
+  organizationID?: number;
+}
 
 async function validateUserCreation(
   req: Request,
@@ -53,18 +26,17 @@ async function validateUserCreation(
   next: NextFunction,
 ) {
   const userToCreate: UserSignUp = { ...req.body };
-  const validFields: string = validateUserSignUpFields(userToCreate);
-  const validEmail: string = await validateNewUserEmail(userToCreate.email);
+  const invalidSignup = validateUserSignUpFields(userToCreate);
+  if (invalidSignup) {
+    return res.status(400).json({ error: invalidSignup });
+  }
 
-  //TODO maybe reduce the number of db operations by merging validate email and validate id
-  if (validFields) {
-    return res.status(400).json({ error: validFields });
+  const invalidEmail = await validateNewUserEmail(userToCreate.email);
+  if (invalidEmail) {
+    return res.status(400).json({ error: invalidEmail });
   }
-  if (validEmail) {
-    return res.status(400).json({ error: validEmail });
-  }
+
   next();
-  //maybe using strings like this is bad maybe the functions should return a {message:string, isValid:boolean}
 }
 
 async function validateStudentCreation(
@@ -77,10 +49,13 @@ async function validateStudentCreation(
     return;
   }
 
-  const studentToCreate: StudentSignUp = { ...req.body };
-  const validStudentId: string = await validateNewStudentId(
-    studentToCreate.studentId,
-  );
+  const studentToCreate: UserSignUp = { ...req.body };
+  if (!studentToCreate.studentId || studentToCreate.studentId.trim() === "") {
+    return res
+      .status(400)
+      .json({ error: "Student ID is required for student accounts" });
+  }
+  const validStudentId = await validateNewStudentId(studentToCreate.studentId);
 
   if (validStudentId) {
     return res.status(400).json({ error: validStudentId });
@@ -97,24 +72,52 @@ async function validateOrganizerCreation(
     next();
     return;
   }
-  const organizerToCreate: OrganizerSignUp = { ...req.body };
+  const organizerToCreate: UserSignUp = { ...req.body };
 
-  //TODO validate organizationId;
+  if (!organizerToCreate.organizationID) {
+    return res.status(400).json({
+      error: "Organization selection is required for organizer accounts",
+    });
+  }
 
+  if (
+    typeof organizerToCreate.organizationID !== "number" ||
+    isNaN(organizerToCreate.organizationID)
+  ) {
+    return res.status(400).json({
+      error: "Invalid organization ID",
+    });
+  }
+
+  try {
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizerToCreate.organizationID },
+    });
+
+    if (!organization) {
+      return res.status(400).json({
+        error: "Selected organization does not exist",
+      });
+    }
+
+    if (!organization.isActive) {
+      return res.status(400).json({
+        error: "Selected organization is not active",
+      });
+    }
+  } catch (error) {
+    console.error("Error validating organization:", error);
+    return res.status(500).json({
+      error: "Failed to validate organization",
+    });
+  }
   next();
 }
 
 async function addNewUser(req: Request, res: Response, next: NextFunction) {
   const userToCreate: UserSignUp = { ...req.body };
-  const studentToCreate: StudentSignUp = { ...req.body };
-  const organizerToCreate: OrganizerSignUp = { ...req.body };
-
   try {
-    const createdUser = await addUserToDB(
-      userToCreate,
-      studentToCreate,
-      organizerToCreate,
-    );
+    const createdUser = await addUserToDB(userToCreate);
     next();
   } catch (error) {
     console.error("Failed to create user:", error);
@@ -164,62 +167,37 @@ async function validateNewStudentId(studentId: string): Promise<string> {
   return "";
 }
 
-async function createUser(
-  userToCreate: UserSignUp,
-  studentToCreate: StudentSignUp,
-  organizerToCreate: OrganizerSignUp,
-): Promise<UserMinimal> {
-  const encryptedPassword = await generateSecurePassword(userToCreate.password);
+async function addUserToDB(userToCreate: UserSignUp) {
+  const hashedPassword = await bcrypt.hash(userToCreate.password, 10);
 
-  let name = "";
-  let studentId = null;
-  let OrganizationId = null;
-  if (userToCreate.role === user_role.STUDENT) {
-    studentId = studentToCreate.studentId;
-  }
-  if (userToCreate.role === user_role.ORGANIZER) {
-    OrganizationId = organizerToCreate.organization_Id;
-  }
+  const fullName = `${userToCreate.firstName} ${userToCreate.lastName}`;
 
-  const newUser: UserMinimal = {
-    name: userToCreate.firstName + " " + userToCreate.lastName,
+  const userData: any = {
+    name: fullName,
     email: userToCreate.email,
-    password: encryptedPassword,
+    password: hashedPassword,
     role: userToCreate.role,
-    studentId,
   };
 
-  return newUser;
-}
+  if (userToCreate.role === user_role.STUDENT) {
+    userData.studentId = userToCreate.studentId;
+    userData.accountStatus = accountstatus.APPROVED;
+  }
 
-async function generateSecurePassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt();
-  const encryptedPassword = await bcrypt.hash(password, salt);
-  return encryptedPassword;
-}
+  if (userToCreate.role === user_role.ORGANIZER) {
+    userData.organizationId = userToCreate.organizationID;
+    userData.accountStatus = accountstatus.PENDING; // Requires admin approval
+  }
 
-async function addUserToDB(
-  userToCreate: UserSignUp,
-  studentToCreate: StudentSignUp,
-  organizerToCreate: OrganizerSignUp,
-): Promise<UserMinimal> {
-  const newUser: UserMinimal = await createUser(
-    userToCreate,
-    studentToCreate,
-    organizerToCreate,
-  );
-  const now = new Date();
-  return await prisma.user.create({
-    data: {
-      name: newUser.name,
-      email: newUser.email,
-      password: newUser.password,
-      role: newUser.role,
-      studentId: newUser.studentId,
-      createdAt: now,
-      updatedAt: now,
-    },
+  if (userToCreate.role === user_role.ADMIN) {
+    userData.accountStatus = accountstatus.APPROVED;
+  }
+
+  const newUser = await prisma.user.create({
+    data: userData,
   });
+
+  return newUser;
 }
 
 export {
