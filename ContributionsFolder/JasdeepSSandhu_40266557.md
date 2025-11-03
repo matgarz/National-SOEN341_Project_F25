@@ -37,3 +37,4 @@ Almost always active on discord but an estimate of daily Discord involvement: 1 
 - Made the technical architecture as well as wrote down the technical documentation for the project. (Worked on the diagram with Matteo) (~2 hours on Nov 2)
 - As a scrum master, I kept track of the tasks to be done with the help of issues. I also tracked all the pull request changes, reviewed and approved them for merge. Handled multiple pull requests together (throughout sprint 3)
 - Kept up with everyone on Discord with their tasks and made sure the sprint goals are met before the deadline with all the requirements as mentioned in the Sprint 3 document. (throughout Sprint 3)
+- Also attended weekly meetings during the labs (~ 5 hours total)
