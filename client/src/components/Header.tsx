@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
 import {useNavigate} from "react-router-dom";
+import BackButton from "../routes/BackButton.tsx";
 //import {
 //Select,
 //SelectContent,
@@ -58,10 +59,12 @@ export default function Header({
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo and Role/Guest buttons */}
           <div className="flex items-center space-x-4">
+            <BackButton></BackButton>
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
