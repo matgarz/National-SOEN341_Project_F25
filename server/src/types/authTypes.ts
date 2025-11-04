@@ -3,6 +3,7 @@ import { user_role } from "@prisma/client";
  * User details sent back to the front end
  */
 type UserPublic = {
+  id: number;
   name: string;
   email: string;
   studentId: string | null;
