@@ -111,12 +111,12 @@ export default function Register() {
         return;
       }
 
-      if(payload.role === "ORGANIZER" && signupRes.ok) {
+      if (payload.role === "ORGANIZER" && signupRes.ok) {
         setAccountNotApproved(true);
         setLoading(false);
         return;
       }
-      
+
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -139,7 +139,7 @@ export default function Register() {
       });
       login(data.userPublic);
 
-      navigate('/');
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Network error");
@@ -157,16 +157,21 @@ export default function Register() {
     return (
       <div>
         <AccountNotApproved
-          message={"Your Account Has been been created, it is now pending approval\n\nRemember your email: " + form.email + "\nand Password: " + form.password}
+          message={
+            "Your Account Has been been created, it is now pending approval\n\nRemember your email: " +
+            form.email +
+            "\nand Password: " +
+            form.password
+          }
           nameOfUser={form.firstName + " " + form.lastName}
         />
         <p className="flex flex-col items-center justify-center h-screen text-center">
           remember your email: {form.email}
-          <br/>
+          <br />
           and Password: {form.password}
         </p>
       </div>
-      );
+    );
   }
   return (
     <div

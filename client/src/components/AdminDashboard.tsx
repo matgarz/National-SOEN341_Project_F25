@@ -125,7 +125,6 @@ export default function AdminDashboard() {
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
-
   // Fetch all data
   useEffect(() => {
     fetchStats();
@@ -167,10 +166,9 @@ export default function AdminDashboard() {
   // Fetch Pending Orgs
   const fetchPendingOrganizers = async () => {
     try {
-      const response = await fetch(
-        `/api/admin/users/pending-organizers`,
-        { headers: getAuthHeaders() },
-      );
+      const response = await fetch(`/api/admin/users/pending-organizers`, {
+        headers: getAuthHeaders(),
+      });
       if (response.ok) {
         const data = await response.json();
         setPendingOrganizers(data);
@@ -228,14 +226,11 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `/api/admin/events/${eventId}/status`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ status: newStatus }),
-        },
-      );
+      const response = await fetch(`/api/admin/events/${eventId}/status`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (!response.ok) throw new Error("Failed to update event status");
       alert(`Event ${action}d successfully`);
@@ -251,13 +246,10 @@ export default function AdminDashboard() {
     if (!confirm(`Approve organizer account for ${userName}?`)) return;
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${userId}/approve`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-        },
-      );
+      const response = await fetch(`/api/admin/users/${userId}/approve`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+      });
 
       if (response.ok) {
         alert("Organizer approved successfully!");
@@ -285,13 +277,10 @@ export default function AdminDashboard() {
       return;
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${userId}/reject`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-        },
-      );
+      const response = await fetch(`/api/admin/users/${userId}/reject`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+      });
 
       if (response.ok) {
         alert("Organizer rejected successfully");
@@ -320,13 +309,10 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `/api/admin/events/${eventId}`,
-        {
-          method: "DELETE",
-          headers: getAuthHeaders(),
-        },
-      );
+      const response = await fetch(`/api/admin/events/${eventId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) throw new Error("Failed to delete event");
       alert("Event deleted successfully");
@@ -347,14 +333,11 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${userId}/role`,
-        {
-          method: "PATCH",
-          headers: getAuthHeaders(),
-          body: JSON.stringify({ role }),
-        },
-      );
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ role }),
+      });
 
       if (!response.ok) throw new Error("Failed to update role");
       alert("User role updated successfully");
@@ -377,13 +360,10 @@ export default function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: getAuthHeaders(),
-        },
-      );
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) throw new Error("Failed to delete user");
       alert("User deleted successfully");

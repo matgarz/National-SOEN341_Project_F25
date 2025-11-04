@@ -1,6 +1,6 @@
 import { useAuth } from "./AuthContext";
 import { clearTokens } from "./tokenAuth";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function NoAccess() {
   const { logout } = useAuth();

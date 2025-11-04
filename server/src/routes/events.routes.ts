@@ -172,6 +172,7 @@ router.get(
         return {
           eventId: ev.id,
           title: ev.title,
+          date: ev.date,
           ticketsIssued,
           attended,
           attendanceRate: attendanceRate.toFixed(1),

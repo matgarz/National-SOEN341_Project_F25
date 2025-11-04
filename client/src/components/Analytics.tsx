@@ -87,15 +87,12 @@ export function Analytics({ userRole }: AnalyticsProps) {
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(
-        `/api/admin/analytics/comprehensive`,
-        {
-          headers: {
-            ...getAuthHeader(),
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`/api/admin/analytics/comprehensive`, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to fetch analytics");
 
