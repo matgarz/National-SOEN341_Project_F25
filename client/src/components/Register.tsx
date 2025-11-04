@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenAuth";
 import { useAuth } from "../auth/AuthContext";
 
-type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
+type Role = "STUDENT" | "ORGANIZER";
 
 interface Organization {
   id: number;
@@ -36,7 +36,6 @@ export default function Register() {
 
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
-  //const isAdmin = form.role === "ADMIN";
 
   useEffect(() => {
     if (isOrganizer && organizations.length === 0) {
@@ -72,9 +71,6 @@ export default function Register() {
     }
     if (form.role === "ORGANIZER") {
       if (!form.organizationId || form.organizationId === "") return false;
-    }
-    if (form.role === "ADMIN") {
-      // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
     }
     return true;
   }, [form]);
@@ -125,7 +121,6 @@ export default function Register() {
       const data = await loginRes.json();
       if (!loginRes.ok) throw new Error(data.error || "Auto-login failed");
 
-      // Step 3: Store tokens + user
       setTokens({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
@@ -271,7 +266,6 @@ export default function Register() {
           >
             <option value="STUDENT">STUDENT</option>
             <option value="ORGANIZER">ORGANIZER</option>
-            <option value="ADMIN">ADMIN</option>
           </select>
         </label>
 
