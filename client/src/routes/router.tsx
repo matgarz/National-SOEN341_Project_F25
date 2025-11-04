@@ -35,6 +35,16 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
+function LoggedInRedirect({
+  children,
+}: {
+  children: React.ReactNode,
+}) {
+  const { user } = useAuth();
+  if (!user) return <>{children}</>;
+  return <Navigate to="/" replace />;
+}
+
 function IndexRedirect() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -56,8 +66,22 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <IndexRedirect /> },
 
-      { path: "login", element: <IndexRedirect /> },
-      { path: "register", element: <IndexRedirect /> },
+      {
+        path: "login",
+        element: (
+            <LoggedInRedirect>
+              <Login/>
+            </LoggedInRedirect>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+            <LoggedInRedirect>
+              <Register/>
+            </LoggedInRedirect>
+        ),
+      },
 
       {
         path: "student-dashboard",
