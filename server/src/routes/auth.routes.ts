@@ -25,34 +25,6 @@ router.post(
         message:
           "Account created successfully. Your organizer account is pending admin approval.",
         requiresApproval: true,
-        user: {
-          id: createdUser.id,
-          email: createdUser.email,
-          name: createdUser.name,
-          role: createdUser.role,
-          accountStatus: createdUser.accountStatus,
-        },
-      });
-    }
-    if (createdUser && createdUser.accountStatus === "APPROVED") {
-      const tokens = TokenAuth.createTokens({
-        id: createdUser.id,
-        email: createdUser.email,
-        role: createdUser.role,
-      });
-
-      return res.status(201).json({
-        message: "User created successfully",
-        ...tokens,
-        userPublic: {
-          id: createdUser.id,
-          email: createdUser.email,
-          name: createdUser.name,
-          role: createdUser.role,
-          studentId: createdUser.studentId,
-          organizationId: createdUser.organizationId,
-          accountStatus: createdUser.accountStatus,
-        },
       });
     }
     res.status(201).json({
