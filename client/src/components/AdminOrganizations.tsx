@@ -97,12 +97,9 @@ export default function AdminOrganizations() {
 
   const fetchOrganizationDetails = async (orgId: number) => {
     try {
-      const orgResponse = await fetch(
-        `/api/admin/organizations/${orgId}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      );
+      const orgResponse = await fetch(`/api/admin/organizations/${orgId}`, {
+        headers: getAuthHeaders(),
+      });
 
       const eventsResponse = await fetch(
         `/api/admin/organizations/${orgId}/events`,

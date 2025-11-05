@@ -62,17 +62,14 @@ export default function AdminUserManagement() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `/api/admin/users/${userId}/role`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ role }),
+      const response = await fetch(`/api/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ role }),
+      });
 
       if (!response.ok) throw new Error("Failed to update role");
 
@@ -96,15 +93,12 @@ export default function AdminUserManagement() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `/api/admin/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to delete user");
 

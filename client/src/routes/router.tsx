@@ -35,11 +35,7 @@ function ProtectedRoute({
   return <>{children}</>;
 }
 
-function LoggedInRedirect({
-  children,
-}: {
-  children: React.ReactNode,
-}) {
+function LoggedInRedirect({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   if (!user) return <>{children}</>;
   return <Navigate to="/" replace />;
@@ -69,17 +65,17 @@ export const router = createBrowserRouter([
       {
         path: "login",
         element: (
-            <LoggedInRedirect>
-              <Login/>
-            </LoggedInRedirect>
+          <LoggedInRedirect>
+            <Login />
+          </LoggedInRedirect>
         ),
       },
       {
         path: "register",
         element: (
-            <LoggedInRedirect>
-              <Register/>
-            </LoggedInRedirect>
+          <LoggedInRedirect>
+            <Register />
+          </LoggedInRedirect>
         ),
       },
 

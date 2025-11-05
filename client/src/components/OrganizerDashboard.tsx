@@ -56,18 +56,19 @@ export default function OrganizerDashboard() {
     return () => ctrl.abort();
   }, [organizerId]);
 
-  // Separate into upcoming/past events based on date
-  const now = Date.now();
-
+  // Separate into upcoming/past events based on a UTC-safe date comparison --> Maybe we should not use UTC anywhere?
   const filteredAnalytics = useMemo(() => {
+    const now = new Date(); // current moment (in local time of machine)
+    const nowTime = now.getTime(); // convert to epoch milliseconds (UTC-safe)
+
     return analytics
       .filter((a) => {
         const eventTime = new Date(a.date).getTime();
-        const isUpcoming = eventTime > now;
+        const isUpcoming = eventTime >= nowTime; // compare in UTC-safe milliseconds
         return filter === "upcoming" ? isUpcoming : !isUpcoming;
       })
       .filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [analytics, filter, searchQuery, now]);
+  }, [analytics, filter, searchQuery]);
 
   // Compute summary stats
   const summary = useMemo(() => {
@@ -155,6 +156,7 @@ export default function OrganizerDashboard() {
                 key={a.eventId}
                 id={String(a.eventId)}
                 title={a.title}
+                date={a.date}
                 ticketsIssued={a.ticketsIssued}
                 attended={a.attended}
                 attendanceRate={a.attendanceRate}

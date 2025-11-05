@@ -74,17 +74,14 @@ export default function AdminEventModeration() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `/api/admin/events/${eventId}/status`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: newStatus }),
+      const response = await fetch(`/api/admin/events/${eventId}/status`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (!response.ok) throw new Error("Failed to update event status");
 
@@ -107,15 +104,12 @@ export default function AdminEventModeration() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        `/api/admin/events/${eventId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await fetch(`/api/admin/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to delete event");
 

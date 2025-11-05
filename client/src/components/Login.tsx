@@ -14,9 +14,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accountNotApproved, setAccountNotApproved] = useState<{
-        message: string;
-        nameOfUser: string;
-    } | null>(null);
+    message: string;
+    nameOfUser: string;
+  } | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -45,17 +45,16 @@ export default function Login() {
       if (!res.ok) {
         const error = await res.json();
         if (res.status == 403) {
-            setAccountNotApproved({
-                message: error.message,
-                nameOfUser: error.nameOfUser,
-            });
-            setLoading(false);
-            return;
-        }
-        else {
-            alert(error.error || `Login failed (${res.status})`);
-            setLoading(false);
-            return;
+          setAccountNotApproved({
+            message: error.message,
+            nameOfUser: error.nameOfUser,
+          });
+          setLoading(false);
+          return;
+        } else {
+          alert(error.error || `Login failed (${res.status})`);
+          setLoading(false);
+          return;
         }
       }
 
@@ -70,7 +69,7 @@ export default function Login() {
       });
       login(data.userPublic);
 
-      navigate('/');
+      navigate("/");
     } catch (err: any) {
       setError(err?.message || "Login failed");
     } finally {
@@ -84,7 +83,7 @@ export default function Login() {
         message={accountNotApproved.message}
         nameOfUser={accountNotApproved.nameOfUser}
       />
-      );
+    );
   }
 
   return (
