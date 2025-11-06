@@ -68,9 +68,6 @@ export default function AdminOrganizations() {
     isActive: true,
   });
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
-
   const getAuthHeaders = () => {
     return {
       ...getAuthHeader(),
@@ -84,7 +81,7 @@ export default function AdminOrganizations() {
 
   const fetchOrganizations = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+      const response = await fetch(`/api/admin/organizations`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -100,15 +97,12 @@ export default function AdminOrganizations() {
 
   const fetchOrganizationDetails = async (orgId: number) => {
     try {
-      const orgResponse = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${orgId}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      );
+      const orgResponse = await fetch(`/api/admin/organizations/${orgId}`, {
+        headers: getAuthHeaders(),
+      });
 
       const eventsResponse = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${orgId}/events`,
+        `/api/admin/organizations/${orgId}/events`,
         {
           headers: getAuthHeaders(),
         },
@@ -136,7 +130,7 @@ export default function AdminOrganizations() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+      const response = await fetch(`/api/admin/organizations`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(createForm),
@@ -180,7 +174,7 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
+        `/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -204,7 +198,7 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
+        `/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "DELETE",
           headers: getAuthHeaders(),

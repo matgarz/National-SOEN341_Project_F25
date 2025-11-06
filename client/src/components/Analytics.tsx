@@ -81,24 +81,18 @@ export function Analytics({ userRole }: AnalyticsProps) {
   );
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
-
   useEffect(() => {
     fetchAnalytics();
   }, []);
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/admin/analytics/comprehensive`,
-        {
-          headers: {
-            ...getAuthHeader(),
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`/api/admin/analytics/comprehensive`, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Failed to fetch analytics");
 

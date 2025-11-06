@@ -36,6 +36,7 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
       error: "Account pending approval",
       message:
         "Your organizer account is awaiting admin approval. You will be notified once approved.",
+      nameOfUser: user.name,
     });
   }
   if (user.accountStatus === "REJECTED") {
@@ -43,12 +44,14 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
       error: "Account rejected",
       message:
         "Your organizer account request was not approved. Please contact support for more information.",
+      nameOfUser: user.name,
     });
   }
   if (user.accountStatus === "SUSPENDED") {
     return res.status(403).json({
       error: "Account suspended",
       message: "Your account has been suspended. Please contact support.",
+      nameOfUser: user.name,
     });
   }
   if (!(await bcrypt.compare(userToLogin.password, user.password))) {

@@ -2,8 +2,9 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setTokens } from "../auth/tokenAuth";
 import { useAuth } from "../auth/AuthContext";
+import AccountNotApproved from "./AccountNotApproved.tsx";
 
-type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
+type Role = "STUDENT" | "ORGANIZER";
 
 interface Organization {
   id: number;
@@ -33,10 +34,10 @@ export default function Register() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accountNotApproved, setAccountNotApproved] = useState(false);
 
   const isStudent = form.role === "STUDENT";
   const isOrganizer = form.role === "ORGANIZER";
-  //const isAdmin = form.role === "ADMIN";
 
   useEffect(() => {
     if (isOrganizer && organizations.length === 0) {
@@ -73,9 +74,6 @@ export default function Register() {
     if (form.role === "ORGANIZER") {
       if (!form.organizationId || form.organizationId === "") return false;
     }
-    if (form.role === "ADMIN") {
-      // TODO add admin contraints -- like a key so that not anyone could sign up as an admin
-    }
     return true;
   }, [form]);
 
@@ -101,15 +99,22 @@ export default function Register() {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/signup", {
+      const signupRes = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
+      if (!signupRes.ok) {
+        const data = await signupRes.json();
         setError(`Error: ${data.error || "Something went wrong"}`);
+        return;
+      }
+
+      if (payload.role === "ORGANIZER" && signupRes.ok) {
+        setAccountNotApproved(true);
+        setLoading(false);
+        return;
       }
 
       const loginRes = await fetch("/api/auth/login", {
@@ -123,22 +128,18 @@ export default function Register() {
       });
 
       const data = await loginRes.json();
-      if (!loginRes.ok) throw new Error(data.error || "Auto-login failed");
+      if (!loginRes.ok) {
+        setError(data.error || "Auto-login failed");
+        return;
+      }
 
-      // Step 3: Store tokens + user
       setTokens({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
       });
       login(data.userPublic);
 
-      const user = data.userPublic;
-      if (user.role === "STUDENT")
-        navigate("/student-dashboard", { replace: true });
-      else if (user.role === "ORGANIZER")
-        navigate("/organizer-dashboard", { replace: true });
-      else if (user.role === "ADMIN")
-        navigate("/admin-dashboard", { replace: true });
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Network error");
@@ -152,6 +153,26 @@ export default function Register() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  if (accountNotApproved) {
+    return (
+      <div>
+        <AccountNotApproved
+          message={
+            "Your Account Has been been created, it is now pending approval\n\nRemember your email: " +
+            form.email +
+            "\nand Password: " +
+            form.password
+          }
+          nameOfUser={form.firstName + " " + form.lastName}
+        />
+        <p className="flex flex-col items-center justify-center h-screen text-center">
+          remember your email: {form.email}
+          <br />
+          and Password: {form.password}
+        </p>
+      </div>
+    );
+  }
   return (
     <div
       style={{
@@ -271,7 +292,6 @@ export default function Register() {
           >
             <option value="STUDENT">STUDENT</option>
             <option value="ORGANIZER">ORGANIZER</option>
-            <option value="ADMIN">ADMIN</option>
           </select>
         </label>
 

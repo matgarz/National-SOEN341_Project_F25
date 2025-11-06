@@ -141,8 +141,13 @@ function validateUserSignUpFields(userToCreate: UserSignUp): string {
     console.log(typeof userToCreate.email);
     return "Invalid sign up fields"; //TODO more precise error message maybe
   }
-  if (!Object.values(user_role).includes(userToCreate.role)) {
-    return "invalid role";
+  if (
+    !(
+      userToCreate.role === user_role.STUDENT ||
+      userToCreate.role === user_role.ORGANIZER
+    )
+  ) {
+    return "invalid role, may only sign up as a student or an organizer";
   }
   return "";
 }

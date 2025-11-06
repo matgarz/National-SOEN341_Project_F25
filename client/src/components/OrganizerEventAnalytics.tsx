@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useAuth } from "../auth/AuthContext";
 import jsQR from "jsqr";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
 interface Attendee {
   id: number;
   name: string;
@@ -40,7 +38,7 @@ export default function OrganizerEventAnalytics() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API}/api/events/${id}/details`, {
+        const res = await fetch(`/api/events/${id}/details`, {
           signal: ctrl.signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -108,7 +106,7 @@ export default function OrganizerEventAnalytics() {
         console.log("Decoded QR code:", qrCode);
 
         try {
-          const res = await fetch(`${API}/api/events/validate-ticket`, {
+          const res = await fetch(`/api/events/validate-ticket`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ qrCode }),

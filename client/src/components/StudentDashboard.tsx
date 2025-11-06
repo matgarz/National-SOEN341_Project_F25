@@ -46,8 +46,6 @@ type ApiEvent = {
   _count?: { ticket: number }; // if you included this in the backend
 };
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
 /** Map API events → EventCard props */
 const toCard = (
   e: ApiEvent,
@@ -103,7 +101,7 @@ export default function StudentDashboard() {
     const fetchUserData = async () => {
       try {
         // Fetch bookmarked events
-        const bookmarksRes = await fetch(`${API}/api/events/saved/${user.id}`);
+        const bookmarksRes = await fetch(`/api/events/saved/${user.id}`);
         if (bookmarksRes.ok) {
           const data: ApiEvent[] = await bookmarksRes.json();
           const ids = new Set(data.map((e) => String(e.id)));
@@ -111,7 +109,7 @@ export default function StudentDashboard() {
         }
 
         // Fetch claimed tickets
-        const ticketsRes = await fetch(`${API}/api/events/tickets/${user.id}`);
+        const ticketsRes = await fetch(`/api/events/tickets/${user.id}`);
         if (ticketsRes.ok) {
           const tickets = await ticketsRes.json();
           const ticketEventIds = new Set(
@@ -135,8 +133,8 @@ export default function StudentDashboard() {
         setLoading(true);
         setError(null);
         const url = searchQuery.trim()
-          ? `${API}/api/events/search?keyword=${encodeURIComponent(searchQuery.trim())}`
-          : `${API}/api/events`;
+          ? `/api/events/search?keyword=${encodeURIComponent(searchQuery.trim())}`
+          : `/api/events`;
         const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: ApiEvent[] = await res.json();
@@ -163,7 +161,7 @@ export default function StudentDashboard() {
     try {
       if (isCurrentlyBookmarked) {
         // Remove bookmark
-        const res = await fetch(`${API}/api/events/${eventId}/save`, {
+        const res = await fetch(`/api/events/${eventId}/save`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.id }),
@@ -184,7 +182,7 @@ export default function StudentDashboard() {
         }
       } else {
         // Add bookmark
-        const res = await fetch(`${API}/api/events/${eventId}/save`, {
+        const res = await fetch(`/api/events/${eventId}/save`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.id }),
@@ -219,7 +217,7 @@ export default function StudentDashboard() {
     if (!user?.id) return;
 
     try {
-      const res = await fetch(`${API}/api/events/${eventId}/ticket`, {
+      const res = await fetch(`/api/events/${eventId}/ticket`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id }),

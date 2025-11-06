@@ -2,6 +2,8 @@ import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
+import { useNavigate } from "react-router-dom";
+import BackButton from "../routes/BackButton.tsx";
 //import {
 //Select,
 //SelectContent,
@@ -48,6 +50,8 @@ export default function Header({
     }
   };
 
+  const navigate = useNavigate();
+
   return (
     <motion.header
       className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm"
@@ -59,6 +63,7 @@ export default function Header({
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo and Role/Guest buttons */}
           <div className="flex items-center space-x-4">
+            <BackButton></BackButton>
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
@@ -78,7 +83,7 @@ export default function Header({
                   className="cursor-pointer"
                   variant="default"
                   size="sm"
-                  onClick={() => onViewChange && onViewChange("login")}
+                  onClick={() => navigate("/login")}
                 >
                   Login
                 </Button>
@@ -86,7 +91,7 @@ export default function Header({
                   className="cursor-pointer"
                   variant="default"
                   size="sm"
-                  onClick={() => onViewChange && onViewChange("register")}
+                  onClick={() => navigate("/register")}
                 >
                   Register
                 </Button>

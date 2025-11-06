@@ -24,8 +24,6 @@ import "temporal-polyfill/global";
 import "@schedule-x/theme-default/dist/index.css";
 import { motion } from "motion/react";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
 interface TicketData {
   id: number;
   qrCode: string;
@@ -77,7 +75,7 @@ export default function MyEvents() {
 
       try {
         setLoading(true);
-        const res = await fetch(`${API}/api/events/tickets/${user.id}`);
+        const res = await fetch(`/api/events/tickets/${user.id}`);
         if (res.ok) {
           const data: TicketData[] = await res.json();
           // Filter out any tickets with undefined/null event data
