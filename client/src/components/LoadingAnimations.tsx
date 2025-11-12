@@ -136,7 +136,9 @@ export function PulseLoading({
           ease: "easeOut",
         }}
       />
-      <div className={`${sizeClasses[size]} ${color} rounded-full opacity-80`} />
+      <div
+        className={`${sizeClasses[size]} ${color} rounded-full opacity-80`}
+      />
     </div>
   );
 }

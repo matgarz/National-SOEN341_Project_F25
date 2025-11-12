@@ -44,7 +44,7 @@ export function PaymentModal({
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!cardNumber || !expiryDate || !cvv || !cardName) {
       alert("Please fill in all fields");
       return;
@@ -53,7 +53,7 @@ export function PaymentModal({
     setProcessing(true);
     setTimeout(() => {
       setStep("success");
-      setProcessing(false);      
+      setProcessing(false);
       setTimeout(() => {
         onPaymentComplete();
         onClose();
@@ -148,7 +148,7 @@ export function PaymentModal({
                           value={cardNumber}
                           onChange={(e) => {
                             const formatted = formatCardNumber(
-                              e.target.value.replace(/\s/g, "").slice(0, 16)
+                              e.target.value.replace(/\s/g, "").slice(0, 16),
                             );
                             setCardNumber(formatted);
                           }}
@@ -182,7 +182,9 @@ export function PaymentModal({
                           placeholder="123"
                           value={cvv}
                           onChange={(e) =>
-                            setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))
+                            setCvv(
+                              e.target.value.replace(/\D/g, "").slice(0, 3),
+                            )
                           }
                           maxLength={3}
                           required
@@ -201,7 +203,8 @@ export function PaymentModal({
                     </div>
 
                     <p className="text-xs text-center text-gray-500 mt-3">
-                      🔒 This is a mock payment system for demonstration purposes
+                      🔒 This is a mock payment system for demonstration
+                      purposes
                     </p>
                   </form>
                 )}
@@ -210,12 +213,18 @@ export function PaymentModal({
                   <div className="py-12 text-center">
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                       className="inline-block"
                     >
                       <CreditCard className="h-16 w-16 text-blue-600" />
                     </motion.div>
-                    <p className="mt-4 text-lg font-semibold">Processing Payment...</p>
+                    <p className="mt-4 text-lg font-semibold">
+                      Processing Payment...
+                    </p>
                     <p className="text-sm text-gray-500 mt-2">
                       Please don't close this window
                     </p>
@@ -231,7 +240,11 @@ export function PaymentModal({
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 15,
+                      }}
                       className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4"
                     >
                       <div className="text-4xl">✓</div>

@@ -16,7 +16,6 @@ import L from "leaflet";
 import { useEffect, useState } from "react";
 import { PaymentModal } from "./PaymentModal";
 
-
 // Fix for default marker icon in React Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -80,8 +79,6 @@ const getCoordinatesFromLocation = async (
   return defaultCoords;
 };
 
-
-
 export function EventDetailsModal({
   event,
   isOpen,
@@ -108,7 +105,9 @@ export function EventDetailsModal({
       setShowPaymentModal(false);
     } catch (error) {
       console.error("Failed to claim ticket after payment:", error);
-      alert("Payment successful but ticket claiming failed. Please contact support.");
+      alert(
+        "Payment successful but ticket claiming failed. Please contact support.",
+      );
     } finally {
       setProcessingPayment(false);
     }
@@ -340,7 +339,11 @@ export function EventDetailsModal({
                         className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                         onClick={() => {
                           // Check if event is paid
-                          if (event.ticketType === "paid" && event.price && event.price > 0) {
+                          if (
+                            event.ticketType === "paid" &&
+                            event.price &&
+                            event.price > 0
+                          ) {
                             setShowPaymentModal(true);
                           } else {
                             // Free event - claim directly
@@ -350,13 +353,11 @@ export function EventDetailsModal({
                         }}
                         disabled={processingPayment}
                       >
-                        {processingPayment ? (
-                          "Processing..."
-                        ) : event.ticketType === "free" ? (
-                          "Claim Free Ticket"
-                        ) : (
-                          `Buy Ticket - $${event.price}`
-                        )}
+                        {processingPayment
+                          ? "Processing..."
+                          : event.ticketType === "free"
+                            ? "Claim Free Ticket"
+                            : `Buy Ticket - $${event.price}`}
                       </Button>
                     )}
                   </div>
@@ -366,7 +367,7 @@ export function EventDetailsModal({
           </div>
         </>
       )}
-        {showPaymentModal && event.price && (
+      {showPaymentModal && event.price && (
         <PaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}

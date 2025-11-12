@@ -44,9 +44,9 @@ const padding = 32;
 const innerImageSizeFactor = 8;
 
 function QRCode({ link, size, title, showDownload = true }: QRCodeProps) {
-    const qrRef = useRef<HTMLDivElement>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
 
-     const handleDownload = () => {
+  const handleDownload = () => {
     if (!qrRef.current) return;
     const svg = qrRef.current.querySelector("svg");
     if (!svg) return;
@@ -85,31 +85,31 @@ function QRCode({ link, size, title, showDownload = true }: QRCodeProps) {
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
       <div ref={qrRef}>
-      <Item variant="outline" size="sm" asChild width={size} height={size}>
+        <Item variant="outline" size="sm" asChild width={size} height={size}>
           <div className="cursor-default">
-          <ItemContent>
-            <QRCodeSVG
-              value={link}
-              title={title} //TODO cahnge the title
-              size={size - padding}
-              bgColor={"#ffffff"}
-              fgColor={"#000000"}
-              level={"L"}
-              imageSettings={{
-                src: favicon,
-                x: undefined,
-                y: undefined,
-                height: size / innerImageSizeFactor,
-                width: size / innerImageSizeFactor,
-                opacity: 1,
-                excavate: true,
-              }}
-            />
-          </ItemContent>
-        </div>
-      </Item>
-    </div>
-    {showDownload && (
+            <ItemContent>
+              <QRCodeSVG
+                value={link}
+                title={title} //TODO cahnge the title
+                size={size - padding}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
+                level={"L"}
+                imageSettings={{
+                  src: favicon,
+                  x: undefined,
+                  y: undefined,
+                  height: size / innerImageSizeFactor,
+                  width: size / innerImageSizeFactor,
+                  opacity: 1,
+                  excavate: true,
+                }}
+              />
+            </ItemContent>
+          </div>
+        </Item>
+      </div>
+      {showDownload && (
         <Button
           onClick={handleDownload}
           variant="outline"

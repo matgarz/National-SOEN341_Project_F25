@@ -257,7 +257,7 @@ export default function AdminDashboard() {
     }
     await performEventAction(eventId, newStatus, eventTitle);
   };
-const performEventAction = async (
+  const performEventAction = async (
     eventId: number,
     newStatus: string,
     eventTitle: string,
@@ -289,7 +289,7 @@ const performEventAction = async (
     }
   };
 
-    const handleApproveOrganizer = async (userId: number, userName: string) => {
+  const handleApproveOrganizer = async (userId: number, userName: string) => {
     // Show T&C modal for organizer approval
     setTcModal({
       isOpen: true,
@@ -579,8 +579,8 @@ const performEventAction = async (
             <div>
               {pendingEventsCount > 0 && (
                 <span className="text-orange-900">
-                  {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
-                  awaiting approval.
+                  {pendingEventsCount} event
+                  {pendingEventsCount !== 1 ? "s" : ""} awaiting approval.
                 </span>
               )}
               {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
@@ -835,9 +835,11 @@ const performEventAction = async (
               {filteredEvents.length === 0 && (
                 <div className="text-center py-16">
                   <div className="text-6xl mb-4">📋</div>
-                  <h3 className="text-xl font-semibold mb-2">No Events Found</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No Events Found
+                  </h3>
                   <p className="text-muted-foreground mb-4">
-                    {eventStatusFilter === "PENDING" 
+                    {eventStatusFilter === "PENDING"
                       ? "No events pending approval"
                       : `No ${eventStatusFilter.toLowerCase()} events`}
                   </p>
@@ -1006,11 +1008,11 @@ const performEventAction = async (
                   <div className="text-6xl mb-4">👥</div>
                   <h3 className="text-xl font-semibold mb-2">No Users Found</h3>
                   <p className="text-muted-foreground mb-4">
-                    {searchTerm 
+                    {searchTerm
                       ? `No users match "${searchTerm}"`
                       : userRoleFilter !== "ALL"
-                      ? `No ${userRoleFilter.toLowerCase()} users`
-                      : "No users in the system"}
+                        ? `No ${userRoleFilter.toLowerCase()} users`
+                        : "No users in the system"}
                   </p>
                   {(searchTerm || userRoleFilter !== "ALL") && (
                     <Button
