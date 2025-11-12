@@ -14,6 +14,8 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
+import { PaymentModal } from "./PaymentModal";
+
 
 // Fix for default marker icon in React Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -78,6 +80,8 @@ const getCoordinatesFromLocation = async (
   return defaultCoords;
 };
 
+
+
 export function EventDetailsModal({
   event,
   isOpen,
@@ -88,12 +92,27 @@ export function EventDetailsModal({
   const [mapCoords, setMapCoords] = useState<[number, number]>([
     45.5017, -73.5673,
   ]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (isOpen && event.location) {
       getCoordinatesFromLocation(event.location).then(setMapCoords);
     }
   }, [isOpen, event.location]);
+
+  const handlePaymentComplete = async () => {
+    setProcessingPayment(true);
+    try {
+      await onClaimTicket?.(event.id);
+      setShowPaymentModal(false);
+    } catch (error) {
+      console.error("Failed to claim ticket after payment:", error);
+      alert("Payment successful but ticket claiming failed. Please contact support.");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -320,13 +339,24 @@ export function EventDetailsModal({
                       <Button
                         className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                         onClick={() => {
-                          onClaimTicket(event.id);
-                          onClose();
+                          // Check if event is paid
+                          if (event.ticketType === "paid" && event.price && event.price > 0) {
+                            setShowPaymentModal(true);
+                          } else {
+                            // Free event - claim directly
+                            onClaimTicket(event.id);
+                            onClose();
+                          }
                         }}
+                        disabled={processingPayment}
                       >
-                        {event.ticketType === "free"
-                          ? "Claim Free Ticket"
-                          : `Buy Ticket - $${event.price}`}
+                        {processingPayment ? (
+                          "Processing..."
+                        ) : event.ticketType === "free" ? (
+                          "Claim Free Ticket"
+                        ) : (
+                          `Buy Ticket - $${event.price}`
+                        )}
                       </Button>
                     )}
                   </div>
@@ -335,6 +365,15 @@ export function EventDetailsModal({
             </motion.div>
           </div>
         </>
+      )}
+        {showPaymentModal && event.price && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          eventTitle={event.title}
+          amount={event.price}
+          onPaymentComplete={handlePaymentComplete}
+        />
       )}
     </AnimatePresence>
   );
