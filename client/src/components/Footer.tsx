@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Github, Mail, Heart } from "lucide-react";
 
 export default function Footer() {
@@ -10,120 +9,81 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About Section */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-lg">Campus Events</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-bold text-xl text-gray-900">
+              Campus Events Platform
+            </h3>
+            <p className="text-sm text-gray-700 leading-relaxed">
               Your one-stop platform for discovering and booking campus events
-              at Concordia University.
+              at Concordia University. Built by students, for students, as part
+              of SOEN 341 Fall 2025.
             </p>
+            <div className="pt-2">
+              <p className="text-xs text-gray-600 font-semibold">
+                Team Nationals:
+              </p>
+              <p className="text-xs text-gray-600">
+                Software Engineering Students - SOEN 341 Project
+              </p>
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-base">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  to="/events"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Browse Events
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/about"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <div className="space-y-4">
+            <h3 className="font-bold text-xl text-gray-900">Get in Touch</h3>
+            {/* Contact Information */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    Email Support
+                  </p>
+                  <a
+                    href="mailto:support@campusevents.ca"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    support@campusevents.ca
+                  </a>
+                </div>
+              </div>
 
-          {/* Support */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-base">Support</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  to="/help"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/faq"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  FAQs
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/privacy"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
+              <div className="flex items-start gap-3">
+                <Github className="h-5 w-5 text-gray-700 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    Project Repository
+                  </p>
+                  <a
+                    href="https://github.com/matgarz/National-SOEN341_Project_F25"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    View on GitHub
+                  </a>
+                </div>
+              </div>
+            </div>
 
-          {/* Contact */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-base">Get in Touch</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <a
-                  href="mailto:support@campusevents.ca"
-                  className="hover:text-primary transition-colors"
-                >
-                  support@campusevents.ca
-                </a>
-              </li>
-              <li className="flex items-center gap-2 text-muted-foreground">
-                <Github className="h-4 w-4" />
-                <a
-                  href="https://github.com/your-team"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors"
-                >
-                  View on GitHub
-                </a>
-              </li>
-            </ul>
+            {/* Quick Info */}
+            <div className="pt-3 border-t border-gray-200">
+              <p className="text-xs text-gray-600 leading-relaxed">
+                <strong>Office Hours:</strong> Monday - Friday, 9 AM - 5 PM EST
+                <br />
+                <strong>Location:</strong> Concordia University, Montreal, QC
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-8 pt-6 border-t">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
             <p>
               © {currentYear} Campus Events Platform. SOEN 341 - Fall 2025.
             </p>
             <p className="flex items-center gap-1">
               Made with <Heart className="h-4 w-4 text-red-500 fill-red-500" />{" "}
-              by Team 8
+              by Team Nationals
             </p>
           </div>
         </div>

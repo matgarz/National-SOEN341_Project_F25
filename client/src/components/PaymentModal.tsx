@@ -86,7 +86,7 @@ export function PaymentModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/80"
             onClick={handleClose}
           />
 
@@ -98,49 +98,60 @@ export function PaymentModal({
             transition={{ duration: 0.3 }}
             className="relative z-10 w-full max-w-md"
           >
-            <Card className="border-0 shadow-2xl">
-              <CardHeader className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <Card className="border-0 shadow-2xl bg-white">
+              <CardHeader className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
                 {!processing && (
                   <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
+                    className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 )}
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Lock className="h-6 w-6" />
                   Secure Payment
                 </CardTitle>
-                <p className="text-sm text-white/90 mt-1">
+                <p className="text-sm text-white/90 mt-2">
                   Complete your ticket purchase for:
                 </p>
                 <p className="font-semibold mt-1">{eventTitle}</p>
               </CardHeader>
 
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 bg-white">
                 {step === "form" && (
-                  <form onSubmit={handlePayment} className="space-y-4">
-                    <div className="text-center mb-4">
-                      <p className="text-2xl font-bold text-gray-900">
+                  <form onSubmit={handlePayment} className="space-y-5">
+                    <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200">
+                      <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+                      <p className="text-3xl font-bold text-gray-900">
                         ${amount.toFixed(2)}
                       </p>
-                      <p className="text-sm text-gray-500">Total Amount</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="cardName">Cardholder Name</Label>
+                      <Label
+                        htmlFor="cardName"
+                        className="text-gray-700 font-semibold"
+                      >
+                        Cardholder Name
+                      </Label>
                       <Input
                         id="cardName"
                         placeholder="John Doe"
                         value={cardName}
                         onChange={(e) => setCardName(e.target.value)}
+                        className="border-gray-300 focus:border-blue-500 bg-white"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Label
+                        htmlFor="cardNumber"
+                        className="text-gray-700 font-semibold"
+                      >
+                        Card Number
+                      </Label>
                       <div className="relative">
                         <Input
                           id="cardNumber"
@@ -153,6 +164,7 @@ export function PaymentModal({
                             setCardNumber(formatted);
                           }}
                           maxLength={19}
+                          className="border-gray-300 focus:border-blue-500 pr-12 bg-white"
                           required
                         />
                         <CreditCard className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -161,7 +173,12 @@ export function PaymentModal({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
+                        <Label
+                          htmlFor="expiryDate"
+                          className="text-gray-700 font-semibold"
+                        >
+                          Expiry Date
+                        </Label>
                         <Input
                           id="expiryDate"
                           placeholder="MM/YY"
@@ -171,11 +188,17 @@ export function PaymentModal({
                             setExpiryDate(formatted);
                           }}
                           maxLength={5}
+                          className="border-gray-300 focus:border-blue-500 bg-white"
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="cvv">CVV</Label>
+                        <Label
+                          htmlFor="cvv"
+                          className="text-gray-700 font-semibold"
+                        >
+                          CVV
+                        </Label>
                         <Input
                           id="cvv"
                           type="password"
@@ -187,6 +210,7 @@ export function PaymentModal({
                             )
                           }
                           maxLength={3}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 text-lg"
                           required
                         />
                       </div>
@@ -202,15 +226,17 @@ export function PaymentModal({
                       </Button>
                     </div>
 
-                    <p className="text-xs text-center text-gray-500 mt-3">
-                      🔒 This is a mock payment system for demonstration
-                      purposes
-                    </p>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                      <p className="text-xs text-center text-yellow-800 font-medium">
+                        🔒 This is a mock payment system for demonstration
+                        purposes only
+                      </p>
+                    </div>
                   </form>
                 )}
 
                 {step === "processing" && (
-                  <div className="py-12 text-center">
+                  <div className="py-16 text-center bg-white">
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{
@@ -220,12 +246,12 @@ export function PaymentModal({
                       }}
                       className="inline-block"
                     >
-                      <CreditCard className="h-16 w-16 text-blue-600" />
+                      <CreditCard className="h-20 w-20 text-blue-600" />
                     </motion.div>
-                    <p className="mt-4 text-lg font-semibold">
+                    <p className="mt-6 text-xl font-semibold text-gray-900">
                       Processing Payment...
                     </p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-gray-600 mt-2">
                       Please don't close this window
                     </p>
                   </div>
@@ -235,7 +261,7 @@ export function PaymentModal({
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="py-12 text-center"
+                    className="py-16 text-center bg-white"
                   >
                     <motion.div
                       initial={{ scale: 0 }}
@@ -245,14 +271,14 @@ export function PaymentModal({
                         stiffness: 200,
                         damping: 15,
                       }}
-                      className="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4"
+                      className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6"
                     >
-                      <div className="text-4xl">✓</div>
+                      <div className="text-5xl">✓</div>
                     </motion.div>
-                    <h3 className="text-xl font-bold text-green-600">
+                    <h3 className="text-2xl font-bold text-green-600">
                       Payment Successful!
                     </h3>
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-gray-600 mt-3 text-lg">
                       Your ticket has been confirmed
                     </p>
                   </motion.div>
