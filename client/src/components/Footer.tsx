@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto border-t bg-gradient-to-b from-background to-muted/20">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols md:grid-cols-4 ">
           {/* About Section */}
           <div className="space-y-3">
             <h3 className="font-bold text-xl text-gray-900">
