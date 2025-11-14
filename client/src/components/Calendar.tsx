@@ -47,11 +47,9 @@ export default function CalendarApp({
       try {
         setLoading(true);
         setError(null);
-        const API_BASE_URL =
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
         const url = showAllEvents
-          ? `${API_BASE_URL}/api/admin/events`
-          : `${API_BASE_URL}/api/admin/events?status=APPROVED`;
+          ? `/api/admin/events`
+          : `/api/admin/events?status=APPROVED`;
         const response = await fetch(url, {
           headers: getAuthHeader(),
         });

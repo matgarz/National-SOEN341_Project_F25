@@ -2,6 +2,7 @@ import { useState } from "react";
 import { setTokens } from "../auth/tokenAuth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import AccountNotApproved from "./AccountNotApproved.tsx";
 
 const isEmail = (v: string) => v.includes("@");
 const isStudentId = (v: string) => /^\d{6,}$/.test(v);
@@ -12,6 +13,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [accountNotApproved, setAccountNotApproved] = useState<{
+    message: string;
+    nameOfUser: string;
+  } | null>(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -31,9 +36,7 @@ export default function Login() {
 
     try {
       setLoading(true);
-      const API_BASE_URL =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const res = await fetch(`/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -41,9 +44,18 @@ export default function Login() {
 
       if (!res.ok) {
         const error = await res.json();
-        alert(error.error || `Login failed (${res.status})`);
-        setLoading(false);
-        return;
+        if (res.status == 403) {
+          setAccountNotApproved({
+            message: error.message,
+            nameOfUser: error.nameOfUser,
+          });
+          setLoading(false);
+          return;
+        } else {
+          alert(error.error || `Login failed (${res.status})`);
+          setLoading(false);
+          return;
+        }
       }
 
       const data = await res.json();
@@ -57,18 +69,21 @@ export default function Login() {
       });
       login(data.userPublic);
 
-      const user = data.userPublic;
-      if (user.role === "STUDENT")
-        navigate("/student-dashboard", { replace: true });
-      else if (user.role === "ORGANIZER")
-        navigate("/organizer-dashboard", { replace: true });
-      else if (user.role === "ADMIN")
-        navigate("/admin-dashboard", { replace: true });
+      navigate("/");
     } catch (err: any) {
       setError(err?.message || "Login failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (accountNotApproved) {
+    return (
+      <AccountNotApproved
+        message={accountNotApproved.message}
+        nameOfUser={accountNotApproved.nameOfUser}
+      />
+    );
   }
 
   return (
