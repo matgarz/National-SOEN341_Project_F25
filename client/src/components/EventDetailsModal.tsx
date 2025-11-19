@@ -5,7 +5,7 @@ import {
   MapPin,
   Users,
   Tag,
-  DollarSign,
+  DollarSign, Ticket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "./ui/Button";
@@ -42,6 +42,7 @@ export interface EventDetails {
   attendees: number;
   image: string;
   tags: string[];
+  hasTicket?: boolean;
 }
 
 interface EventDetailsModalProps {
@@ -316,7 +317,15 @@ export function EventDetailsModal({
                     >
                       Close
                     </Button>
-                    {event.capacity > event.attendees && (
+                    { event?.hasTicket ? (
+                      <Button
+                          size="sm"
+                          className="flex-1 gradient-secondary bg-gradient-to-r text-black from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                          disabled
+                      >
+                        Attending
+                      </Button>
+                      ) : event.capacity > event.attendees && (
                       <Button
                         className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                         onClick={() => {

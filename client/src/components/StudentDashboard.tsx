@@ -561,6 +561,7 @@ export default function StudentDashboard() {
                       onBookmark={handleBookmark}
                       onClaimTicket={handleClaimTicket}
                       onViewDetails={handleViewDetails}
+                      ispassed={false}
                     />
                   ))}
                 </div>
@@ -581,6 +582,7 @@ export default function StudentDashboard() {
                       userRole="student"
                       onBookmark={handleBookmark}
                       onViewDetails={handleViewDetails}
+                      ispassed={true}
                     />
                   ))}
                 </div>
