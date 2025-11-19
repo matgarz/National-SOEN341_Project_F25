@@ -1,3 +1,11 @@
+// Allow access to global "puter" --> AI Image Generation Tool
+declare global {
+    interface Window {
+        puter: any;
+    }
+}
+
+
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 //import type { User } from "../auth/AuthContext";
@@ -30,7 +38,15 @@ export default function OrganizerCreateEvent() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    // AI Image Generation State
+    const [aiPrompt, setAiPrompt] = useState("");
+    const [aiGeneratedUrl, setAiGeneratedUrl] = useState<string | null>(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
+
+    const MAX_PROMPT_LENGTH = 150;
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -91,6 +107,48 @@ export default function OrganizerCreateEvent() {
       setLoading(false);
     }
   };
+
+    const handleAIGenerate = async () => {
+        setAiError(null);
+
+        if (!aiPrompt.trim()) {
+            setAiError("Please enter a prompt first.");
+            return;
+        }
+
+        if (aiPrompt.length > MAX_PROMPT_LENGTH) {
+            setAiError(`Prompt too long (max ${MAX_PROMPT_LENGTH} characters).`);
+            return;
+        }
+
+        try {
+            setAiLoading(true);
+
+            // Call puter.js
+            const imageElement = await window.puter.ai.txt2img(aiPrompt, {
+                model: "gpt-image-1",
+                quality: "medium",
+            });
+
+            // The image is an HTMLImageElement → extract base64 URL
+            const url = imageElement.src;
+
+            setAiGeneratedUrl(url);
+
+            // Auto-fill the event's image URL field
+            setForm((prev) => ({
+                ...prev,
+                imageUrl: url,
+            }));
+        } catch (err: any) {
+            console.error(err);
+            setAiError("Failed to generate image. Try a simpler prompt.");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 text-left">
@@ -216,6 +274,53 @@ export default function OrganizerCreateEvent() {
             <option value="Workshop">Workshop</option>
           </select>
         </div>
+
+              {/* AI Image Generator */}
+              <div className="border p-4 rounded-lg bg-gray-50">
+                  <label className="block font-semibold mb-2">
+                      Generate Event Image with AI
+                  </label>
+
+                  <textarea
+                      className="w-full border rounded p-2"
+                      rows={2}
+                      placeholder="Describe the image you want (e.g., 'a neon poster for a night festival with purple sky')"
+                      value={aiPrompt}
+                      maxLength={MAX_PROMPT_LENGTH}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                  ></textarea>
+
+                  <div className="text-sm text-gray-500 mb-2">
+                      {aiPrompt.length}/{MAX_PROMPT_LENGTH} characters
+                  </div>
+
+                  {aiError && <div className="text-red-600 text-sm mb-2">{aiError}</div>}
+
+                  <button
+                      type="button"
+                      onClick={handleAIGenerate}
+                      disabled={aiLoading}
+                      className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
+                  >
+                      {aiLoading ? "Generating..." : "Generate Image"}
+                  </button>
+
+                  {aiGeneratedUrl && (
+                      <div className="mt-4">
+                          <p className="font-medium mb-2">Preview:</p>
+                          <img
+                              src={aiGeneratedUrl}
+                              alt="Generated event"
+                              className="w-full h-auto rounded shadow"
+                          />
+
+                          <p className="text-xs text-gray-500 mt-2">
+                              Auto-filled Image URL in the form.
+                          </p>
+                      </div>
+                  )}
+              </div>
+
 
         {/* Image URL */}
         <div>
