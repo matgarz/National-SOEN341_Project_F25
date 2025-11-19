@@ -247,6 +247,59 @@ router.get("/:id/details", async (req: Request, res: Response) => {
   }
 });
 
+
+router.get("/:id/comments", async (req: Request, res: Response) => {
+
+  console.log("route is working!");
+  try {
+    const eventId: number = Number(req.params.id);
+    console.log(eventId);
+    if (isNaN(eventId)) return res.status(400).json({ error: "Invalid event ID" });
+    const comments :  {
+      id: number;
+      createdAt: Date;
+      updatedAt: Date;
+      eventId: number;
+      userId: number;
+      rating: number;
+      comment: string | null;
+    }[] = await prisma.review.findMany({
+      where: { eventId: eventId },
+    });
+    console.log(comments);
+    if (!comments) return res.status(404);
+    return res.status(200).json({comments: comments});
+  } catch (err) {
+    console.error("Error fetching event details:", err);
+    res.status(400).json({ error: err });
+  }
+});
+
+router.post("/:id/comments", async (req: Request, res: Response) => {
+
+  /*console.log("route is working!");
+  try {
+    const eventId: number = req.body.id;
+    console.log(eventId);
+    if (isNaN(eventId)) return res.status(400).json({ error: "Invalid event ID" });
+    const comments :  {
+      id: number;
+      createdAt: Date;
+      updatedAt: Date;
+      eventId: number;
+      userId: number;
+      rating: number;
+      comment: string | null;
+    }[] = await prisma.review.findMany({
+      where: { eventId: eventId }
+    });
+    console.log(comments);
+    if (!comments) return res.status(404);
+    return res.status(200).json({comments: comments});
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }*/
+});
 //POST /api/events (Create new Event)
 router.post(
   "/",
