@@ -1,15 +1,13 @@
 // Allow access to global "puter" --> AI Image Generation Tool
 declare global {
-    interface Window {
-        puter: any;
-    }
+  interface Window {
+    puter: any;
+  }
 }
-
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { uploadToImgBB } from "./utils/uploadToImgBB";
-
 
 interface EventForm {
   title: string;
@@ -39,26 +37,25 @@ export default function OrganizerCreateEvent() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    // AI Image Generation State
-    const [aiPrompt, setAiPrompt] = useState("");
-    const [aiGeneratedUrl, setAiGeneratedUrl] = useState<string | null>(null);
-    const [aiLoading, setAiLoading] = useState(false);
-    const [aiError, setAiError] = useState<string | null>(null);
+  // AI Image Generation State
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiGeneratedUrl, setAiGeneratedUrl] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
-    const [aiUploadLoading, setAiUploadLoading] = useState(false);
-    const [aiUploadError, setAiUploadError] = useState<string | null>(null);
+  const [aiUploadLoading, setAiUploadLoading] = useState(false);
+  const [aiUploadError, setAiUploadError] = useState<string | null>(null);
 
-    const [uploadError, setUploadError] = useState<string | null>(null);
-    const [uploadLoading, setUploadLoading] = useState(false);
-    const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
 
-    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
-    const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
 
-
-    const MAX_PROMPT_LENGTH = 150;
+  const MAX_PROMPT_LENGTH = 150;
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -79,12 +76,12 @@ export default function OrganizerCreateEvent() {
     setSuccess(null);
     setError(null);
 
-      // SAFETY CHECK — prevent submitting base64 --> This happened a couple times
-      if (form.imageUrl?.startsWith("data:image")) {
-          setError("Please upload the AI image before submitting the event.");
-          setLoading(false);
-          return;
-      }
+    // SAFETY CHECK — prevent submitting base64 --> This happened a couple times
+    if (form.imageUrl?.startsWith("data:image")) {
+      setError("Please upload the AI image before submitting the event.");
+      setLoading(false);
+      return;
+    }
 
     try {
       // Prepare payload matching validator expectations
@@ -127,113 +124,110 @@ export default function OrganizerCreateEvent() {
     }
   };
 
-    const handleAIGenerate = async () => {
-        setAiError(null);
+  const handleAIGenerate = async () => {
+    setAiError(null);
 
-        if (!aiPrompt.trim()) {
-            setAiError("Please enter a prompt first.");
-            return;
-        }
+    if (!aiPrompt.trim()) {
+      setAiError("Please enter a prompt first.");
+      return;
+    }
 
-        if (aiPrompt.length > MAX_PROMPT_LENGTH) {
-            setAiError(`Prompt too long (max ${MAX_PROMPT_LENGTH} characters).`);
-            return;
-        }
+    if (aiPrompt.length > MAX_PROMPT_LENGTH) {
+      setAiError(`Prompt too long (max ${MAX_PROMPT_LENGTH} characters).`);
+      return;
+    }
 
-        try {
-            setAiLoading(true);
+    try {
+      setAiLoading(true);
 
-            // Call puter.js
-            const imageElement = await window.puter.ai.txt2img(aiPrompt, {
-                model: "gpt-image-1",
-                quality: "medium",
-            });
+      // Call puter.js
+      const imageElement = await window.puter.ai.txt2img(aiPrompt, {
+        model: "gpt-image-1",
+        quality: "medium",
+      });
 
-            // The image is an HTMLImageElement → extract base64 URL
-            const url = imageElement.src;
+      // The image is an HTMLImageElement → extract base64 URL
+      const url = imageElement.src;
 
-            setAiGeneratedUrl(url);
+      setAiGeneratedUrl(url);
+    } catch (err: any) {
+      console.error(err);
+      setAiError("Failed to generate image. Try a simpler prompt.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
-        } catch (err: any) {
-            console.error(err);
-            setAiError("Failed to generate image. Try a simpler prompt.");
-        } finally {
-            setAiLoading(false);
-        }
-    };
+  const handleAISaveToImgBB = async () => {
+    if (!aiGeneratedUrl) {
+      setAiUploadError("No generated image to upload.");
+      return;
+    }
 
-    const handleAISaveToImgBB = async () => {
-        if (!aiGeneratedUrl) {
-            setAiUploadError("No generated image to upload.");
-            return;
-        }
+    try {
+      setAiUploadError(null);
+      setAiUploadLoading(true);
 
-        try {
-            setAiUploadError(null);
-            setAiUploadLoading(true);
+      // aiGeneratedUrl is a base64 data URL --> pass to uploader
+      const cleanUrl = await uploadToImgBB(aiGeneratedUrl);
 
-            // aiGeneratedUrl is a base64 data URL --> pass to uploader
-            const cleanUrl = await uploadToImgBB(aiGeneratedUrl);
+      // Update the form with final hosted URL
+      setForm((prev) => ({
+        ...prev,
+        imageUrl: cleanUrl,
+      }));
 
-            // Update the form with final hosted URL
-            setForm(prev => ({
-                ...prev,
-                imageUrl: cleanUrl,
-            }));
+      // Update the preview to the new hosted URL
+      setAiGeneratedUrl(cleanUrl);
+    } catch (err: any) {
+      console.error(err);
+      setAiUploadError("Failed to upload image to ImgBB.");
+    } finally {
+      setAiUploadLoading(false);
+    }
+  };
 
-            // Update the preview to the new hosted URL
-            setAiGeneratedUrl(cleanUrl);
+  const handleLocalFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-        } catch (err: any) {
-            console.error(err);
-            setAiUploadError("Failed to upload image to ImgBB.");
-        } finally {
-            setAiUploadLoading(false);
-        }
-    };
+    setUploadError(null);
+    setSelectedFileName(file.name);
+    setSelectedLocalFile(file);
 
-    const handleLocalFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const preview = URL.createObjectURL(file);
+    setUploadedPreview(preview);
+  };
 
-        setUploadError(null);
-        setSelectedFileName(file.name);
-        setSelectedLocalFile(file);
+  const handleUploadSelectedFile = async () => {
+    if (!selectedLocalFile) {
+      setUploadError("No file selected.");
+      return;
+    }
 
+    setUploadError(null);
+    setUploadLoading(true);
 
-        const preview = URL.createObjectURL(file);
-        setUploadedPreview(preview);
+    try {
+      const hostedUrl = await uploadToImgBB(selectedLocalFile);
 
-    };
+      // Update form
+      setForm((prev) => ({
+        ...prev,
+        imageUrl: hostedUrl,
+      }));
 
-    const handleUploadSelectedFile = async () => {
-        if (!selectedLocalFile) {
-            setUploadError("No file selected.");
-            return;
-        }
-
-        setUploadError(null);
-        setUploadLoading(true);
-
-        try {
-            const hostedUrl = await uploadToImgBB(selectedLocalFile);
-
-            // Update form
-            setForm(prev => ({
-                ...prev,
-                imageUrl: hostedUrl,
-            }));
-
-            // Update preview
-            setUploadedPreview(hostedUrl);
-
-        } catch (err) {
-            console.error(err);
-            setUploadError("Failed to upload file to ImgBB.");
-        } finally {
-            setUploadLoading(false);
-        }
-    };
+      // Update preview
+      setUploadedPreview(hostedUrl);
+    } catch (err) {
+      console.error(err);
+      setUploadError("Failed to upload file to ImgBB.");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 text-left">
@@ -358,130 +352,132 @@ export default function OrganizerCreateEvent() {
             <option value="Career">Career</option>
             <option value="Workshop">Workshop</option>
           </select>
-              </div>
+        </div>
 
-              {/* Upload Image from Computer */}
-              <div className="border p-4 rounded-lg bg-gray-50 mt-6">
-                  <label className="block font-semibold mb-2">
-                      Upload Image from Your Computer
-                  </label>
+        {/* Upload Image from Computer */}
+        <div className="border p-4 rounded-lg bg-gray-50 mt-6">
+          <label className="block font-semibold mb-2">
+            Upload Image from Your Computer
+          </label>
 
-                  {/* Choose File (styled) */}
-                  <div className="mb-3">
-                      <label
-                          htmlFor="file-upload"
-                          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700 transition inline-block"
-                      >
-                          Choose File
-                      </label>
+          {/* Choose File (styled) */}
+          <div className="mb-3">
+            <label
+              htmlFor="file-upload"
+              className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700 transition inline-block"
+            >
+              Choose File
+            </label>
 
-                      <input
-                          id="file-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLocalFileUpload}
-                          className="hidden"
-                      />
-                  </div>
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleLocalFileUpload}
+              className="hidden"
+            />
+          </div>
 
-                  {/* Show filename */}
-                  {selectedFileName && (
-                      <div className="text-sm text-gray-600 mb-2">
-                          Selected: <strong>{selectedFileName}</strong>
-                      </div>
-                  )}
+          {/* Show filename */}
+          {selectedFileName && (
+            <div className="text-sm text-gray-600 mb-2">
+              Selected: <strong>{selectedFileName}</strong>
+            </div>
+          )}
 
-                  {uploadedPreview && (
-                      <div className="mt-3">
-                          <p className="font-medium mb-2">Preview:</p>
-                          <img
-                              src={uploadedPreview}
-                              alt="Uploaded preview"
-                              className="w-full h-auto rounded shadow"
-                          />
+          {uploadedPreview && (
+            <div className="mt-3">
+              <p className="font-medium mb-2">Preview:</p>
+              <img
+                src={uploadedPreview}
+                alt="Uploaded preview"
+                className="w-full h-auto rounded shadow"
+              />
 
-                          {/* Upload button */}
-                          <button
-                              type="button"
-                              onClick={handleUploadSelectedFile}
-                              disabled={uploadLoading}
-                              className="bg-green-600 text-white px-4 py-2 mt-3 rounded hover:bg-green-700 transition disabled:opacity-50"
-                          >
-                              {uploadLoading ? "Uploading…" : "Use this Image"}
-                          </button>
+              {/* Upload button */}
+              <button
+                type="button"
+                onClick={handleUploadSelectedFile}
+                disabled={uploadLoading}
+                className="bg-green-600 text-white px-4 py-2 mt-3 rounded hover:bg-green-700 transition disabled:opacity-50"
+              >
+                {uploadLoading ? "Uploading…" : "Use this Image"}
+              </button>
 
-                          <p className="text-xs text-gray-500 mt-2">
-                              If you click "Use this image", this image will be uploaded to ImgBB and correct URL will be in Image URL form.
-                          </p>
-                      </div>
-                  )}
+              <p className="text-xs text-gray-500 mt-2">
+                If you click "Use this image", this image will be uploaded to
+                ImgBB and correct URL will be in Image URL form.
+              </p>
+            </div>
+          )}
 
-                  {uploadError && (
-                      <div className="text-red-600 text-sm mt-2">{uploadError}</div>
-                  )}
-              </div>
+          {uploadError && (
+            <div className="text-red-600 text-sm mt-2">{uploadError}</div>
+          )}
+        </div>
 
+        {/* AI Image Generator */}
+        <div className="border p-4 rounded-lg bg-gray-50">
+          <label className="block font-semibold mb-2">
+            Generate Event Image with AI
+          </label>
 
-              {/* AI Image Generator */}
-              <div className="border p-4 rounded-lg bg-gray-50">
-                  <label className="block font-semibold mb-2">
-                      Generate Event Image with AI
-                  </label>
+          <textarea
+            className="w-full border rounded p-2"
+            rows={2}
+            placeholder="Describe the image you want (e.g., 'a neon poster for a night festival with purple sky')"
+            value={aiPrompt}
+            maxLength={MAX_PROMPT_LENGTH}
+            onChange={(e) => setAiPrompt(e.target.value)}
+          ></textarea>
 
-                  <textarea
-                      className="w-full border rounded p-2"
-                      rows={2}
-                      placeholder="Describe the image you want (e.g., 'a neon poster for a night festival with purple sky')"
-                      value={aiPrompt}
-                      maxLength={MAX_PROMPT_LENGTH}
-                      onChange={(e) => setAiPrompt(e.target.value)}
-                  ></textarea>
+          <div className="text-sm text-gray-500 mb-2">
+            {aiPrompt.length}/{MAX_PROMPT_LENGTH} characters
+          </div>
 
-                  <div className="text-sm text-gray-500 mb-2">
-                      {aiPrompt.length}/{MAX_PROMPT_LENGTH} characters
-                  </div>
+          {aiError && (
+            <div className="text-red-600 text-sm mb-2">{aiError}</div>
+          )}
 
-                  {aiError && <div className="text-red-600 text-sm mb-2">{aiError}</div>}
+          <button
+            type="button"
+            onClick={handleAIGenerate}
+            disabled={aiLoading}
+            className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
+          >
+            {aiLoading ? "Generating..." : "Generate Image"}
+          </button>
 
-                  <button
-                      type="button"
-                      onClick={handleAIGenerate}
-                      disabled={aiLoading}
-                      className="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition disabled:opacity-50"
-                  >
-                      {aiLoading ? "Generating..." : "Generate Image"}
-                  </button>
+          {aiGeneratedUrl && (
+            <div className="mt-4">
+              <p className="font-medium mb-2">Preview:</p>
+              <img
+                src={aiGeneratedUrl}
+                alt="Generated event"
+                className="w-full h-auto rounded shadow"
+              />
 
-                  {aiGeneratedUrl && (
-                      <div className="mt-4">
-                          <p className="font-medium mb-2">Preview:</p>
-                          <img
-                              src={aiGeneratedUrl}
-                              alt="Generated event"
-                              className="w-full h-auto rounded shadow"
-                          />
+              {/* Upload Button */}
+              <button
+                type="button"
+                onClick={handleAISaveToImgBB}
+                disabled={aiUploadLoading}
+                className="bg-blue-600 text-white px-3 py-2 mt-3 rounded hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {aiUploadLoading ? "Uploading…" : "Use Generated Image"}
+              </button>
 
-                          {/* Upload Button */}
-                          <button
-                              type="button"
-                              onClick={handleAISaveToImgBB}
-                              disabled={aiUploadLoading}
-                              className="bg-blue-600 text-white px-3 py-2 mt-3 rounded hover:bg-blue-700 transition disabled:opacity-50"
-                          >
-                              {aiUploadLoading ? "Uploading…" : "Use Generated Image"}
-                          </button>
+              {aiUploadError && (
+                <div className="text-red-600 text-sm mt-2">{aiUploadError}</div>
+              )}
 
-                          {aiUploadError && (
-                              <div className="text-red-600 text-sm mt-2">{aiUploadError}</div>
-                          )}
-
-                          <p className="text-xs text-gray-500 mt-2">
-                              If you click "Use Generated Image", the image will be uploaded to ImgBB and correct URL will be in Image URL form.
-                          </p>
-                      </div>
-                  )}
-              </div>
-
+              <p className="text-xs text-gray-500 mt-2">
+                If you click "Use Generated Image", the image will be uploaded
+                to ImgBB and correct URL will be in Image URL form.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Image URL */}
         <div>
@@ -490,9 +486,9 @@ export default function OrganizerCreateEvent() {
             type="text"
             name="imageUrl"
             value={form.imageUrl}
-                      onChange={handleChange}
-                      disabled={!!form.imageUrl}   // disable if URL is set
-                      className="w-full border rounded p-2 mt-1 disabled:bg-gray-100 disabled:opacity-70"
+            onChange={handleChange}
+            disabled={!!form.imageUrl} // disable if URL is set
+            className="w-full border rounded p-2 mt-1 disabled:bg-gray-100 disabled:opacity-70"
           />
         </div>
 
