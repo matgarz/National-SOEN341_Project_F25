@@ -8,7 +8,8 @@ declare global {
 
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
-//import type { User } from "../auth/AuthContext";
+import { uploadToImgBB } from "./utils/uploadToImgBB";
+
 
 interface EventForm {
   title: string;
@@ -46,6 +47,10 @@ export default function OrganizerCreateEvent() {
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState<string | null>(null);
 
+    const [aiUploadLoading, setAiUploadLoading] = useState(false);
+    const [aiUploadError, setAiUploadError] = useState<string | null>(null);
+
+
     const MAX_PROMPT_LENGTH = 150;
 
   const handleChange = (
@@ -66,6 +71,13 @@ export default function OrganizerCreateEvent() {
     setLoading(true);
     setSuccess(null);
     setError(null);
+
+      // SAFETY CHECK — prevent submitting base64 --> This happened a couple times
+      if (form.imageUrl?.startsWith("data:image")) {
+          setError("Please upload the AI image before submitting the event.");
+          setLoading(false);
+          return;
+      }
 
     try {
       // Prepare payload matching validator expectations
@@ -148,6 +160,35 @@ export default function OrganizerCreateEvent() {
         }
     };
 
+    const handleAISaveToImgBB = async () => {
+        if (!aiGeneratedUrl) {
+            setAiUploadError("No generated image to upload.");
+            return;
+        }
+
+        try {
+            setAiUploadError(null);
+            setAiUploadLoading(true);
+
+            // aiGeneratedUrl is a base64 data URL → pass to uploader
+            const cleanUrl = await uploadToImgBB(aiGeneratedUrl);
+
+            // Update the form with final hosted URL
+            setForm(prev => ({
+                ...prev,
+                imageUrl: cleanUrl,
+            }));
+
+            // Update the preview to the new hosted URL
+            setAiGeneratedUrl(cleanUrl);
+
+        } catch (err: any) {
+            console.error(err);
+            setAiUploadError("Failed to upload image to ImgBB.");
+        } finally {
+            setAiUploadLoading(false);
+        }
+    };
 
 
   return (
@@ -314,8 +355,22 @@ export default function OrganizerCreateEvent() {
                               className="w-full h-auto rounded shadow"
                           />
 
+                          {/* Upload Button */}
+                          <button
+                              type="button"
+                              onClick={handleAISaveToImgBB}
+                              disabled={aiUploadLoading}
+                              className="bg-blue-600 text-white px-3 py-2 mt-3 rounded hover:bg-blue-700 transition disabled:opacity-50"
+                          >
+                              {aiUploadLoading ? "Uploading…" : "Save to ImgBB & Use Image"}
+                          </button>
+
+                          {aiUploadError && (
+                              <div className="text-red-600 text-sm mt-2">{aiUploadError}</div>
+                          )}
+
                           <p className="text-xs text-gray-500 mt-2">
-                              Auto-filled Image URL in the form.
+                              After saving, the base64 image will be replaced with a clean hosted URL.
                           </p>
                       </div>
                   )}
