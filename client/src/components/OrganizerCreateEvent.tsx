@@ -50,6 +50,13 @@ export default function OrganizerCreateEvent() {
     const [aiUploadLoading, setAiUploadLoading] = useState(false);
     const [aiUploadError, setAiUploadError] = useState<string | null>(null);
 
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [uploadLoading, setUploadLoading] = useState(false);
+    const [uploadedPreview, setUploadedPreview] = useState<string | null>(null);
+
+    const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+    const [selectedLocalFile, setSelectedLocalFile] = useState<File | null>(null);
+
 
     const MAX_PROMPT_LENGTH = 150;
 
@@ -147,11 +154,6 @@ export default function OrganizerCreateEvent() {
 
             setAiGeneratedUrl(url);
 
-            // Auto-fill the event's image URL field
-            setForm((prev) => ({
-                ...prev,
-                imageUrl: url,
-            }));
         } catch (err: any) {
             console.error(err);
             setAiError("Failed to generate image. Try a simpler prompt.");
@@ -170,7 +172,7 @@ export default function OrganizerCreateEvent() {
             setAiUploadError(null);
             setAiUploadLoading(true);
 
-            // aiGeneratedUrl is a base64 data URL → pass to uploader
+            // aiGeneratedUrl is a base64 data URL --> pass to uploader
             const cleanUrl = await uploadToImgBB(aiGeneratedUrl);
 
             // Update the form with final hosted URL
@@ -190,6 +192,48 @@ export default function OrganizerCreateEvent() {
         }
     };
 
+    const handleLocalFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadError(null);
+        setSelectedFileName(file.name);
+        setSelectedLocalFile(file);
+
+
+        const preview = URL.createObjectURL(file);
+        setUploadedPreview(preview);
+
+    };
+
+    const handleUploadSelectedFile = async () => {
+        if (!selectedLocalFile) {
+            setUploadError("No file selected.");
+            return;
+        }
+
+        setUploadError(null);
+        setUploadLoading(true);
+
+        try {
+            const hostedUrl = await uploadToImgBB(selectedLocalFile);
+
+            // Update form
+            setForm(prev => ({
+                ...prev,
+                imageUrl: hostedUrl,
+            }));
+
+            // Update preview
+            setUploadedPreview(hostedUrl);
+
+        } catch (err) {
+            console.error(err);
+            setUploadError("Failed to upload file to ImgBB.");
+        } finally {
+            setUploadLoading(false);
+        }
+    };
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md mt-6 text-left">
@@ -314,7 +358,69 @@ export default function OrganizerCreateEvent() {
             <option value="Career">Career</option>
             <option value="Workshop">Workshop</option>
           </select>
-        </div>
+              </div>
+
+              {/* Upload Image from Computer */}
+              <div className="border p-4 rounded-lg bg-gray-50 mt-6">
+                  <label className="block font-semibold mb-2">
+                      Upload Image from Your Computer
+                  </label>
+
+                  {/* Choose File (styled) */}
+                  <div className="mb-3">
+                      <label
+                          htmlFor="file-upload"
+                          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-700 transition inline-block"
+                      >
+                          Choose File
+                      </label>
+
+                      <input
+                          id="file-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLocalFileUpload}
+                          className="hidden"
+                      />
+                  </div>
+
+                  {/* Show filename */}
+                  {selectedFileName && (
+                      <div className="text-sm text-gray-600 mb-2">
+                          Selected: <strong>{selectedFileName}</strong>
+                      </div>
+                  )}
+
+                  {uploadedPreview && (
+                      <div className="mt-3">
+                          <p className="font-medium mb-2">Preview:</p>
+                          <img
+                              src={uploadedPreview}
+                              alt="Uploaded preview"
+                              className="w-full h-auto rounded shadow"
+                          />
+
+                          {/* Upload button */}
+                          <button
+                              type="button"
+                              onClick={handleUploadSelectedFile}
+                              disabled={uploadLoading}
+                              className="bg-green-600 text-white px-4 py-2 mt-3 rounded hover:bg-green-700 transition disabled:opacity-50"
+                          >
+                              {uploadLoading ? "Uploading…" : "Use this Image"}
+                          </button>
+
+                          <p className="text-xs text-gray-500 mt-2">
+                              If you click "Use this image", this image will be uploaded to ImgBB and correct URL will be in Image URL form.
+                          </p>
+                      </div>
+                  )}
+
+                  {uploadError && (
+                      <div className="text-red-600 text-sm mt-2">{uploadError}</div>
+                  )}
+              </div>
+
 
               {/* AI Image Generator */}
               <div className="border p-4 rounded-lg bg-gray-50">
@@ -362,7 +468,7 @@ export default function OrganizerCreateEvent() {
                               disabled={aiUploadLoading}
                               className="bg-blue-600 text-white px-3 py-2 mt-3 rounded hover:bg-blue-700 transition disabled:opacity-50"
                           >
-                              {aiUploadLoading ? "Uploading…" : "Save to ImgBB & Use Image"}
+                              {aiUploadLoading ? "Uploading…" : "Use Generated Image"}
                           </button>
 
                           {aiUploadError && (
@@ -370,7 +476,7 @@ export default function OrganizerCreateEvent() {
                           )}
 
                           <p className="text-xs text-gray-500 mt-2">
-                              After saving, the base64 image will be replaced with a clean hosted URL.
+                              If you click "Use Generated Image", the image will be uploaded to ImgBB and correct URL will be in Image URL form.
                           </p>
                       </div>
                   )}
@@ -384,8 +490,9 @@ export default function OrganizerCreateEvent() {
             type="text"
             name="imageUrl"
             value={form.imageUrl}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mt-1"
+                      onChange={handleChange}
+                      disabled={!!form.imageUrl}   // disable if URL is set
+                      className="w-full border rounded p-2 mt-1 disabled:bg-gray-100 disabled:opacity-70"
           />
         </div>
 
