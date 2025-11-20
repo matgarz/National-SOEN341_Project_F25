@@ -34,6 +34,8 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Analytics } from "./Analytics";
 import { Input } from "./ui/input";
 import AdminOrganizations from "./AdminOrganizations";
+import { LoadingSpinner } from "./LoadingAnimations";
+import { AdminTCModal } from "./AdminTCModal";
 
 interface Organization {
   id: number;
@@ -125,6 +127,19 @@ export default function AdminDashboard() {
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
+  const [tcModal, setTcModal] = useState<{
+    isOpen: boolean;
+    type: "event" | "user";
+    itemId: number;
+    itemName: string;
+    onAccept: () => void;
+  }>({
+    isOpen: false,
+    type: "event",
+    itemId: 0,
+    itemName: "",
+    onAccept: () => {},
+  });
   // Fetch all data
   useEffect(() => {
     fetchStats();
@@ -221,9 +236,33 @@ export default function AdminDashboard() {
     };
     const action = statusActions[newStatus] || "change status of";
 
+    if (newStatus === "APPROVED") {
+      setTcModal({
+        isOpen: true,
+        type: "event",
+        itemId: eventId,
+        itemName: eventTitle,
+        onAccept: () => performEventAction(eventId, newStatus, eventTitle),
+      });
+      return;
+    }
+
     if (!confirm(`Are you sure you want to ${action} "${eventTitle}"?`)) {
       return;
     }
+    await performEventAction(eventId, newStatus, eventTitle);
+  };
+  const performEventAction = async (
+    eventId: number,
+    newStatus: string,
+    eventTitle: string,
+  ) => {
+    const statusActions: Record<string, string> = {
+      APPROVED: "approve",
+      REJECTED: "reject",
+      CANCELLED: "cancel",
+    };
+    const action = statusActions[newStatus] || "change status of";
 
     try {
       const response = await fetch(`/api/admin/events/${eventId}/status`, {
@@ -243,8 +282,18 @@ export default function AdminDashboard() {
   };
 
   const handleApproveOrganizer = async (userId: number, userName: string) => {
-    if (!confirm(`Approve organizer account for ${userName}?`)) return;
+    // Show T&C modal for organizer approval
+    setTcModal({
+      isOpen: true,
+      type: "user",
+      itemId: userId,
+      itemName: userName,
+      onAccept: () => performOrganizerApproval(userId, userName),
+    });
+  };
 
+  // Separated function to actually perform the approval
+  const performOrganizerApproval = async (userId: number, userName: string) => {
     try {
       const response = await fetch(`/api/admin/users/${userId}/approve`, {
         method: "PATCH",
@@ -428,7 +477,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading admin dashboard...</div>
+        <LoadingSpinner size="lg" text="Loading admin dashboard..." />
       </div>
     );
   }
@@ -501,22 +550,38 @@ export default function AdminDashboard() {
 
       {/* Alert for pending items */}
       {(pendingEventsCount > 0 || pendingOrganizers.length > 0) && (
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            {pendingEventsCount > 0 && (
-              <span>
-                {pendingEventsCount} event{pendingEventsCount !== 1 ? "s" : ""}{" "}
-                awaiting approval.
-              </span>
-            )}
-            {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
-            {pendingOrganizers.length > 0 && (
-              <span>
-                {pendingOrganizers.length} organizer account
-                {pendingOrganizers.length !== 1 ? "s" : ""} awaiting approval.
-              </span>
-            )}
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <div>
+              {pendingEventsCount > 0 && (
+                <span className="text-orange-900">
+                  {pendingEventsCount} event
+                  {pendingEventsCount !== 1 ? "s" : ""} awaiting approval.
+                </span>
+              )}
+              {pendingEventsCount > 0 && pendingOrganizers.length > 0 && " • "}
+              {pendingOrganizers.length > 0 && (
+                <span className="text-orange-900">
+                  {pendingOrganizers.length} organizer account
+                  {pendingOrganizers.length !== 1 ? "s" : ""} awaiting approval.
+                </span>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-4"
+              onClick={() => {
+                // Switch to events tab if there are pending events
+                if (pendingEventsCount > 0) {
+                  setEventStatusFilter("PENDING");
+                  document.querySelector('[value="events"]')?.click();
+                }
+              }}
+            >
+              Review Now
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -745,8 +810,24 @@ export default function AdminDashboard() {
                 </TableBody>
               </Table>
               {filteredEvents.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No events found matching your criteria
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">📋</div>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No Events Found
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {eventStatusFilter === "PENDING"
+                      ? "No events pending approval"
+                      : `No ${eventStatusFilter.toLowerCase()} events`}
+                  </p>
+                  {eventStatusFilter !== "ALL" && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setEventStatusFilter("ALL")}
+                    >
+                      View All Events
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -900,8 +981,27 @@ export default function AdminDashboard() {
                 </TableBody>
               </Table>
               {filteredUsers.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  No users found matching your criteria
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">👥</div>
+                  <h3 className="text-xl font-semibold mb-2">No Users Found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm
+                      ? `No users match "${searchTerm}"`
+                      : userRoleFilter !== "ALL"
+                        ? `No ${userRoleFilter.toLowerCase()} users`
+                        : "No users in the system"}
+                  </p>
+                  {(searchTerm || userRoleFilter !== "ALL") && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setUserRoleFilter("ALL");
+                      }}
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -918,6 +1018,14 @@ export default function AdminDashboard() {
           <Analytics userRole="admin" />
         </TabsContent>
       </Tabs>
+      {/* Admin T&C Modal */}
+      <AdminTCModal
+        isOpen={tcModal.isOpen}
+        onClose={() => setTcModal({ ...tcModal, isOpen: false })}
+        onAccept={tcModal.onAccept}
+        type={tcModal.type}
+        itemName={tcModal.itemName}
+      />
     </div>
   );
 }

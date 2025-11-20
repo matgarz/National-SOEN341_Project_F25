@@ -300,6 +300,7 @@ router.post("/:id/comment", async (req: Request, res: Response) => {
         userId,
         comment: text,
         rating,
+        updatedAt: new Date()
       },
     });
     if(!newComment) return res.status(500).json({error: "error posting comment"});
@@ -590,7 +591,7 @@ router.post("/:id/ticket", async (req: Request, res: Response) => {
         eventId,
         claimed: true,
         checkedIn: false,
-        paymentStatus: event.ticketType === "FREE" ? "FREE" : "PENDING",
+        paymentStatus: event.ticketType === "FREE" ? "FREE" : "COMPLETED",
         paymentAmount: event.ticketPrice,
         updatedAt: new Date(),
       },

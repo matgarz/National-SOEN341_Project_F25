@@ -279,12 +279,7 @@ export default function MyEvents() {
                                 </p>
                                 <div className="flex justify-center">
                                   <QRCode
-                                    link={JSON.stringify({
-                                      ticketId: ticket.qrCode,
-                                      eventId: ticket.event.id,
-                                      userId: ticket.user?.id || user?.id,
-                                      eventTitle: ticket.event.title,
-                                    })}
+                                    link={ticket.qrCode}
                                     size={192}
                                     title={`Ticket for ${ticket.event.title}`}
                                   />
