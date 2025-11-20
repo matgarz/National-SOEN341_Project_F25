@@ -12,7 +12,7 @@ type UserLogin = {
   password: string;
 };
 
-async function logUserIn(req: Request, res: Response, next: NextFunction) {
+async function logUserIn(req: Request, res: Response) {
   const userToLogin: UserLogin = req.body;
   const user: user | null = await prisma.user.findFirst({
     where: {

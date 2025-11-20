@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
+
 // import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export interface Event {
@@ -39,6 +40,7 @@ interface EventCardProps {
   onClaimTicket?: (eventId: string) => void;
   onViewDetails?: (eventId: string) => void;
   onEdit?: (eventId: string) => void;
+  ispassed?: boolean;
 }
 
 export function EventCard({
@@ -48,6 +50,7 @@ export function EventCard({
   onClaimTicket,
   onViewDetails,
   onEdit,
+  ispassed,
 }: EventCardProps) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -207,7 +210,16 @@ export function EventCard({
                   Details
                 </Button>
               </motion.div>
-              {!event.hasTicket && event.capacity > event.attendees ? (
+              {ispassed ? (
+                <Button
+                  size="sm"
+                  className="flex-1 gradient-secondary text-black"
+                  disabled
+                >
+                  <Ticket className="h-4 w-4 mr-1" />
+                  Event is over
+                </Button>
+              ) : !event.hasTicket && event.capacity > event.attendees ? (
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -215,7 +227,7 @@ export function EventCard({
                 >
                   <Button
                     size="sm"
-                    className="w-full gradient-primary text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    className="w-full gradient-primary text-white shadow-md hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                     onClick={() => onClaimTicket?.(event.id)}
                   >
                     <Ticket className="h-4 w-4 mr-1" />
@@ -227,11 +239,11 @@ export function EventCard({
               ) : event.hasTicket ? (
                 <Button
                   size="sm"
-                  className="flex-1 gradient-secondary text-white"
+                  className="flex-1 gradient-secondary text-black"
                   disabled
                 >
                   <Ticket className="h-4 w-4 mr-1" />
-                  Ticket Claimed
+                  Attending
                 </Button>
               ) : (
                 <Button

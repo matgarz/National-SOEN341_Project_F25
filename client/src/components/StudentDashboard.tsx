@@ -9,6 +9,7 @@ import { FilterSidebar, type FilterState } from "./FilterSidebar";
 import { EventDetailsModal, type EventDetails } from "./EventDetailsModal";
 import { useAuth } from "../auth/AuthContext";
 import { Check, AlertCircle } from "lucide-react";
+import { LoadingSpinner } from "./LoadingAnimations";
 
 // Initial filter state
 const initialFilters: FilterState = {
@@ -43,7 +44,7 @@ type ApiEvent = {
   organization?: { id: number; name: string | null };
   Organizer?: { id: number; name: string | null };
   creator?: { id: number; name: string | null; email: string };
-  _count?: { ticket: number }; // if you included this in the backend
+  _count?: { ticket: number };
 };
 
 /** Map API events → EventCard props */
@@ -469,6 +470,48 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-6 relative">
+      {/* Hero Banner */}
+      <div className="relative h-64 mb-8 rounded-xl overflow-hidden shadow-lg">
+        <img
+          src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=80"
+          alt="Campus Events"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-purple-900/90" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-5xl font-bold mb-4 text-center"
+          >
+            Discover Campus Events
+          </motion.h1>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-lg md:text-xl text-center max-w-2xl"
+          >
+            Find, book, and attend amazing events happening at Concordia
+            University
+          </motion.p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-6 flex gap-2 text-sm"
+          >
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+              {upcomingEvents.length} Upcoming Events
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+              {bookmarkedEvents.length} Bookmarked
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
       {/* Notification Toast */}
       <AnimatePresence>
         {notification && (
@@ -525,96 +568,146 @@ export default function StudentDashboard() {
           )}
         </AnimatePresence>
         <div className="flex-1">
-          {error && <div className="text-red-600 text-sm">Error: {error}</div>}
-          {loading && <div className="text-sm opacity-70">Loading…</div>}
+          {/* Error State */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2"
+            >
+              <AlertCircle className="h-5 w-5" />
+              <span>Error: {error}</span>
+            </motion.div>
+          )}
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="lg" text="Loading events..." />
+            </div>
+          )}
+          {/* Main Content */}
+          {!loading && (
+            <Tabs defaultValue="upcoming" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 space-x-7">
+                <TabsTrigger
+                  className="bg-gray-200  hover:cursor-pointer"
+                  value="upcoming"
+                >
+                  Upcoming
+                </TabsTrigger>
+                <TabsTrigger
+                  className="bg-gray-200  hover:cursor-pointer"
+                  value="past"
+                >
+                  Past
+                </TabsTrigger>
+                <TabsTrigger
+                  className="bg-gray-200  hover:cursor-pointer"
+                  value="bookmarked"
+                >
+                  Bookmarked
+                </TabsTrigger>
+              </TabsList>
 
-          <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 space-x-7">
-              <TabsTrigger
-                className="bg-gray-200  hover:cursor-pointer"
-                value="upcoming"
-              >
-                Upcoming
-              </TabsTrigger>
-              <TabsTrigger
-                className="bg-gray-200  hover:cursor-pointer"
-                value="past"
-              >
-                Past
-              </TabsTrigger>
-              <TabsTrigger
-                className="bg-gray-200  hover:cursor-pointer"
-                value="bookmarked"
-              >
-                Bookmarked
-              </TabsTrigger>
-            </TabsList>
+              <TabsContent value="upcoming">
+                {upcomingEvents.length > 0 ? (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {upcomingEvents.map((ev) => (
+                      <EventCard
+                        key={ev.id}
+                        event={ev}
+                        userRole="student"
+                        onBookmark={handleBookmark}
+                        onClaimTicket={handleClaimTicket}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-16"
+                  >
+                    <div className="text-6xl mb-4">🎉</div>
+                    <h3 className="text-xl font-semibold mb-2">
+                      No Events Found
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Try adjusting your filters or check back later
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => setFilters(initialFilters)}
+                    >
+                      Clear Filters
+                    </Button>
+                  </motion.div>
+                )}
+              </TabsContent>
+              <TabsContent value="past">
+                {pastEvents.length > 0 ? (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {pastEvents.map((ev) => (
+                      <EventCard
+                        key={ev.id}
+                        event={ev}
+                        userRole="student"
+                        onBookmark={handleBookmark}
+                        onViewDetails={handleViewDetails}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-16"
+                  >
+                    <div className="text-6xl mb-4">❤️</div>
+                    <h3 className="text-xl font-semibold mb-2">
+                      No Bookmarks Yet
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Click the heart icon on any event card to bookmark it!
+                    </p>
+                    <Button
+                      onClick={() => {
+                        // Switch to upcoming tab
+                        document.querySelector('[value="upcoming"]')?.click();
+                      }}
+                    >
+                      Browse Events
+                    </Button>
+                  </motion.div>
+                )}
+              </TabsContent>
 
-            <TabsContent value="upcoming">
-              {upcomingEvents.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {upcomingEvents.map((ev) => (
-                    <EventCard
-                      key={ev.id}
-                      event={ev}
-                      userRole="student"
-                      onBookmark={handleBookmark}
-                      onClaimTicket={handleClaimTicket}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  No upcoming events found. Try adjusting your filters.
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="past">
-              {pastEvents.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {pastEvents.map((ev) => (
-                    <EventCard
-                      key={ev.id}
-                      event={ev}
-                      userRole="student"
-                      onBookmark={handleBookmark}
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  No past events found.
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="bookmarked">
-              {bookmarkedEvents.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {bookmarkedEvents.map((ev) => (
-                    <EventCard
-                      key={ev.id}
-                      event={ev}
-                      userRole="student"
-                      onBookmark={handleBookmark}
-                      onClaimTicket={(id) => console.log("claim/buy", id)}
-                      onViewDetails={(id) => console.log("details", id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <p className="text-lg mb-2">No bookmarked events yet.</p>
-                  <p className="text-sm">
-                    Click the heart icon on any event card to bookmark it!
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="bookmarked">
+                {bookmarkedEvents.length > 0 ? (
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {bookmarkedEvents.map((ev) => (
+                      <EventCard
+                        key={ev.id}
+                        event={ev}
+                        userRole="student"
+                        onBookmark={handleBookmark}
+                        onClaimTicket={(id) => console.log("claim/buy", id)}
+                        onViewDetails={(id) => console.log("details", id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-lg mb-2">No bookmarked events yet.</p>
+                    <p className="text-sm">
+                      Click the heart icon on any event card to bookmark it!
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
 

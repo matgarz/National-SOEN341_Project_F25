@@ -247,6 +247,74 @@ router.get("/:id/details", async (req: Request, res: Response) => {
   }
 });
 
+//get comments under event
+router.get("/:id/comments", async (req: Request, res: Response) => {
+  console.log("route is working!");
+  try {
+    const eventId: number = Number(req.params.id);
+    if (isNaN(eventId))
+      return res.status(400).json({ error: "Invalid event ID" });
+    const rawComments = await prisma.review.findMany({
+      where: { eventId },
+      include: {
+        user: {
+          select: {
+            name: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    const comments = rawComments.map((comment) => ({
+      userName: comment.user.name,
+      userRole: comment.user.role,
+      text: comment.comment ?? "",
+      date: comment.createdAt.toISOString(),
+      rating: comment.rating,
+    }));
+    return res.status(200).json({ comments: comments });
+  } catch (err) {
+    console.error("Error fetching event details:", err);
+    res.status(400).json({ error: err });
+  }
+});
+
+//post a comment under event
+router.post("/:id/comment", async (req: Request, res: Response) => {
+  console.log("route is working!");
+  try {
+    const eventId = Number(req.params.id);
+    const userId: number = req.body.userId;
+    const text: string = req.body.text;
+    const rating: number = req.body.rating;
+    if (isNaN(eventId))
+      return res.status(400).json({ error: "Invalid event ID" });
+
+    const newComment = await prisma.review.create({
+      data: {
+        eventId,
+        userId,
+        comment: text,
+        rating,
+        updatedAt: new Date(),
+      },
+    });
+    if (!newComment)
+      return res.status(500).json({ error: "error posting comment" });
+
+    return res.status(200).json({
+      message: "Comment posted successfully",
+      comment: newComment,
+    });
+  } catch (err) {
+    res.status(400).json({
+      error: err instanceof Error ? err.message : "Unknown server error",
+    });
+  }
+});
 //POST /api/events (Create new Event)
 router.post(
   "/",
@@ -523,7 +591,7 @@ router.post("/:id/ticket", async (req: Request, res: Response) => {
         eventId,
         claimed: true,
         checkedIn: false,
-        paymentStatus: event.ticketType === "FREE" ? "FREE" : "PENDING",
+        paymentStatus: event.ticketType === "FREE" ? "FREE" : "COMPLETED",
         paymentAmount: event.ticketPrice,
         updatedAt: new Date(),
       },

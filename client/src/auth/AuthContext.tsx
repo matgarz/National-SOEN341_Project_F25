@@ -19,7 +19,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      const parsed = JSON.parse(saved);
+
+      if (typeof parsed === "object" && parsed !== null && "id" in parsed) {
+        return parsed as User;
+      }
+
+      localStorage.removeItem("user");
+      return null;
+    } catch {
+      // If corrupted data → wipe and return null
+      localStorage.removeItem("user");
+      return null;
+    }
   });
 
   const login = (userData: User) => {
