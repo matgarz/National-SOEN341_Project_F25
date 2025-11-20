@@ -9,7 +9,10 @@ export function StarRating({ rating, max = 5 }: StarRatingProps) {
       {Array.from({ length: max }, (_, i) => {
         const filled = i < rating;
         return (
-          <span key={i} className={filled ? "text-yellow-400" : "text-gray-300"}>
+          <span
+            key={i}
+            className={filled ? "text-yellow-400" : "text-gray-300"}
+          >
             ★
           </span>
         );

@@ -5,7 +5,8 @@ import {
   MapPin,
   Users,
   Tag,
-  DollarSign, Ticket,
+  DollarSign,
+  Ticket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "./ui/Button";
@@ -20,7 +21,7 @@ import { PaymentModal } from "./PaymentModal";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import {Comments} from "./Comments.tsx";
+import { Comments } from "./Comments.tsx";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -336,44 +337,46 @@ export function EventDetailsModal({
                     >
                       Close
                     </Button>
-                    { event?.hasTicket ? (
+                    {event?.hasTicket ? (
                       <Button
-                          size="sm"
-                          className="flex-1 gradient-secondary bg-gradient-to-r text-black from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                          disabled
+                        size="sm"
+                        className="flex-1 gradient-secondary bg-gradient-to-r text-black from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                        disabled
                       >
                         Attending
                       </Button>
-                      ) : event.capacity > event.attendees && (
-                      <Button
-                        className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
-                        onClick={() => {
-                          // Check if event is paid
-                          if (
-                            event.ticketType === "paid" &&
-                            event.price &&
-                            event.price > 0
-                          ) {
-                            setShowPaymentModal(true);
-                          } else {
-                            // Free event - claim directly
-                            onClaimTicket(event.id);
-                            onClose();
-                          }
-                        }}
-                        disabled={processingPayment}
-                      >
-                        {processingPayment
-                          ? "Processing..."
-                          : event.ticketType === "free"
-                            ? "Claim Free Ticket"
-                            : `Buy Ticket - $${event.price}`}
-                      </Button>
+                    ) : (
+                      event.capacity > event.attendees && (
+                        <Button
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                          onClick={() => {
+                            // Check if event is paid
+                            if (
+                              event.ticketType === "paid" &&
+                              event.price &&
+                              event.price > 0
+                            ) {
+                              setShowPaymentModal(true);
+                            } else {
+                              // Free event - claim directly
+                              onClaimTicket(event.id);
+                              onClose();
+                            }
+                          }}
+                          disabled={processingPayment}
+                        >
+                          {processingPayment
+                            ? "Processing..."
+                            : event.ticketType === "free"
+                              ? "Claim Free Ticket"
+                              : `Buy Ticket - $${event.price}`}
+                        </Button>
+                      )
                     )}
                   </div>
                 )}
               </div>
-              <Comments eventId={event.id}/>
+              <Comments eventId={event.id} />
             </motion.div>
           </div>
         </>
