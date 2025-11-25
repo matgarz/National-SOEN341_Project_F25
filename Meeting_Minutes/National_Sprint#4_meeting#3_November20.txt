@@ -1,0 +1,21 @@
+﻿NATIONAL
+SPRINT 4 MEETING #3 11/20
+  
+
+20 NOVEMBER 2025 / 6:30 PM / Room H907
+ATTENDEES
+Ariberto, Romain, Mateo, Jonathan, Karim, Protip, Jasdeep, Tristian
+AGENDA
+Tasks Done:
+* Reviewed and discussed AI image generator feature using keyword prompts.
+* Opted out of implementing the fidelity system for final demo.
+* Prepared outline and pacing for demo video.
+
+To be done (until next lab):
+* Finalize and submit demo video.
+* Complete project report.
+* Submit peer-review individual evaluations.
+
+NOTES
+* Demo scheduled for November 27th at 6:00 PM.
+* Ensured full feature coverage for the demo presentation.
