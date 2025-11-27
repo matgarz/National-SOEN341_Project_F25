@@ -8,6 +8,9 @@ Decided which languages we were going to use.
 Added necessary information to README file.
 Split tasks based on skills and experience.
 
+Helped assign user stories to team members.
+Coordinated with the team when deliverables musst be completed for sprint 1.
+
 Sprint 2: 
 
 Worked on CI/CD testing with github actions.
