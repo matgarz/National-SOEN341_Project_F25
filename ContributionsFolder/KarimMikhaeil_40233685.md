@@ -15,8 +15,11 @@ Sprint 2:
 
 * Worked on CI/CD testing with github actions.
 * Implemented yml file to build a CI pipeline.
+* Reviewed pull requests.
 
 Sprint 3: 
 
 * Worked on unit tests.
 * Implemented 3 unit tests on the authorization files using jest and made sure they all passed.
+* Tested AuthContext.tsx NoAccess.tsx and tokenAuth.ts
+
