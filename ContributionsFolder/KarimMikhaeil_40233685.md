@@ -13,10 +13,10 @@ Sprint 1:
 
 Sprint 2: 
 
-Worked on CI/CD testing with github actions.
-Implemented yml file to build a CI pipeline.
+* Worked on CI/CD testing with github actions.
+* Implemented yml file to build a CI pipeline.
 
 Sprint 3: 
 
-Worked on unit tests.
-Implemented 3 unit tests on the authorization files using jest and made sure they all passed.
+* Worked on unit tests.
+* Implemented 3 unit tests on the authorization files using jest and made sure they all passed.
