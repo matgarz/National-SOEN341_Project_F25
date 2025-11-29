@@ -123,6 +123,7 @@ export default function AdminDashboard() {
 
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [newRole, setNewRole] = useState<string>("");
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
