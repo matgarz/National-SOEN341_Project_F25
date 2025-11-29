@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom"; // ✅ ADD THIS
-import NoAccess from "./NoAccess";
+import NoAccess from "../components/auth/NoAccess";
 
 // Mock AuthContext
 jest.mock("./AuthContext", () => {

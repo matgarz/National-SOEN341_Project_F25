@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Filter } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { Button } from "./ui/Button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Input } from "./ui/input";
-import { EventCard, type Event as EventCardEvent } from "./EventCard";
-import { FilterSidebar, type FilterState } from "./FilterSidebar";
-import { EventDetailsModal, type EventDetails } from "./EventDetailsModal";
-import { useAuth } from "../auth/AuthContext";
+import { Button } from "../ui/Button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Input } from "../ui/input";
+import { EventCard, type Event as EventCardEvent } from "../event/EventCard";
+import { FilterSidebar, type FilterState } from "../student/FilterSidebar";
+import { EventDetailsModal, type EventDetails } from "../event/EventDetailsModal";
+import { useAuth } from "../../auth/AuthContext";
 import { Check, AlertCircle } from "lucide-react";
-import { LoadingSpinner } from "./LoadingAnimations";
+import { LoadingSpinner } from "../common/LoadingAnimations";
 
 // Initial filter state
 const initialFilters: FilterState = {

@@ -8,9 +8,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "./ui/Button";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { Button } from "../ui/Button";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
+import { Badge } from "../ui/badge";
 
 // import { ImageWithFallback } from "./figma/ImageWithFallback";
 

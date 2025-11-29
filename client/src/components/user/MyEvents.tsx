@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Badge } from "./ui/badge";
-import { Card, CardContent, CardHeader } from "./ui/card";
-import QRCode from "./QRCode";
+import { useAuth } from "../../auth/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import QRCode from "../common/QRCode";
 import {
   Calendar as CalendarIcon,
   MapPin,

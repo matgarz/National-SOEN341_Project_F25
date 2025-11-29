@@ -1,9 +1,9 @@
 import { QRCodeSVG } from "qrcode.react";
-import favicon from "../assets/project_favicon.svg";
-import { Item, ItemContent } from "./ui/item";
+import favicon from "../../assets/project_favicon.svg";
+import { Item, ItemContent } from "../ui/item";
 import { useRef } from "react";
 import { Download } from "lucide-react";
-import { Button } from "./ui/Button";
+import { Button } from "../ui/Button";
 
 type multipleOfSixteen =
   | 0

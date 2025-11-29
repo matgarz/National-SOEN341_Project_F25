@@ -1,9 +1,9 @@
 import { Calendar, Search, User } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "./ui/Button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/Button.tsx";
+import { Input } from "../ui/input.tsx";
 import { useNavigate } from "react-router-dom";
-import BackButton from "../routes/BackButton.tsx";
+import BackButton from "../../routes/BackButton.tsx";
 //import {
 //Select,
 //SelectContent,
@@ -11,7 +11,7 @@ import BackButton from "../routes/BackButton.tsx";
 //SelectTrigger,
 //SelectValue,
 //} from "./ui/select";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge.tsx";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {

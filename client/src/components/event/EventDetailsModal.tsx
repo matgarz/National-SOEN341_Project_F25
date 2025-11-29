@@ -9,13 +9,13 @@ import {
   Ticket,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Button } from "./ui/Button";
-import { Badge } from "./ui/badge";
+import { Button } from "../ui/Button";
+import { Badge } from "../ui/badge";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState } from "react";
-import { PaymentModal } from "./PaymentModal";
+import { PaymentModal } from "../common/PaymentModal.tsx";
 
 // Fix for default marker icon in React Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";

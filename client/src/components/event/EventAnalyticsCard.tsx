@@ -4,8 +4,8 @@
   CardHeader,
   CardTitle,
   CardFooter,
-} from "./ui/card";
-import { Button } from "./ui/Button";
+} from "../ui/card";
+import { Button } from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 
 interface EventAnalyticsCardProps {

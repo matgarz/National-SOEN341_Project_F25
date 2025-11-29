@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { setTokens } from "../auth/tokenAuth";
-import { useAuth } from "../auth/AuthContext";
+import { setTokens } from "../../auth/tokenAuth.ts";
+import { useAuth } from "../../auth/AuthContext.tsx";
 import AccountNotApproved from "./AccountNotApproved.tsx";
 
 type Role = "STUDENT" | "ORGANIZER";

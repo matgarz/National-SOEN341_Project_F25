@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { X, CreditCard, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Button } from "./ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface PaymentModalProps {
   isOpen: boolean;

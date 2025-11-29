@@ -19,11 +19,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/Button";
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/Button";
 import { Download, Users, Calendar, Ticket, TrendingUp } from "lucide-react";
-import { getAuthHeader } from "../auth/tokenAuth";
+import { getAuthHeader } from "../../auth/tokenAuth";
 
 interface EventPerformance {
   name: string;

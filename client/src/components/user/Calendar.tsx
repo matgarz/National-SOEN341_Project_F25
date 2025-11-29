@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../auth/AuthContext";
-import { getAuthHeader } from "../auth/tokenAuth";
+import { useAuth } from "../../auth/AuthContext";
+import { getAuthHeader } from "../../auth/tokenAuth";
 import "@schedule-x/theme-shadcn/dist/index.css";
 import { useCalendarApp, ScheduleXCalendar } from "@schedule-x/react";
 import { createDragAndDropPlugin } from "@schedule-x/drag-and-drop";

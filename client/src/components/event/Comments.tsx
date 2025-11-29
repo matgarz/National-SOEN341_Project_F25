@@ -5,11 +5,11 @@ import {
   ItemFooter,
   ItemHeader,
   ItemMedia,
-} from "./ui/item";
-import { Button } from "./ui/Button";
-import { useAuth } from "../auth/AuthContext";
+} from "../ui/item";
+import { Button } from "../ui/Button";
+import { useAuth } from "../../auth/AuthContext";
 import { User } from "lucide-react";
-import { StarRating } from "./ui/StarRating";
+import { StarRating } from "../ui/StarRating";
 import { ItemText } from "@radix-ui/react-select";
 
 interface CommentsProps {

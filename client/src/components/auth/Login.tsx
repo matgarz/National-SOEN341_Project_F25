@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { setTokens } from "../auth/tokenAuth";
+import { setTokens } from "../../auth/tokenAuth.ts";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../../auth/AuthContext.tsx";
 import AccountNotApproved from "./AccountNotApproved.tsx";
 
 const isEmail = (v: string) => v.includes("@");

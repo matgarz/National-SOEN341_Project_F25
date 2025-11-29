@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import BackButton from "../routes/BackButton.tsx";
-import { Button } from "./ui/Button.tsx";
+import { Button } from "../ui/Button.tsx";
 import { useNavigate } from "react-router-dom";
 
 interface AccountNotApprovedProps {

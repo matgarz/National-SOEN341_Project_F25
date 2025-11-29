@@ -1,5 +1,5 @@
-import { useAuth } from "./AuthContext";
-import { clearTokens } from "./tokenAuth";
+import { useAuth } from "../../auth/AuthContext";
+import { clearTokens } from "../../auth/tokenAuth";
 import { useNavigate } from "react-router-dom";
 
 export default function NoAccess() {

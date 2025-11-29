@@ -1,24 +1,24 @@
 import { Filter, X } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "./ui/Button";
-import { Checkbox } from "./ui/checkbox";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../ui/Button";
+import { Checkbox } from "../ui/checkbox";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Separator } from "./ui/separator";
+} from "../ui/select";
+import { Separator } from "../ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./ui/sheet";
+} from "../ui/sheet";
 
 export interface FilterState {
   categories: string[];

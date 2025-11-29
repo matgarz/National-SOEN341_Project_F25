@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Input } from "./ui/input";
-import { Button } from "./ui/Button";
-import { EventAnalyticsCard } from "./EventAnalyticsCard";
-import { useAuth } from "../auth/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Input } from "../ui/input";
+import { Button } from "../ui/Button";
+import { EventAnalyticsCard } from "../event/EventAnalyticsCard";
+import { useAuth } from "../../auth/AuthContext";
 
 type AnalyticsData = {
   eventId: number;

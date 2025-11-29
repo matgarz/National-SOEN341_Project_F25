@@ -31,10 +31,10 @@ import {
 } from "../ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Alert, AlertDescription } from "../ui/alert";
-import { Analytics } from "../Analytics";
+import { Analytics } from "./Analytics";
 import { Input } from "../ui/input";
 import AdminOrganizations from "./AdminOrganizations";
-import { LoadingSpinner } from "../LoadingAnimations";
+import { LoadingSpinner } from "../common/LoadingAnimations";
 import { AdminTCModal } from "./AdminTCModal";
 
 interface Organization {
