@@ -39,3 +39,10 @@ I spent a total of 20 hours developing and 4 hours reviewing gitHub and Discord.
 Overall time spent on project in Sprint 3:
 20 hours + 4 hours + 1 hour = 25 hours.
 
+--- Sprint 4 ---
+In sprint 4, I refined the organizer's dashboard to have better UI and navigation. I also implemented an AI image generator using puter.js, this image generator is in the Create Event page for organizers. 
+I also worked along my teammates to refactor and fix various bugs/inconsistencies and participated in lots of discussions in gitHub Discussions and Discord.
+I also added a way to save images to imgBB, so that we can access images through an easy URL in the Image URL field in Create Event (which gets autofilled as soon as a proper URL is created).
+I spent a total of 18 hours developing, 4 hours reviewing gitHub and Discord.
+Overall time spent on project in Sprint 4:
+18+4 = 22 hours.
