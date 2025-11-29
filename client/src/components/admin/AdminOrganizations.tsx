@@ -10,7 +10,7 @@ import {
   Eye,
   Plus,
 } from "lucide-react";
-import { getAuthHeader } from "../auth/tokenAuth";
+import { getAuthHeader } from "../../auth/tokenAuth";
 
 interface Organization {
   id: number;

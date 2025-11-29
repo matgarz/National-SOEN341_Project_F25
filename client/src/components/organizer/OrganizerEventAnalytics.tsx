@@ -1,8 +1,8 @@
 ﻿import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button } from "./ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { useAuth } from "../auth/AuthContext";
+import { Button } from "../ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { useAuth } from "../../auth/AuthContext";
 import jsQR from "jsqr";
 
 interface Attendee {

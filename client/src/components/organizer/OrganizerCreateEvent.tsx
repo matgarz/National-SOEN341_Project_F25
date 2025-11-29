@@ -6,8 +6,8 @@ declare global {
 }
 
 import { useState } from "react";
-import { useAuth } from "../auth/AuthContext";
-import { uploadToImgBB } from "./utils/uploadToImgBB";
+import { useAuth } from "../../auth/AuthContext";
+import { uploadToImgBB } from "../utils/uploadToImgBB";
 
 interface EventForm {
   title: string;

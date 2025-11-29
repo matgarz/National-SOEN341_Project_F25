@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAuthHeader } from "../auth/tokenAuth";
+import { getAuthHeader } from "../../auth/tokenAuth";
 import {
   Check,
   X,
@@ -12,15 +12,15 @@ import {
   Search,
   UserCheck,
 } from "lucide-react";
-import { Button } from "./ui/Button";
+import { Button } from "../ui/Button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Badge } from "./ui/badge";
+} from "../ui/card";
+import { Badge } from "../ui/badge";
 import {
   Table,
   TableBody,
@@ -28,13 +28,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Analytics } from "./Analytics";
-import { Input } from "./ui/input";
+} from "../ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Analytics } from "../Analytics";
+import { Input } from "../ui/input";
 import AdminOrganizations from "./AdminOrganizations";
-import { LoadingSpinner } from "./LoadingAnimations";
+import { LoadingSpinner } from "../LoadingAnimations";
 import { AdminTCModal } from "./AdminTCModal";
 
 interface Organization {

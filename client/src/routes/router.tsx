@@ -8,13 +8,13 @@ import NoAccess from "../auth/NoAccess";
 import Login from "../components/Login";
 import Register from "../components/Register";
 import StudentDashboard from "../components/StudentDashboard";
-import OrganizerCreateEvent from "../components/OrganizerCreateEvent";
+import OrganizerCreateEvent from "../components/organizer/OrganizerCreateEvent";
 import Calendar from "../components/Calendar";
 import MyEvents from "../components/MyEvents";
 import { useAuth } from "../auth/AuthContext";
 import OrganizerDashboard from "../components/OrganizerDashboard";
-import AdminDashboard from "../components/AdminDashboard";
-import OrganizerEventAnalytics from "../components/OrganizerEventAnalytics";
+import AdminDashboard from "../components/admin/AdminDashboard";
+import OrganizerEventAnalytics from "../components/organizer/OrganizerEventAnalytics";
 
 type Role = "STUDENT" | "ORGANIZER" | "ADMIN";
 

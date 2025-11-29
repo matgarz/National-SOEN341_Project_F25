@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { X, CheckCircle, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Button } from "./ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Checkbox } from "./ui/checkbox";
+import { Button } from "../ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
 
 interface AdminTCModalProps {
   isOpen: boolean;
