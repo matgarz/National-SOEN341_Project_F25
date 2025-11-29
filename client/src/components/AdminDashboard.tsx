@@ -126,7 +126,7 @@ export default function AdminDashboard() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   const [pendingOrganizers, setPendingOrganizers] = useState<User[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+
 
   const [tcModal, setTcModal] = useState<{
     isOpen: boolean;
