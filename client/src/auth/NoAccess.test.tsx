@@ -39,15 +39,15 @@ test("renders Access Denied copy", () => {
   render(
     <MemoryRouter>
       <NoAccess />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
   expect(
-    screen.getByRole("heading", { name: /access denied/i })
+    screen.getByRole("heading", { name: /access denied/i }),
   ).toBeInTheDocument();
 
   expect(
-    screen.getByText(/you don't have permission to view this page/i)
+    screen.getByText(/you don't have permission to view this page/i),
   ).toBeInTheDocument();
 
   expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
@@ -59,7 +59,7 @@ test("clicking Logout clears tokens and logs out", async () => {
   render(
     <MemoryRouter>
       <NoAccess />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
   await user.click(screen.getByRole("button", { name: /logout/i }));
