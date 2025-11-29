@@ -1,0 +1,21 @@
+﻿NATIONAL
+SPRINT 4 MEETING #1 11/06
+  
+
+06 NOVEMBER 2025 / 6:30 PM / Room H907
+ATTENDEES
+Ariberto, Romain, Mateo, Jonathan, Karim, Protip, Jasdeep, Tristian
+AGENDA
+Tasks Done:
+* Added a dedicated payment page with verification/confirmation flow to the Student page.
+* Added event location as an additional Student page feature for improved UX.
+* Implemented QR code functionality for Organizer page ticket generation.
+* Discussed QR-based attendance validation tools for organizers.
+
+To be done (until next lab):
+* Begin integration testing for payment flow.
+* Finalize QR code scanning workflow.
+
+NOTES
+* Identified dependencies between payment system, ticketing, and QR validation.
+* Ensured consistency of UI components across user roles.

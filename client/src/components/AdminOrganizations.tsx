@@ -8,6 +8,7 @@ import {
   Edit,
   Trash2,
   Eye,
+  Plus,
 } from "lucide-react";
 import { getAuthHeader } from "../auth/tokenAuth";
 
@@ -51,6 +52,7 @@ export default function AdminOrganizations() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -59,8 +61,12 @@ export default function AdminOrganizations() {
     isActive: true,
   });
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+  const [createForm, setCreateForm] = useState({
+    name: "",
+    description: "",
+    contactEmail: "",
+    isActive: true,
+  });
 
   const getAuthHeaders = () => {
     return {
@@ -75,7 +81,7 @@ export default function AdminOrganizations() {
 
   const fetchOrganizations = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/organizations`, {
+      const response = await fetch(`/api/admin/organizations`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -91,15 +97,12 @@ export default function AdminOrganizations() {
 
   const fetchOrganizationDetails = async (orgId: number) => {
     try {
-      const orgResponse = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${orgId}`,
-        {
-          headers: getAuthHeaders(),
-        },
-      );
+      const orgResponse = await fetch(`/api/admin/organizations/${orgId}`, {
+        headers: getAuthHeaders(),
+      });
 
       const eventsResponse = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${orgId}/events`,
+        `/api/admin/organizations/${orgId}/events`,
         {
           headers: getAuthHeaders(),
         },
@@ -120,6 +123,41 @@ export default function AdminOrganizations() {
     }
   };
 
+  const handleCreate = async () => {
+    if (!createForm.name.trim()) {
+      alert("Organization name is required");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/organizations`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(createForm),
+      });
+
+      if (response.ok) {
+        await fetchOrganizations();
+        setShowCreateModal(false);
+        setCreateForm({
+          name: "",
+          description: "",
+          contactEmail: "",
+          isActive: true,
+        });
+        alert("Organization created successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(
+          `Failed to create organization: ${errorData.error || "Unknown error"}`,
+        );
+      }
+    } catch (error) {
+      console.error("Error creating organization:", error);
+      alert("Failed to create organization");
+    }
+  };
+
   const handleEdit = (org: Organization) => {
     setEditForm({
       name: org.name,
@@ -136,7 +174,7 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
+        `/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "PATCH",
           headers: getAuthHeaders(),
@@ -160,7 +198,7 @@ export default function AdminOrganizations() {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/admin/organizations/${selectedOrg.id}`,
+        `/api/admin/organizations/${selectedOrg.id}`,
         {
           method: "DELETE",
           headers: getAuthHeaders(),
@@ -202,12 +240,21 @@ export default function AdminOrganizations() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Create Button */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Organizations</h2>
-        <div className="text-sm text-gray-600">
-          Total: {filteredOrganizations.length}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Organizations</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Total: {filteredOrganizations.length}
+          </p>
         </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-md"
+        >
+          <Plus className="h-5 w-5" />
+          Create Organization
+        </button>
       </div>
 
       {/* Filters */}
@@ -316,6 +363,116 @@ export default function AdminOrganizations() {
         </div>
       )}
 
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">
+                Create New Organization
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Add a new organization to the platform
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organization Name *
+                </label>
+                <input
+                  type="text"
+                  value={createForm.name}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, name: e.target.value })
+                  }
+                  placeholder="Enter organization name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={createForm.description}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Enter organization description"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Email
+                </label>
+                <input
+                  type="email"
+                  value={createForm.contactEmail}
+                  onChange={(e) =>
+                    setCreateForm({
+                      ...createForm,
+                      contactEmail: e.target.value,
+                    })
+                  }
+                  placeholder="contact@organization.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="create-isActive"
+                  checked={createForm.isActive}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, isActive: e.target.checked })
+                  }
+                  className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                />
+                <label
+                  htmlFor="create-isActive"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Active
+                </label>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setCreateForm({
+                    name: "",
+                    description: "",
+                    contactEmail: "",
+                    isActive: true,
+                  });
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreate}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Create Organization
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Details Modal */}
       {showDetailsModal && selectedOrg && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -416,30 +573,27 @@ export default function AdminOrganizations() {
                 </div>
               </div>
 
-              {/* Events List */}
+              {/* Recent Events */}
               {selectedOrg.events && selectedOrg.events.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Events</h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {selectedOrg.events.map((event) => (
+                  <h3 className="text-lg font-semibold mb-3">Recent Events</h3>
+                  <div className="space-y-2">
+                    {selectedOrg.events.slice(0, 5).map((event) => (
                       <div
                         key={event.id}
-                        className="bg-gray-50 p-4 rounded-lg flex items-center justify-between"
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <div>
-                          <h4 className="font-medium text-gray-900">
+                          <div className="font-medium text-gray-900">
                             {event.title}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
-                            <span>
-                              {new Date(event.date).toLocaleDateString()}
-                            </span>
-                            <span>•</span>
-                            <span className="capitalize">{event.category}</span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {new Date(event.date).toLocaleDateString()} •{" "}
+                            {event.category}
                           </div>
                         </div>
                         <span
-                          className={`px-3 py-1 text-xs rounded-full ${
+                          className={`px-2 py-1 text-xs rounded-full ${
                             event.status === "APPROVED"
                               ? "bg-green-100 text-green-700"
                               : event.status === "PENDING"
@@ -545,23 +699,23 @@ export default function AdminOrganizations() {
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  id="isActive"
+                  id="edit-isActive"
                   checked={editForm.isActive}
                   onChange={(e) =>
                     setEditForm({ ...editForm, isActive: e.target.checked })
                   }
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <label
-                  htmlFor="isActive"
+                  htmlFor="edit-isActive"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Active Organization
+                  Active
                 </label>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+            <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
               <button
                 onClick={() => setShowEditModal(false)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"

@@ -1,0 +1,16 @@
+NATIONAL
+SPRINT 3 MEETING #2 30/10
+
+30 OCTOBER 2025 / 6:30 / ROOM 907
+ATTENDEES
+Ariberto, Romain, Mateo, Karim, Jasdeep, Tristian
+AGENDA
+Tasks Done:
+1. Finished distributing last tasks to be completed for sprint 3
+2. Priority shifted to testing success
+3. Discussed some of the code with each other to help code implementation productivity
+4. Finilized the and got good feedback on the potential additional feature for sprint 4
+
+To be done (until next lab):
+* Finish Sprint 3 requirements!
+

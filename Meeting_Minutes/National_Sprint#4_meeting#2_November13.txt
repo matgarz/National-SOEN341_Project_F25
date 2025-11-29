@@ -1,0 +1,25 @@
+﻿NATIONAL
+SPRINT 4 MEETING #2 11/13
+  
+
+13 NOVEMBER 2025 / 6:30 PM / Room H907
+ATTENDEES
+Ariberto, Romain, Mateo, Jonathan, Karim, Protip, Jasdeep, Tristian
+AGENDA
+Tasks Done:
+* Discussed presentation style and outline for Demo Day.
+* Ensured team members prepared for architecture-related questions.
+* Evaluated feasibility of the Fidelity (Rewards) Program.
+* Planned point-based system for discounts on future events.
+* Defined UI requirements for showing points earned per event.
+* Reviewed UI improvements for Upcoming Events (uniform headers, sliding text).
+* Discussed Generated AI images for event cards.
+* Discussed addition of a comment board.
+
+To be done (until next lab):
+* Complete fidelity system prototype.
+* Implement UI adjustments for event headers.
+
+NOTES
+* Ensured event card text remains readable across different event lengths.
+* Discussed possible expansion of student engagement features.

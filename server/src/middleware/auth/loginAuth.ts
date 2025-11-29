@@ -12,7 +12,7 @@ type UserLogin = {
   password: string;
 };
 
-async function logUserIn(req: Request, res: Response, next: NextFunction) {
+async function logUserIn(req: Request, res: Response) {
   const userToLogin: UserLogin = req.body;
   const user: user | null = await prisma.user.findFirst({
     where: {
@@ -21,6 +21,9 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
         { studentId: userToLogin.emailOrStudentId },
       ],
     },
+    include: {
+      organization: true,
+    },
   });
   console.log(user);
   console.log(userToLogin.emailOrStudentId);
@@ -28,11 +31,31 @@ async function logUserIn(req: Request, res: Response, next: NextFunction) {
   if (!user) {
     return res.status(400).json({ error: "Email or Student Id was not found" });
   }
-  if (!(await bcrypt.compare(userToLogin.password, user.password))) {
-    res.status(401).json({ error: "invalid or incorrect password" });
+  if (user.accountStatus === "PENDING") {
+    return res.status(403).json({
+      error: "Account pending approval",
+      message:
+        "Your organizer account is awaiting admin approval. You will be notified once approved.",
+      nameOfUser: user.name,
+    });
+  }
+  if (user.accountStatus === "REJECTED") {
+    return res.status(403).json({
+      error: "Account rejected",
+      message:
+        "Your organizer account request was not approved. Please contact support for more information.",
+      nameOfUser: user.name,
+    });
+  }
+  if (user.accountStatus === "SUSPENDED") {
+    return res.status(403).json({
+      error: "Account suspended",
+      message: "Your account has been suspended. Please contact support.",
+      nameOfUser: user.name,
+    });
   }
   if (!(await bcrypt.compare(userToLogin.password, user.password))) {
-    res.status(401).send(); //TODO add real success response
+    res.status(401).json({ error: "invalid or incorrect password" });
   }
 
   const userPublic: UserPublic = { ...user };

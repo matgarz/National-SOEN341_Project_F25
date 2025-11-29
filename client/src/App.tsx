@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./components/Header";
 import { useAuth } from "./auth/AuthContext";
+import Footer from "./components/Footer";
 //import AdminDashboard from './components/AdminDashboard';
 //import QRCode from "./components/QRCode";
 
@@ -22,6 +23,7 @@ export default function App() {
       <main className="p-4 max-w-7xl mx-auto flex-grow">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }

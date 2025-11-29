@@ -3,93 +3,50 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Input } from "./ui/input";
 import { Button } from "./ui/Button";
-import { EventCard, type Event as EventCardEvent } from "./EventCard";
-import { FilterSidebar, type FilterState } from "./FilterSidebar";
+import { EventAnalyticsCard } from "./EventAnalyticsCard";
+import { useAuth } from "../auth/AuthContext";
 
-// Initial filter state (reused from StudentDashboard)
-const initialFilters: FilterState = {
-  categories: [],
-  ticketTypes: [],
-  dateRange: "all",
-  location: "",
-  sortBy: "date-asc",
-};
-
-type TicketType = "FREE" | "PAID";
-type EventStatus =
-  | "PENDING"
-  | "APPROVED"
-  | "REJECTED"
-  | "CANCELLED"
-  | "COMPLETED";
-
-type ApiEvent = {
-  id: number;
+type AnalyticsData = {
+  eventId: number;
   title: string;
-  description: string;
-  date: string; // ISO
-  location: string;
-  capacity: number;
-  ticketType: TicketType;
-  ticketPrice?: string | number | null;
-  category?: string | null;
-  imageUrl?: string | null;
-  status: EventStatus;
-  organization?: { id: number; name: string | null };
-  creator?: { id: number; name: string | null; email: string };
-  _count?: { ticket: number }; // Prisma _count
-};
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
-
-/** Map API events → EventCard props */
-const toCard = (e: ApiEvent): EventCardEvent => {
-  const d = new Date(e.date);
-  return {
-    id: String(e.id),
-    title: e.title,
-    description: e.description ?? "",
-    date: e.date,
-    time: d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    location: e.location ?? "TBA",
-    organizer: e.organization?.name ?? "Unknown",
-    category: e.category ?? "General",
-    ticketType: e.ticketType === "FREE" ? "free" : "paid",
-    price: e.ticketType === "PAID" ? Number(e.ticketPrice ?? 0) : undefined,
-    capacity: e.capacity ?? 0,
-    attendees: e._count?.ticket ?? 0,
-    image: e.imageUrl ?? "https://via.placeholder.com/640x360?text=Event",
-    tags: e.category ? [e.category] : [],
-    isBookmarked: false,
-    hasTicket: false,
-  };
+  date: string;
+  ticketsIssued: number;
+  attended: number;
+  attendanceRate: string;
+  remainingCapacity: number;
 };
 
 export default function OrganizerDashboard() {
-  const [bookmarkedEvents /*, setBookmarkedEvents*/] = useState<
-    EventCardEvent[]
-  >([]);
   const navigate = useNavigate();
-  const [events, setEvents] = useState<EventCardEvent[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<"upcoming" | "past">("upcoming");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  const [filters, setFilters] = useState(initialFilters);
+  // const organizerId = 2; // John Smith's (organizer1@concordia.ca) current ID --> Hardcoded --> Useful to debug --> Check prisma studio
+
+  const organizerId = user?.id;
+
+  if (!user) {
+    return <div className="p-4">Loading organizer data…</div>;
+  }
+
+  if (user.role !== "ORGANIZER") {
+    return <div>Unauthorized: Organizer access only</div>;
+  }
 
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
       try {
         setLoading(true);
-        setError(null);
-        const url = searchQuery.trim()
-          ? `${API}/api/events/search?keyword=${encodeURIComponent(searchQuery.trim())}`
-          : `${API}/api/events`;
+        const url = `/api/events/organizer/${organizerId}/analytics`;
         const res = await fetch(url, { signal: ctrl.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: ApiEvent[] = await res.json();
-        setEvents(data.map(toCard));
+        const data: AnalyticsData[] = await res.json();
+        setAnalytics(data);
       } catch (e: any) {
         if (e.name !== "AbortError") setError(e.message ?? String(e));
       } finally {
@@ -97,109 +54,121 @@ export default function OrganizerDashboard() {
       }
     })();
     return () => ctrl.abort();
-  }, [searchQuery]);
+  }, [organizerId]);
 
-  // client-side filter (optional, mirrors StudentDashboard)
-  const filtered = useMemo(() => {
-    if (!searchQuery) return events;
-    const q = searchQuery.toLowerCase();
-    return events.filter(
-      (e) =>
-        e.title.toLowerCase().includes(q) ||
-        e.organizer.toLowerCase().includes(q) ||
-        e.category.toLowerCase().includes(q) ||
-        e.location.toLowerCase().includes(q),
+  // Separate into upcoming/past events based on a UTC-safe date comparison --> Maybe we should not use UTC anywhere?
+  const filteredAnalytics = useMemo(() => {
+    const now = new Date(); // current moment (in local time of machine)
+    const nowTime = now.getTime(); // convert to epoch milliseconds (UTC-safe)
+
+    return analytics
+      .filter((a) => {
+        const eventTime = new Date(a.date).getTime();
+        const isUpcoming = eventTime >= nowTime; // compare in UTC-safe milliseconds
+        return filter === "upcoming" ? isUpcoming : !isUpcoming;
+      })
+      .filter((a) => a.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [analytics, filter, searchQuery]);
+
+  // Compute summary stats
+  const summary = useMemo(() => {
+    if (filteredAnalytics.length === 0) return null;
+    const totalTickets = filteredAnalytics.reduce(
+      (sum, a) => sum + a.ticketsIssued,
+      0,
     );
-  }, [events, searchQuery]);
-
-  const now = Date.now();
-  const upcoming = filtered.filter((e) => new Date(e.date).getTime() > now);
-  const past = filtered.filter((e) => new Date(e.date).getTime() <= now);
-  //const pending = filtered.filter((e) => e.status === "PENDING"); TODO fix this line
+    const totalAttended = filteredAnalytics.reduce(
+      (sum, a) => sum + a.attended,
+      0,
+    );
+    const avgAttendanceRate =
+      totalTickets > 0
+        ? ((totalAttended / totalTickets) * 100).toFixed(1)
+        : "0";
+    return { totalTickets, totalAttended, avgAttendanceRate };
+  }, [filteredAnalytics]);
 
   return (
-    <div className=" space-y-6">
-      <Button
-        onClick={() => navigate("/create-event")}
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
-      >
-        + Create Event
-      </Button>
-      <div className="flex items-center gap-2">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Event Analytics</h2>
+        <Button
+          onClick={() => navigate("/create-event")}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition"
+        >
+          + Create Event
+        </Button>
+      </div>
+
+      <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
+        <TabsList className="grid grid-cols-2 w-full mb-4 space-x-7">
+          <TabsTrigger
+            className="bg-gray-200  hover:cursor-pointer"
+            value="upcoming"
+          >
+            Upcoming
+          </TabsTrigger>
+          <TabsTrigger
+            className="bg-gray-200  hover:cursor-pointer"
+            value="past"
+          >
+            Past
+          </TabsTrigger>
+        </TabsList>
+
         <Input
-          placeholder="Search events…"
+          placeholder="Search your events…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md mb-4"
         />
-        {/*<Button variant="outline">
-          <Filter className="h-4 w-4 mr-2" />
-          Filters
-        </Button>*/}
-      </div>
 
-      <div className="flex justify-between gap-6">
-        <FilterSidebar
-          filters={filters}
-          onFiltersChange={(newFilters) => setFilters(newFilters)}
-        />
-        <div>
+        <TabsContent value={filter}>
+          {loading && (
+            <div className="text-sm opacity-70">Loading analytics…</div>
+          )}
           {error && <div className="text-red-600 text-sm">Error: {error}</div>}
-          {loading && <div className="text-sm opacity-70">Loading…</div>}
 
-          <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="past">Past</TabsTrigger>
-              <TabsTrigger value="bookmarked">Bookmarked</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="upcoming">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {upcoming.map((ev) => (
-                  <EventCard
-                    key={ev.id}
-                    event={ev}
-                    userRole="student"
-                    onBookmark={(id) => console.log("bookmark", id)}
-                    onClaimTicket={(id) => console.log("claim/buy", id)}
-                    onViewDetails={(id) => console.log("details", id)}
-                  />
-                ))}
+          {/* Summary section */}
+          {summary && (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-gray-100 rounded-lg shadow">
+                <h3 className="font-semibold text-gray-700">Tickets Issued</h3>
+                <p className="text-xl font-bold">{summary.totalTickets}</p>
               </div>
-            </TabsContent>
-
-            <TabsContent value="past">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {past.map((ev) => (
-                  <EventCard
-                    key={ev.id}
-                    event={ev}
-                    userRole="student"
-                    onViewDetails={(id) => console.log("details", id)}
-                  />
-                ))}
+              <div className="p-4 bg-gray-100 rounded-lg shadow">
+                <h3 className="font-semibold text-gray-700">Attendees</h3>
+                <p className="text-xl font-bold">{summary.totalAttended}</p>
               </div>
-            </TabsContent>
+              <div className="p-4 bg-gray-100 rounded-lg shadow">
+                <h3 className="font-semibold text-gray-700">Avg Attendance</h3>
+                <p className="text-xl font-bold">
+                  {summary.avgAttendanceRate}%
+                </p>
+              </div>
+            </div>
+          )}
 
-            <TabsContent value="bookmarked">
-              {bookmarkedEvents.length ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {bookmarkedEvents.map((ev) => (
-                    <EventCard
-                      key={ev.id}
-                      event={ev}
-                      userRole="student"
-                      onViewDetails={(id) => console.log("details", id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm opacity-70">No bookmarks yet.</div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+          {/* List of analytics cards */}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredAnalytics.map((a) => (
+              <EventAnalyticsCard
+                key={a.eventId}
+                id={String(a.eventId)}
+                title={a.title}
+                date={a.date}
+                ticketsIssued={a.ticketsIssued}
+                attended={a.attended}
+                attendanceRate={a.attendanceRate}
+                remainingCapacity={a.remainingCapacity}
+              />
+            ))}
+            {filteredAnalytics.length === 0 && !loading && (
+              <div className="text-sm opacity-70">No events found.</div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
